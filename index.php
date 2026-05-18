@@ -2,14 +2,14 @@
 session_start();
 require 'config.php'; 
 
-// Consulta para buscar itens e o nome da categoria
+// 1. Consulta para buscar todos os itens e o nome da categoria para o catálogo geral
 $query = "SELECT itens.*, categorias.nome as cat_nome 
           FROM itens 
           LEFT JOIN categorias ON itens.categoria_id = categorias.id";
 $stmt = $pdo->query($query);
 $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Procurar as categorias disponíveis na Base de Dados para preencher o Select do Pop-up
+// 2. Procurar as categorias disponíveis na Base de Dados para preencher o Select do Pop-up
 $categorias = [];
 try {
     $stmt_cat = $pdo->query("SELECT id, nome FROM categorias ORDER BY nome ASC");
@@ -17,6 +17,11 @@ try {
 } catch (PDOException $e) {
     // Falha silenciosa caso a tabela ainda não exista
 }
+
+// 3. Filtrar dinamicamente apenas os itens que PODEM SER RESERVADOS (estado = disponivel)
+$itens_para_reservar = array_filter($itens, function($item) {
+    return $item['estado'] === 'disponivel';
+});
 ?>
 
 <!DOCTYPE html>
@@ -28,8 +33,17 @@ try {
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="Styles/StylesIndex.css">
     <link rel="stylesheet" href="Styles/StylesIndex2.css">
+
+    
 </head>
 <body>
+
+<?php if (isset($_SESSION['alerta'])): ?>
+    <div id="toastAlert" class="alert-toast <?= $_SESSION['alerta']['tipo'] ?>">
+        <span><?= $_SESSION['alerta']['mensagem'] ?></span>
+    </div>
+    <?php unset($_SESSION['alerta']); ?>
+<?php endif; ?>
 
 <header>
     <nav class="navbar">
@@ -83,13 +97,46 @@ try {
     </div>
 </header>
 
-<main class="catalog-container">
+<section class="reservas-container">
+    <h3 style="color: white; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600; text-align: left; margin-bottom: 5px;">
+        ⚡ Disponível Para Reservar Já
+    </h3>
+    <p style="color: #64748b; font-size: 0.85rem; text-align: left; margin: 0 0 15px 0;">Clique diretamente no cubo para gerir ou criar a reserva.</p>
+
+    <?php if (!empty($itens_para_reservar)): ?>
+        <div class="reservas-grid">
+            <?php foreach ($itens_para_reservar as $item_res): 
+                $fotoCapa = !empty($item_res['imagem']) ? 'Uploads/'.$item_res['imagem'] : 'Images/default-cover.png';
+            ?>
+                <a href="reservar.php?id=<?= $item_res['id'] ?>" class="reserva-cube">
+                    <img src="<?= $fotoCapa ?>" alt="Capa" class="reserva-img">
+                    <div class="reserva-info">
+                        <h4><?= htmlspecialchars($item_res['titulo']) ?></h4>
+                        <p><?= htmlspecialchars($item_res['autor_artista']) ?></p>
+                        <span style="font-size: 0.7rem; color: #3b82f6; background: rgba(59, 130, 246, 0.1); padding: 4px 8px; border-radius: 4px; width: fit-content; font-weight: 600; letter-spacing: 0.05em;">
+                            RESERVAR ➜
+                        </span>
+                    </div>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+        <div class="no-reservas">
+            ❌ De momento, não existem reservas disponíveis. Todos os artigos encontram-se indisponíveis.
+        </div>
+    <?php endif; ?>
+</section>
+
+<hr style="max-width: 1200px; margin: 40px auto; border: 0; border-top: 1px solid rgba(255,255,255,0.05);">
+
+<main class="catalog-container" style="margin-top: 0;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 0 10px;">
         <h2 class="section-title" style="margin: 0;">Catálogo</h2>
         
         <?php if (isset($_SESSION['utilizador_tipo']) && ((int)$_SESSION['utilizador_tipo'] === 1 || $_SESSION['utilizador_tipo'] === 'admin')): ?>
             <button type="button" class="btn-add-catalog" id="openAddCatalogBtn">
-                ➕ Adicionar Artigo
+                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                Adicionar Artigo
             </button>
         <?php endif; ?>
     </div>
@@ -129,7 +176,6 @@ try {
 </footer>
 
 <div id="addCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
-    
     <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
         
         <div style="padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
@@ -141,13 +187,11 @@ try {
         </div>
 
         <form action="processa_artigo.php" method="POST" enctype="multipart/form-data" style="padding: 28px; margin: 0; box-sizing: border-box;">
-            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">TÍTULO / NOME DO PRODUTO *</label>
                     <input type="text" name="titulo" class="modal-field" placeholder="Ex: Moby Dick" required>
                 </div>
-
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">AUTOR / ARTISTA *</label>
                     <input type="text" name="autor_artista" class="modal-field" placeholder="Ex: Herman Melville" required>
@@ -164,7 +208,6 @@ try {
                         <?php endforeach; ?>
                     </select>
                 </div>
-
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">ESTADO INICIAL *</label>
                     <select name="estado" class="modal-field" required style="height: 45px;">
@@ -186,7 +229,7 @@ try {
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px;">
-                <button type="button" id="cancelAddModalBtn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; font-family: 'Inter', sans-serif;">Cancelar Criação</button>
+                <button type="button" id="cancelAddModalBtn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-family: 'Inter', sans-serif;">Cancelar Criação</button>
                 <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; font-family: 'Inter', sans-serif;">Confirmar Criação</button>
             </div>
         </form>
@@ -195,30 +238,30 @@ try {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Controlo de abertura/fecho do Modal
     const addModal = document.getElementById('addCatalogModal');
     const openBtn = document.getElementById('openAddCatalogBtn');
     const closeBtn = document.getElementById('closeAddModalBtn');
     const cancelBtn = document.getElementById('cancelAddModalBtn');
 
-    // Abre o Pop-up mudando o display para 'flex'
     if (openBtn) {
         openBtn.addEventListener('click', function() {
             addModal.style.display = 'flex';
         });
     }
 
-    // Função para fechar e redefinir o display para 'none'
-    const closeAddModal = () => {
-        addModal.style.display = 'none';
-    };
+    const closeAddModal = () => { addModal.style.display = 'none'; };
     
     if (closeBtn) closeBtn.addEventListener('click', closeAddModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeAddModal);
+    addModal.addEventListener('click', function(e) { if (e.target === addModal) closeAddModal(); });
 
-    // Fecha se o utilizador clicar fora da caixa do formulário
-    addModal.addEventListener('click', function(e) {
-        if (e.target === addModal) closeAddModal();
-    });
+    // Animação e Controlo do Alerta/Toast de Confirmação
+    const toast = document.getElementById('toastAlert');
+    if (toast) {
+        setTimeout(() => { toast.classList.add('show'); }, 200);
+        setTimeout(() => { toast.classList.remove('show'); }, 4000);
+    }
 });
 </script>
 

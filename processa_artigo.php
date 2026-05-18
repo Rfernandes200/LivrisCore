@@ -25,7 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 mkdir('Uploads', 0777, true);
             }
             
-            move_uploaded_uploaded_file($_FILES['imagem']['tmp_name'], $destino);
+            // CORRIGIDO: Agora a função nativa está escrita corretamente
+            move_uploaded_file($_FILES['imagem']['tmp_name'], $destino);
         }
     }
 
