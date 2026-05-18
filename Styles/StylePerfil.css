@@ -1,0 +1,223 @@
+:root {
+    --dark-blue: #0f172a;
+    --light-bg: #f8fafc;
+    --border-color: #e2e8f0;
+    --accent-blue: #1e293b;
+    --text-main: #0f172a;
+    /* Cor para o título aparecer no branco */
+}
+
+.perfil-body {
+    background-color: var(--light-bg);
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Banner Superior */
+.perfil-header {
+    background: linear-gradient(to bottom, #101d33, #1e293b);
+    color: white;
+    padding: 40px 10% 120px 10%;
+    /* Aumentado o padding inferior */
+}
+
+.navbar-perfil {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.navbar-perfil .logo {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+}
+
+.logout-btn {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.logout-btn:hover {
+    color: white;
+}
+
+.perfil-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    max-width: 800px;
+    margin: 0 auto;
+    /* Centra o conteúdo do banner */
+}
+
+.avatar-circle {
+    width: 90px;
+    height: 90px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.user-info-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    margin: 0;
+}
+
+.badges {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    align-items: center;
+}
+
+.badge-role {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.badge-date {
+    color: #94a3b8;
+}
+
+/* --- Card de Edição (CORRIGIDO E CENTRADO) --- */
+.perfil-main-content {
+    margin-top: -60px;
+    /* Card sobe para o banner */
+    padding: 0 20px 50px 20px;
+    display: flex;
+    justify-content: center;
+    /* Centra o card horizontalmente */
+}
+
+.edit-card {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    /* Sombra mais suave */
+    width: 100%;
+    max-width: 650px;
+    /* Tamanho mais equilibrado */
+}
+
+.edit-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--text-main);
+    /* GARANTE QUE O TÍTULO APARECE NO BRANCO */
+    margin: 0 0 5px 0;
+}
+
+.subtitle {
+    color: #64748b;
+    margin-bottom: 30px;
+    font-size: 0.95rem;
+}
+
+/* Formulários */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: 1rem;
+    color: #1e293b;
+    box-sizing: border-box;
+    /* Evita que o input saia do card */
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.divider {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 30px 0;
+}
+
+.password-hint {
+    font-style: italic;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+}
+
+.pw-wrapper {
+    position: relative;
+}
+
+.eye-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.btn-save {
+    background: var(--dark-blue);
+    color: white;
+    padding: 14px 30px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    width: auto;
+}
+
+.btn-save:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+}
+
+/* Alertas de Validação */
+.alert {
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
