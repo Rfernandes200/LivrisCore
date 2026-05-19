@@ -2,10 +2,14 @@
 session_start();
 require 'config.php'; 
 
-// 1. Consulta para usar exatamente os campos da tua tabela 'itens'
-$query = "SELECT itens.*, categorias.nome as cat_nome 
+// Pegar o ID do utilizador logado (caso exista sessão) para usar na comparação dos botões
+$id_logado = isset($_SESSION['utilizador_id']) ? (int)$_SESSION['utilizador_id'] : null;
+
+// 1. Consulta atualizada: traz os itens, a categoria e quem reservou o item (se estiver reservado e pendente)
+$query = "SELECT itens.*, categorias.nome as cat_nome, reservas.utilizador_id as quem_reservou 
           FROM itens 
-          LEFT JOIN categorias ON itens.categoria_id = categorias.id";
+          LEFT JOIN categorias ON itens.categoria_id = categorias.id
+          LEFT JOIN reservas ON itens.id = reservas.item_id AND reservas.status = 'pendente'";
 $stmt = $pdo->query($query);
 $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -16,28 +20,6 @@ try {
     $categorias = $stmt_cat->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     // Falha silenciosa caso a tabela ainda não exista
-}
-
-// 3. Filtrar dinamicamente apenas os itens que PODEM SER RESERVADOS (estado = disponivel)
-$itens_para_reservar = array_filter($itens, function($item) {
-    return $item['estado'] === 'disponivel';
-});
-
-// 4. NOVO: Procurar as reservas ativas do utilizador que está atualmente logado
-$minhas_reservas = [];
-if (isset($_SESSION['utilizador_id'])) {
-    try {
-        $query_minhas_res = "SELECT reservas.*, itens.titulo, itens.autor_artista, itens.imagem_url 
-                             FROM reservas 
-                             INNER JOIN itens ON reservas.item_id = itens.id 
-                             WHERE reservas.utilizador_id = ? AND reservas.estado = 'ativa'
-                             ORDER BY reservas.data_inicio ASC";
-        $stmt_minhas_res = $pdo->prepare($query_minhas_res);
-        $stmt_minhas_res->execute([$_SESSION['utilizador_id']]);
-        $minhas_reservas = $stmt_minhas_res->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        // Falha silenciosa caso a tabela de reservas ainda não esteja totalmente integrada
-    }
 }
 ?>
 
@@ -112,82 +94,9 @@ if (isset($_SESSION['utilizador_id'])) {
     </div>
 </header>
 
-<!-- NOVO: ZONA DINÂMICA DAS RESERVAS ATIVAS DO UTILIZADOR -->
-<section class="reservas-container" style="margin-bottom: 20px;">
-    <h3 style="color: white; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600; text-align: left; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;">
-        📌 As Minhas Reservas Ativas
-    </h3>
-    <p style="color: #64748b; font-size: 0.85rem; text-align: left; margin: 0 0 20px 0;">Artigos que reservou e o respetivo período de levantamento/utilização.</p>
-
-    <?php if (!isset($_SESSION['utilizador_id'])): ?>
-        <div style="background: rgba(30, 41, 59, 0.3); border: 1px dashed rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 8px; text-align: center; color: #94a3b8; font-size: 0.9rem;">
-            🔑 <a href="login.php" style="color: #3b82f6; text-decoration: none; font-weight: 600;">Inicie sessão</a> para conseguir visualizar e gerir as suas reservas pessoais.
-        </div>
-    <?php elseif (!empty($minhas_reservas)): ?>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
-            <?php foreach ($minhas_reservas as $reserva): 
-                $imgReserva = !empty($reserva['imagem_url']) ? 'Uploads/'.$reserva['imagem_url'] : 'Images/default-cover.png';
-                $dtInicio = date('d/m/Y', strtotime($reserva['data_inicio']));
-                $dtFim = date('d/m/Y', strtotime($reserva['data_fim']));
-            ?>
-                <div style="background: #0f172a; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 14px; display: flex; gap: 14px; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-                    <img src="<?= $imgReserva ?>" alt="Capa" style="width: 60px; height: 85px; object-fit: cover; border-radius: 6px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.05);">
-                    <div style="flex-grow: 1; text-align: left; overflow: hidden;">
-                        <h4 style="color: white; margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($reserva['titulo']) ?></h4>
-                        <p style="color: #64748b; margin: 0 0 8px 0; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($reserva['autor_artista']) ?></p>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 2px;">
-                            <span style="font-size: 0.75rem; color: #94a3b8;">🗓️ De: <strong style="color: #cbd5e1;"><?= $dtInicio ?></strong></span>
-                            <span style="font-size: 0.75rem; color: #94a3b8;">⌛ Até: <strong style="color: #60a5fa;"><?= $dtFim ?></strong></span>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    <?php else: ?>
-        <div style="background: rgba(30, 41, 59, 0.15); border: 1px solid rgba(255, 255, 255, 0.04); padding: 25px; border-radius: 8px; text-align: center; color: #64748b; font-size: 0.88rem;">
-            Dica: Explore o catálogo abaixo e clique em "Reservar" em qualquer exemplar disponível!
-        </div>
-    <?php endif; ?>
-</section>
-
-<section class="reservas-container">
-    <h3 style="color: white; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600; text-align: left; margin-bottom: 5px;">
-        ⚡ Disponível Para Reservar Já
-    </h3>
-    <p style="color: #64748b; font-size: 0.85rem; text-align: left; margin: 0 0 15px 0;">Clique diretamente no cubo para abrir as opções de marcação de data.</p>
-
-    <?php if (!empty($itens_para_reservar)): ?>
-        <div class="reservas-grid">
-            <?php foreach ($itens_para_reservar as $item_res): 
-                $fotoCapa = !empty($item_res['imagem_url']) ? 'Uploads/'.$item_res['imagem_url'] : 'Images/default-cover.png';
-            ?>
-                <a href="javascript:void(0);" class="reserva-cube js-open-reserve" 
-                   data-id="<?= $item_res['id'] ?>" 
-                   data-titulo="<?= htmlspecialchars($item_res['titulo']) ?>">
-                    <img src="<?= $fotoCapa ?>" alt="Capa" class="reserva-img">
-                    <div class="reserva-info">
-                        <h4><?= htmlspecialchars($item_res['titulo']) ?></h4>
-                        <p><?= htmlspecialchars($item_res['autor_artista']) ?></p>
-                        <span style="font-size: 0.7rem; color: #3b82f6; background: rgba(59, 130, 246, 0.1); padding: 4px 8px; border-radius: 4px; width: fit-content; font-weight: 600; letter-spacing: 0.05em;">
-                            RESERVAR ➜
-                        </span>
-                    </div>
-                </a>
-            <?php endforeach; ?>
-        </div>
-    <?php else: ?>
-        <div class="no-reservas">
-            ❌ De momento, não existem reservas disponíveis. Todos os artigos encontram-se indisponíveis.
-        </div>
-    <?php endif; ?>
-</section>
-
-<hr style="max-width: 1200px; margin: 40px auto; border: 0; border-top: 1px solid rgba(255,255,255,0.05);">
-
-<main class="catalog-container" style="margin-top: 0;">
+<main class="catalog-container" style="margin-top: 40px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 0 10px;">
-        <h2 class="section-title" style="margin: 0;">Catálogo</h2>
+        <h2 class="section-title" style="margin: 0;">Catálogo de Artigos</h2>
         
         <?php if (isset($_SESSION['utilizador_tipo']) && ((int)$_SESSION['utilizador_tipo'] === 1 || $_SESSION['utilizador_tipo'] === 'admin')): ?>
             <button type="button" class="btn-add-catalog" id="openAddCatalogBtn">
@@ -201,10 +110,15 @@ if (isset($_SESSION['utilizador_id'])) {
         <?php foreach($itens as $item): 
             $itemImagem = !empty($item['imagem_url']) ? 'Uploads/'.$item['imagem_url'] : 'Images/default-cover.png';
             $criadorTipo = 'Administrador'; 
+            $estadoLimpo = strtolower(trim($item['estado']));
+            $quemReservou = !empty($item['quem_reservou']) ? (int)$item['quem_reservou'] : null;
         ?>
         <div class="card">
             <div class="card-header">
-                <span class="status-badge <?= $item['estado'] ?>">
+                <span class="status-badge <?= $item['estado'] ?>" style="<?php 
+                    if($estadoLimpo === 'reservado') {
+                        echo 'background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3);';
+                    } ?>">
                     <?= strtoupper($item['estado']) ?>
                 </span>
                 <span class="category-icon">
@@ -228,13 +142,24 @@ if (isset($_SESSION['utilizador_id'])) {
                         Detalhes
                     </button>
 
-                    <?php if($item['estado'] == 'disponivel'): ?>
+                    <?php if($estadoLimpo === 'disponivel'): ?>
                         <button type="button" class="btn-action js-open-reserve" 
                                 data-id="<?= $item['id'] ?>" 
                                 data-titulo="<?= htmlspecialchars($item['titulo']) ?>"
                                 style="border:none; cursor:pointer;">
                             Reservar
                         </button>
+                    <?php elseif($estadoLimpo === 'reservado'): ?>
+                        <?php if($id_logado && $id_logado === $quemReservou): ?>
+                            <form action="cancela_reserva.php" method="POST" style="margin:0; display:inline;">
+                                <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
+                                <button type="submit" class="btn-action" style="background: #ef4444; color: white; border:none; cursor:pointer;">
+                                    Cancelar
+                                </button>
+                            </form>
+                        <?php else: ?>
+                            <button disabled class="btn-disabled" style="background: rgba(234, 179, 8, 0.1); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.2); cursor: not-allowed;">Reservado</button>
+                        <?php endif; ?>
                     <?php else: ?>
                         <button disabled class="btn-disabled">Indisponível</button>
                     <?php endif; ?>
@@ -249,7 +174,6 @@ if (isset($_SESSION['utilizador_id'])) {
     <p>&copy; 2026 BiblioBase - Sistema de Gestão de Biblioteca</p>
 </footer>
 
-<!-- MODAL DE DETALHES -->
 <div id="detailsCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 650px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
         <div style="padding: 20px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
@@ -288,7 +212,6 @@ if (isset($_SESSION['utilizador_id'])) {
     </div>
 </div>
 
-<!-- MODAL DE ADICIONAR ARTIGO -->
 <div id="addCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
         <div style="padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
@@ -323,6 +246,7 @@ if (isset($_SESSION['utilizador_id'])) {
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">ESTADO INICIAL *</label>
                     <select name="estado" class="modal-field" required style="height: 45px;">
                         <option value="disponivel" selected style="background:#0b0f19;">Disponível</option>
+                        <option value="reservado" style="background:#0b0f19;">Reservado</option>
                         <option value="indisponivel" style="background:#0b0f19;">Indisponível</option>
                     </select>
                 </div>
@@ -344,7 +268,6 @@ if (isset($_SESSION['utilizador_id'])) {
     </div>
 </div>
 
-<!-- MODAL POP-UP DE RESERVA COM CALENDÁRIO BRANCO -->
 <div id="reserveCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 450px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
         
@@ -434,9 +357,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const badgeEstado = document.getElementById('txtDetailEstado');
             badgeEstado.innerText = estado;
+            
             if (estado.toLowerCase() === 'disponivel') {
                 badgeEstado.style.background = 'rgba(16, 185, 129, 0.1)';
                 badgeEstado.style.color = '#10b981';
+            } else if (estado.toLowerCase() === 'reservado') {
+                badgeEstado.style.background = 'rgba(234, 179, 8, 0.15)';
+                badgeEstado.style.color = '#eab308';
             } else {
                 badgeEstado.style.background = 'rgba(239, 68, 68, 0.1)';
                 badgeEstado.style.color = '#ef4444';
