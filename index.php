@@ -2,7 +2,7 @@
 session_start();
 require 'config.php'; 
 
-// 1. Consulta para buscar todos os itens e o nome da categoria para o catálogo geral
+// 1. Consulta corrigida para usar exatamente os campos da tua tabela 'itens'
 $query = "SELECT itens.*, categorias.nome as cat_nome 
           FROM itens 
           LEFT JOIN categorias ON itens.categoria_id = categorias.id";
@@ -33,8 +33,6 @@ $itens_para_reservar = array_filter($itens, function($item) {
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="Styles/StylesIndex.css">
     <link rel="stylesheet" href="Styles/StylesIndex2.css">
-
-    
 </head>
 <body>
 
@@ -106,7 +104,8 @@ $itens_para_reservar = array_filter($itens, function($item) {
     <?php if (!empty($itens_para_reservar)): ?>
         <div class="reservas-grid">
             <?php foreach ($itens_para_reservar as $item_res): 
-                $fotoCapa = !empty($item_res['imagem']) ? 'Uploads/'.$item_res['imagem'] : 'Images/default-cover.png';
+                // CORRIGIDO: Mapeado para 'imagem_url' que vem da tua tabela original
+                $fotoCapa = !empty($item_res['imagem_url']) ? 'Uploads/'.$item_res['imagem_url'] : 'Images/default-cover.png';
             ?>
                 <a href="reservar.php?id=<?= $item_res['id'] ?>" class="reserva-cube">
                     <img src="<?= $fotoCapa ?>" alt="Capa" class="reserva-img">
@@ -142,7 +141,13 @@ $itens_para_reservar = array_filter($itens, function($item) {
     </div>
     
     <div class="grid-itens">
-        <?php foreach($itens as $item): ?>
+        <?php foreach($itens as $item): 
+            // CORRIGIDO: Lido do campo 'imagem_url' da tabela original
+            $itemImagem = !empty($item['imagem_url']) ? 'Uploads/'.$item['imagem_url'] : 'Images/default-cover.png';
+            
+            // LÓGICA SEGURO: Como apenas admins adicionam ao acervo, assume Administrador
+            $criadorTipo = 'Administrador'; 
+        ?>
         <div class="card">
             <div class="card-header">
                 <span class="status-badge <?= $item['estado'] ?>">
@@ -158,7 +163,17 @@ $itens_para_reservar = array_filter($itens, function($item) {
                 <p class="author-text"><?= htmlspecialchars($item['autor_artista']) ?></p>
                 
                 <div class="card-footer">
-                    <a href="detalhes.php?id=<?= $item['id'] ?>" class="btn-details">Detalhes</a>
+                    <button type="button" class="btn-details js-open-details" 
+                            data-titulo="<?= htmlspecialchars($item['titulo']) ?>"
+                            data-autor="<?= htmlspecialchars($item['autor_artista']) ?>"
+                            data-categoria="<?= htmlspecialchars($item['cat_nome']) ?>"
+                            data-estado="<?= htmlspecialchars($item['estado']) ?>"
+                            data-descricao="<?= htmlspecialchars($item['descricao']) ?>"
+                            data-imagem="<?= $itemImagem ?>"
+                            data-criador="<?= $criadorTipo ?>">
+                        Detalhes
+                    </button>
+
                     <?php if($item['estado'] == 'disponivel'): ?>
                         <a href="reservar.php?id=<?= $item['id'] ?>" class="btn-action">Reservar</a>
                     <?php else: ?>
@@ -174,6 +189,51 @@ $itens_para_reservar = array_filter($itens, function($item) {
 <footer>
     <p>&copy; 2026 BiblioBase - Sistema de Gestão de Biblioteca</p>
 </footer>
+
+<div id="detailsCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+    <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 650px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
+        
+        <div style="padding: 20px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
+            <div>
+                <span id="txtDetailCategoria" style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">CATEGORIA</span>
+                <h2 id="txtDetailTitulo" style="font-size: 1.4rem; color: white; font-weight: 600; margin: 0; text-align: left;">Título do Artigo</h2>
+            </div>
+            <button type="button" id="closeDetailModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1; transition: color 0.2s;">&times;</button>
+        </div>
+
+        <div style="padding: 28px; display: flex; gap: 24px; box-sizing: border-box;">
+            <div style="flex-shrink: 0;">
+                <img id="imgDetailCapa" src="Images/default-cover.png" alt="Capa" style="width: 140px; height: 190px; object-fit: cover; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);">
+            </div>
+
+            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 14px; text-align: left;">
+                <div>
+                    <label style="font-size: 0.65rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">AUTOR / ARTISTA</label>
+                    <span id="txtDetailAutor" style="color: #cbd5e1; font-size: 0.95rem; font-weight: 500;">-</span>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.65rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">ESTADO DO EXEMPLAR</label>
+                    <span id="txtDetailEstado" style="font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; font-weight: 600; text-transform: uppercase; display: inline-block;">-</span>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.65rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">SINOPSE / DESCRIÇÃO</label>
+                    <p id="txtDetailDescricao" style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5; margin: 0; max-height: 100px; overflow-y: auto; padding-right: 5px;">-</p>
+                </div>
+
+                <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.8rem; color: #64748b;">Criado por:</span>
+                    <strong id="txtDetailCriador" style="font-size: 0.8rem; color: #60a5fa;">Administrador</strong>
+                </div>
+            </div>
+        </div>
+
+        <div style="padding: 16px 28px; background: rgba(11, 15, 25, 0.4); border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: flex-end;">
+            <button type="button" id="cancelDetailModalBtn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: 'Inter', sans-serif;">Fechar Janela</button>
+        </div>
+    </div>
+</div>
 
 <div id="addCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
@@ -238,7 +298,7 @@ $itens_para_reservar = array_filter($itens, function($item) {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Controlo de abertura/fecho do Modal
+    // CONTROLO DO MODAL DE ADICIONAR ARTIGO
     const addModal = document.getElementById('addCatalogModal');
     const openBtn = document.getElementById('openAddCatalogBtn');
     const closeBtn = document.getElementById('closeAddModalBtn');
@@ -256,7 +316,49 @@ document.addEventListener('DOMContentLoaded', function() {
     if (cancelBtn) cancelBtn.addEventListener('click', closeAddModal);
     addModal.addEventListener('click', function(e) { if (e.target === addModal) closeAddModal(); });
 
-    // Animação e Controlo do Alerta/Toast de Confirmação
+    // CONTROLO DO MODAL DE DETALHES
+    const detailModal = document.getElementById('detailsCatalogModal');
+    const closeDetailBtn = document.getElementById('closeDetailModalBtn');
+    const cancelDetailBtn = document.getElementById('cancelDetailModalBtn');
+
+    document.querySelectorAll('.js-open-details').forEach(button => {
+        button.addEventListener('click', function() {
+            const titulo = this.dataset.titulo;
+            const autor = this.dataset.autor;
+            const categoria = this.dataset.categoria;
+            const estado = this.dataset.estado;
+            const descricao = this.dataset.descricao;
+            const imagem = this.dataset.imagem;
+            const criador = this.dataset.criador;
+
+            document.getElementById('txtDetailTitulo').innerText = titulo;
+            document.getElementById('txtDetailAutor').innerText = autor;
+            document.getElementById('txtDetailCategoria').innerText = `[ ${categoria.toUpperCase()} ]`;
+            document.getElementById('txtDetailDescricao').innerText = descricao;
+            document.getElementById('imgDetailCapa').src = imagem;
+            document.getElementById('txtDetailCriador').innerText = criador;
+
+            const badgeEstado = document.getElementById('txtDetailEstado');
+            badgeEstado.innerText = estado;
+            if (estado.toLowerCase() === 'disponivel') {
+                badgeEstado.style.background = 'rgba(16, 185, 129, 0.1)';
+                badgeEstado.style.color = '#10b981';
+            } else {
+                badgeEstado.style.background = 'rgba(239, 68, 68, 0.1)';
+                badgeEstado.style.color = '#ef4444';
+            }
+
+            detailModal.style.display = 'flex';
+        });
+    });
+
+    const closeDetailModal = () => { detailModal.style.display = 'none'; };
+
+    if (closeDetailBtn) closeDetailBtn.addEventListener('click', closeDetailModal);
+    if (cancelDetailBtn) cancelDetailBtn.addEventListener('click', closeDetailModal);
+    detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeDetailModal(); });
+
+    // TOAST
     const toast = document.getElementById('toastAlert');
     if (toast) {
         setTimeout(() => { toast.classList.add('show'); }, 200);

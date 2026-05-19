@@ -42,9 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // Inserção na Base de Dados
-        $query = "INSERT INTO itens (titulo, autor_artista, categoria_id, estado, descricao, imagem) 
-                  VALUES (:titulo, :autor, :categoria, :estado, :descricao, :imagem)";
-        
+        $query = "INSERT INTO itens (titulo, autor_artista, categoria_id, estado, descricao, imagem_url) 
+          VALUES (:titulo, :autor, :categoria, :estado, :descricao, :imagem)";
         $stmt = $pdo->prepare($query);
         $stmt->execute([
             'titulo' => $titulo,
