@@ -16,8 +16,10 @@ $seccao = $_GET['seccao'] ?? 'geral';
 // Contagens dinâmicas para os cards do Painel Geral
 $total_utilizadores = 0;
 $total_artigos = 0;
+$total_reservas = 0;
 $utilizadores = [];
 $artigos = [];
+$reservas = [];
 
 try {
     // Conta os utilizadores diretamente da tabela
@@ -27,6 +29,10 @@ try {
     // Conta os itens do catálogo diretamente da tabela itens
     $stmt_itens = $pdo->query("SELECT COUNT(*) FROM itens");
     $total_artigos = $stmt_itens->fetchColumn();
+
+    // Conta as reservas pendentes/ativas diretamente da tabela reservas
+    $stmt_res_count = $pdo->query("SELECT COUNT(*) FROM reservas WHERE status = 'pendente'");
+    $total_reservas = $stmt_res_count->fetchColumn();
 
     // LÓGICA DA SECÇÃO UTILIZADORES
     if ($seccao === 'utilizadores') {
@@ -38,6 +44,18 @@ try {
             $stmt_u = $pdo->query("SELECT id, nome, email, tipo, ativo, data_registo FROM utilizadores ORDER BY id DESC");
         }
         $utilizadores = $stmt_u->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // LÓGICA DA SECÇÃO RESERVAS (NOVA!)
+    if ($seccao === 'reservas') {
+        // Puxa as reservas ativas interligando com o nome do utilizador e título do item
+        $sql_reservas = "SELECT reservas.*, utilizadores.nome as user_nome, itens.titulo as item_titulo 
+                         FROM reservas 
+                         INNER JOIN utilizadores ON reservas.utilizador_id = utilizadores.id 
+                         INNER JOIN itens ON reservas.item_id = itens.id 
+                         WHERE reservas.status = 'pendente' 
+                         ORDER BY reservas.id DESC";
+        $reservas = $pdo->query($sql_reservas)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // LÓGICA DA SECÇÃO ARTIGOS
@@ -59,10 +77,14 @@ try {
             $params['q'] = "%$pesquisa_artigo%";
         }
 
-        // Filtro por Estado adaptado para (disponivel / indisponivel)
+        // Filtro por Estado (CORRIGIDO: se escolher 'indisponivel', procura por 'reservado')
         if (!empty($filtro_estado)) {
-            $sql_artigos .= " AND itens.estado = :estado";
-            $params['estado'] = $filtro_estado;
+            if ($filtro_estado === 'indisponivel') {
+                $sql_artigos .= " AND itens.estado = 'reservado'";
+            } else {
+                $sql_artigos .= " AND itens.estado = :estado";
+                $params['estado'] = $filtro_estado;
+            }
         }
 
         $sql_artigos .= " ORDER BY itens.id DESC";
@@ -73,7 +95,6 @@ try {
     }
 
 } catch (PDOException $e) {
-    // Tratamento de erro seguro
     die("Erro na Base de Dados: " . $e->getMessage());
 }
 ?>
@@ -87,7 +108,6 @@ try {
     <link rel="stylesheet" href="Styles/StylesIndex.css">
     <link rel="stylesheet" href="Styles/StyleAdmin.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
 </head>
 <body>
 
@@ -125,7 +145,7 @@ try {
                 
                 <div class="dashboard-grid">
                     <div class="stat-card"><h3>Utilizadores</h3><p><?= $total_utilizadores; ?></p></div>
-                    <div class="stat-card"><h3>Reservas Ativas</h3><p>0</p></div>
+                    <div class="stat-card"><h3>Reservas Ativas</h3><p><?= $total_reservas; ?></p></div>
                     <div class="stat-card"><h3>Artigos no Catálogo</h3><p><?= $total_artigos; ?></p></div>
                 </div>
 
@@ -160,9 +180,7 @@ try {
                         <tbody>
                             <?php if (empty($utilizadores)): ?>
                                 <tr>
-                                    <td colspan="7" style="text-align: center; color: #64748b; padding: 30px;">
-                                        Nenhum utilizador encontrado.
-                                    </td>
+                                    <td colspan="7" style="text-align: center; color: #64748b; padding: 30px;">Nenhum utilizador encontrado.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($utilizadores as $u): 
@@ -181,9 +199,7 @@ try {
                                             </div>
                                         </td>
                                         <td><?= htmlspecialchars($u['email']); ?></td>
-                                        <td style="color: #64748b;">
-                                            <?= date('d/m/Y', strtotime($u['data_registo'])); ?>
-                                        </td>
+                                        <td style="color: #64748b;"><?= date('d/m/Y', strtotime($u['data_registo'])); ?></td>
                                         <td><?= $isAdmin ? 'Administrador' : 'Utilizador'; ?></td>
                                         <td>
                                             <span class="status-active" style="<?= (int)$u['ativo'] !== 1 ? 'color: #ef4444; border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.1);' : '' ?>">
@@ -192,7 +208,6 @@ try {
                                         </td>
                                         <td style="text-align: center;">
                                             <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
-                                                
                                                 <button class="btn-edit-trigger" 
                                                         data-id="<?= $u['id']; ?>" 
                                                         data-nome="<?= htmlspecialchars($u['nome']); ?>" 
@@ -200,9 +215,7 @@ try {
                                                         data-tipo="<?= $isAdmin ? 'admin' : 'user'; ?>" 
                                                         data-ativo="<?= $u['ativo']; ?>"
                                                         data-self="<?= $eProprioAdmin ? 'true' : 'false'; ?>"
-                                                        onclick="abrirModalEditar(this)">
-                                                    ✏️ Editar
-                                                </button>
+                                                        onclick="abrirModalEditar(this)">✏️ Editar</button>
 
                                                 <?php if (!$eProprioAdmin): ?>
                                                     <form action="editar_utilizadores.php" method="POST" style="margin:0;" onsubmit="return confirm('Tem a certeza absoluta que deseja eliminar permanentemente a conta de: <?= htmlspecialchars($u['nome']); ?>?');">
@@ -223,8 +236,45 @@ try {
                 </div>
 
             <?php elseif ($seccao === 'reservas'): ?>
-                <h1>Controlo de Reservas</h1>
-                <p class="admin-subtitle">Aprovar e gerir agendamentos de livros e artigos.</p>
+                <h1>Controlo de Reservas Ativas</h1>
+                <p class="admin-subtitle">Abaixo encontram-se todos os pedidos de reserva pendentes de levantamento.</p>
+
+                <div class="table-responsive" style="margin-top: 20px;">
+                    <table class="agent-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">ID</th>
+                                <th>Utilizador</th>
+                                <th>Artigo / Livro</th>
+                                <th>Data de Início</th>
+                                <th>Data Limite</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($reservas)): ?>
+                                <tr>
+                                    <td colspan="6" style="text-align: center; color: #64748b; padding: 40px;">📅 Não existem reservas ativas no sistema de momento.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($reservas as $res): ?>
+                                    <tr>
+                                        <td class="td-id">#<?= $res['id']; ?></td>
+                                        <td style="font-weight: 500; color: #f8fafc;"><?= htmlspecialchars($res['user_nome']); ?></td>
+                                        <td style="color: #cbd5e1;"><?= htmlspecialchars($res['item_titulo']); ?></td>
+                                        <td><?= date('d/m/Y', strtotime($res['data_inicio'])); ?></td>
+                                        <td style="color: #f59e0b; font-weight: 500;"><?= date('d/m/Y', strtotime($res['data_fim'])); ?></td>
+                                        <td>
+                                            <span style="color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); background: rgba(59,130,246,0.1); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
+                                                <?= htmlspecialchars($res['status']); ?>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
 
             <?php elseif ($seccao === 'emprestimos'): ?>
                 <h1>Empréstimos Ativos</h1>
@@ -273,9 +323,7 @@ try {
                         <tbody>
                             <?php if (empty($artigos)): ?>
                                 <tr>
-                                    <td colspan="7" style="text-align: center; color: #64748b; padding: 40px;">
-                                        ❌ Nenhum artigo corresponde aos filtros aplicados.
-                                    </td>
+                                    <td colspan="7" style="text-align: center; color: #64748b; padding: 40px;">❌ Nenhum artigo corresponde aos filtros aplicados.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($artigos as $art): 
@@ -314,9 +362,7 @@ try {
                                                 <a href="eliminar_artigo.php?id=<?= $art['id']; ?>" 
                                                    class="btn-action-square btn-delete-user" 
                                                    title="Eliminar Artigo do Acervo"
-                                                   onclick="return confirm('Tem a certeza que deseja remover permanentemente o anúncio: <?= htmlspecialchars($art['titulo']); ?>?');">
-                                                    🗑️
-                                                </a>
+                                                   onclick="return confirm('Tem a certeza que deseja remover permanentemente o anúncio: <?= htmlspecialchars($art['titulo']); ?>?');">🗑️</a>
                                             </div>
                                         </td>
                                     </tr>
@@ -337,7 +383,7 @@ try {
             </div>
             
             <form action="editar_utilizadores.php" method="POST">
-                <input type="hidden" name="acao" value="atualizar_completo">
+                <input type="hidden" name="acao" value="actualizar_completo">
                 <input type="hidden" id="modal_id" name="utilizador_id">
 
                 <div class="form-group-modal">
@@ -380,7 +426,6 @@ try {
 
     <script>
         function abrirModalEditar(botao) {
-            // Extrair as informações embutidas do utilizador selecionado
             const id = botao.getAttribute('data-id');
             const nome = botao.getAttribute('data-nome');
             const email = botao.getAttribute('data-email');
@@ -388,14 +433,12 @@ try {
             const ativo = botao.getAttribute('data-ativo');
             const isSelf = botao.getAttribute('data-self') === 'true';
 
-            // Alimentar dinamicamente os inputs do Pop-up
             document.getElementById('modal_id').value = id;
             document.getElementById('modal_nome').value = nome;
             document.getElementById('modal_email').value = email;
             document.getElementById('modal_tipo').value = tipo;
             document.getElementById('modal_ativo').value = ativo;
 
-            // Restrição de segurança no Front-end: Trava selects se for a própria conta conectada
             if (isSelf) {
                 document.getElementById('modal_tipo').disabled = true;
                 document.getElementById('modal_ativo').disabled = true;
@@ -406,7 +449,6 @@ try {
                 document.getElementById('aviso_self_edit').style.display = 'none';
             }
 
-            // Ativa o display do Pop-up
             document.getElementById('modalEditarUtilizador').classList.add('active');
         }
 
@@ -414,7 +456,6 @@ try {
             document.getElementById('modalEditarUtilizador').classList.remove('active');
         }
 
-        // Fecha automaticamente se o utilizador clicar na área escura (fora da caixa)
         window.onclick = function(event) {
             const modal = document.getElementById('modalEditarUtilizador');
             if (event.target === modal) {
@@ -422,6 +463,5 @@ try {
             }
         }
     </script>
-
 </body>
 </html>
