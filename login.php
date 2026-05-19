@@ -10,7 +10,6 @@
 <body class="auth-body">
 
 <div class="login-screen">
-    <!-- Coluna Esquerda: Citação e Ícones -->
     <div class="login-sidebar">
         <div class="sidebar-logo">
              <strong>B</strong> BiblioBase
@@ -27,7 +26,6 @@
         </div>
     </div>
 
-    <!-- Coluna Direita: Formulário -->
     <div class="login-main">
         <div class="login-content-wrapper">
             <a href="index.php" class="back-link">← Voltar ao início</a>
@@ -43,10 +41,7 @@
 
                 <div class="input-group">
                     <label>Palavra-passe</label>
-                    <div class="password-wrapper">
-                        <input type="password" name="password" class="input-control" placeholder="••••••••" required>
-                        <span class="toggle-password">👁️</span>
-                    </div>
+                    <input type="password" name="password" class="input-control" placeholder="••••••••" required>
                 </div>
 
                 <div class="remember-me">
