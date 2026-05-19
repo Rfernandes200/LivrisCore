@@ -8,6 +8,8 @@ if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !
     exit();
 }
 
+$id_admin_atual = $_SESSION['utilizador_id'] ?? null; 
+
 // Determinar qual secção mostrar (Geral por defeito)
 $seccao = $_GET['seccao'] ?? 'geral';
 
@@ -38,7 +40,7 @@ try {
         $utilizadores = $stmt_u->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // LÓGICA DA SECÇÃO ARTIGOS (NOVA)
+    // LÓGICA DA SECÇÃO ARTIGOS
     if ($seccao === 'artigos') {
         $pesquisa_artigo = $_GET['q_artigo'] ?? '';
         $filtro_estado = $_GET['estado'] ?? '';
@@ -57,7 +59,7 @@ try {
             $params['q'] = "%$pesquisa_artigo%";
         }
 
-        // Filtro por Estado (disponivel, reservado, emprestado)
+        // Filtro por Estado adaptado para (disponivel / indisponivel)
         if (!empty($filtro_estado)) {
             $sql_artigos .= " AND itens.estado = :estado";
             $params['estado'] = $filtro_estado;
@@ -72,6 +74,7 @@ try {
 
 } catch (PDOException $e) {
     // Tratamento de erro seguro
+    die("Erro na Base de Dados: " . $e->getMessage());
 }
 ?>
 
@@ -84,6 +87,7 @@ try {
     <link rel="stylesheet" href="Styles/StylesIndex.css">
     <link rel="stylesheet" href="Styles/StyleAdmin.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
 </head>
 <body>
 
@@ -107,6 +111,14 @@ try {
         </aside>
 
         <main class="admin-content">
+            <?php if (isset($_SESSION['alerta'])): ?>
+                <div style="padding: 15px; margin-bottom: 20px; border-radius: 8px; font-size: 0.9rem; font-weight: 500; 
+                    <?= $_SESSION['alerta']['tipo'] === 'sucesso' ? 'background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.2);' : 'background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.2);' ?>">
+                    <?= $_SESSION['alerta']['mensagem']; ?>
+                </div>
+                <?php unset($_SESSION['alerta']); ?>
+            <?php endif; ?>
+
             <?php if ($seccao === 'geral'): ?>
                 <h1>Painel Geral</h1>
                 <p class="admin-subtitle">Visão unificada do estado do sistema de gestão.</p>
@@ -118,8 +130,8 @@ try {
                 </div>
 
             <?php elseif ($seccao === 'utilizadores'): ?>
-                <h1>Gestão de Utilizadores</h1>
-                <p class="admin-subtitle">Adicione, edite ou remova contas de acesso à biblioteca.</p>
+                <h1>Lista de Utilizadores</h1>
+                <p class="admin-subtitle">Consulta de contas com acesso à biblioteca.</p>
 
                 <div class="admin-toolbar">
                     <form action="admin.php" method="GET" class="search-container-admin">
@@ -140,20 +152,23 @@ try {
                                 <th>Nome</th>
                                 <th>Email</th>
                                 <th>Registo</th>
+                                <th>Cargo</th>
                                 <th>Estado</th>
-                                <th style="width: 110px; text-align: center;">Ações</th>
+                                <th style="width: 180px; text-align: center;">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($utilizadores)): ?>
                                 <tr>
-                                    <td colspan="6" style="text-align: center; color: #64748b; padding: 30px;">
+                                    <td colspan="7" style="text-align: center; color: #64748b; padding: 30px;">
                                         Nenhum utilizador encontrado.
                                     </td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($utilizadores as $u): 
-                                    $isAdmin = ($u['tipo'] == 'admin' || (int)$u['tipo'] === 1);
+                                    $u_tipo_normalizado = trim(strtolower($u['tipo']));
+                                    $isAdmin = ($u_tipo_normalizado === 'admin' || (int)$u['tipo'] === 1);
+                                    $eProprioAdmin = ($id_admin_atual !== null && (int)$u['id'] === (int)$id_admin_atual);
                                 ?>
                                     <tr>
                                         <td class="td-id">#<?= $u['id']; ?></td>
@@ -169,30 +184,35 @@ try {
                                         <td style="color: #64748b;">
                                             <?= date('d/m/Y', strtotime($u['data_registo'])); ?>
                                         </td>
+                                        <td><?= $isAdmin ? 'Administrador' : 'Utilizador'; ?></td>
                                         <td>
                                             <span class="status-active" style="<?= (int)$u['ativo'] !== 1 ? 'color: #ef4444; border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.1);' : '' ?>">
                                                 <?= (int)$u['ativo'] === 1 ? 'Ativo' : 'Inativo'; ?>
                                             </span>
                                         </td>
-                                        <td>
-                                            <div class="actions-cell" style="justify-content: center;">
-                                                <button type="button" 
-                                                        class="btn-action-square btn-edit-user btn-open-modal" 
-                                                        title="Editar"
-                                                        data-id="<?= $u['id']; ?>"
-                                                        data-nome="<?= htmlspecialchars($u['nome']); ?>"
-                                                        data-email="<?= htmlspecialchars($u['email']); ?>"
-                                                        data-ativo="<?= $u['ativo']; ?>"
-                                                        data-tipo="<?= htmlspecialchars($u['tipo']); ?>">
-                                                    ✏️
-                                                </button>
+                                        <td style="text-align: center;">
+                                            <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
                                                 
-                                                <a href="eliminar_utilizador.php?id=<?= $u['id']; ?>" 
-                                                   class="btn-action-square btn-delete-user" 
-                                                   title="Eliminar"
-                                                   onclick="return confirm('Tem a certeza que deseja eliminar o utilizador <?= htmlspecialchars($u['nome']); ?>?');">
-                                                    🗑️
-                                                </a>
+                                                <button class="btn-edit-trigger" 
+                                                        data-id="<?= $u['id']; ?>" 
+                                                        data-nome="<?= htmlspecialchars($u['nome']); ?>" 
+                                                        data-email="<?= htmlspecialchars($u['email']); ?>" 
+                                                        data-tipo="<?= $isAdmin ? 'admin' : 'user'; ?>" 
+                                                        data-ativo="<?= $u['ativo']; ?>"
+                                                        data-self="<?= $eProprioAdmin ? 'true' : 'false'; ?>"
+                                                        onclick="abrirModalEditar(this)">
+                                                    ✏️ Editar
+                                                </button>
+
+                                                <?php if (!$eProprioAdmin): ?>
+                                                    <form action="editar_utilizadores.php" method="POST" style="margin:0;" onsubmit="return confirm('Tem a certeza absoluta que deseja eliminar permanentemente a conta de: <?= htmlspecialchars($u['nome']); ?>?');">
+                                                        <input type="hidden" name="acao" value="eliminar_utilizador">
+                                                        <input type="hidden" name="utilizador_id" value="<?= $u['id']; ?>">
+                                                        <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 4px;" title="Eliminar Utilizador">🗑️</button>
+                                                    </form>
+                                                <?php else: ?>
+                                                    <span style="font-size: 0.75rem; color: #64748b; font-style: italic;">Sua Conta</span>
+                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>
@@ -212,7 +232,7 @@ try {
 
             <?php elseif ($seccao === 'artigos'): ?>
                 <h1>Gerir Artigos (Catálogo)</h1>
-                <p class="admin-subtitle">Monitorize, filtre e altere a disponibilidade dos exemplares do acervo.</p>
+                <p class="admin-subtitle">Monitorize, filtre e remova permanentemente os exemplares do acervo.</p>
 
                 <div class="admin-toolbar" style="display: flex; gap: 15px; align-items: center; justify-content: space-between;">
                     <form action="admin.php" method="GET" style="display: flex; gap: 12px; width: 100%; max-width: 700px;">
@@ -223,11 +243,10 @@ try {
                             <input type="text" name="q_artigo" class="search-input-admin" placeholder="Pesquisar pelo nome do anúncio/artigo..." value="<?= htmlspecialchars($_GET['q_artigo'] ?? '') ?>">
                         </div>
 
-                        <select name="estado" onchange="this.form.submit()" style="background: #0f172a; border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; padding: 0 15px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; outline: none; cursor: pointer; min-width: 160px; height: 45px;">
+                        <select name="estado" onchange="this.form.submit()" style="background: #0f172a; border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; padding: 0 15px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; outline: none; cursor: pointer; min-width: 180px; height: 45px;">
                             <option value="">⚙️ Todos os Estados</option>
                             <option value="disponivel" <?= ($_GET['estado'] ?? '') === 'disponivel' ? 'selected' : '' ?>>🟢 Disponível</option>
-                            <option value="reservado" <?= ($_GET['estado'] ?? '') === 'reservado' ? 'selected' : '' ?>>🟡 Reservado</option>
-                            <option value="emprestado" <?= ($_GET['estado'] ?? '') === 'emprestado' ? 'selected' : '' ?>>🔴 Emprestado</option>
+                            <option value="indisponivel" <?= ($_GET['estado'] ?? '') === 'indisponivel' ? 'selected' : '' ?>>🔴 Indisponível</option>
                         </select>
                         
                         <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 0 20px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; height: 45px; transition: background 0.2s;">Filtrar</button>
@@ -261,13 +280,14 @@ try {
                             <?php else: ?>
                                 <?php foreach ($artigos as $art): 
                                     $capaPath = !empty($art['imagem_url']) ? 'Uploads/'.$art['imagem_url'] : 'Images/default-cover.png';
-                                    
-                                    // Variáveis de estilo dinâmicas dependendo do estado
-                                    $corEstado = 'color: #10b981; border-color: rgba(16,185,129,0.2); background: rgba(16,185,129,0.1);'; // Disponivel
-                                    if($art['estado'] === 'reservado') {
-                                        $corEstado = 'color: #f59e0b; border-color: rgba(245,158,11,0.2); background: rgba(245,158,11,0.1);';
-                                    } elseif($art['estado'] === 'emprestado') {
-                                        $corEstado = 'color: #ef4444; border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.1);';
+                                    $estadoLimpo = strtolower(trim($art['estado']));
+
+                                    if ($estadoLimpo === 'disponivel' || $estadoLimpo === 'disponível') {
+                                        $textoExibido = "Disponível";
+                                        $corEstado = 'color: #10b981; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.1);';
+                                    } else {
+                                        $textoExibido = "Indisponível";
+                                        $corEstado = 'color: #ef4444; border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);';
                                     }
                                 ?>
                                     <tr>
@@ -285,16 +305,12 @@ try {
                                             </span>
                                         </td>
                                         <td>
-                                            <span class="status-active" style="text-transform: uppercase; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; <?= $corEstado ?>">
-                                                <?= htmlspecialchars($art['estado']); ?>
+                                            <span style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; min-width: 110px; border-radius: 6px; text-transform: uppercase; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; <?= $corEstado ?>">
+                                                <?= $textoExibido; ?>
                                             </span>
                                         </td>
                                         <td>
                                             <div class="actions-cell" style="justify-content: center;">
-                                                <button type="button" class="btn-action-square" title="Editar Estado" style="filter: grayscale(1); opacity: 0.6; cursor: not-allowed;">
-                                                    ⚙️
-                                                </button>
-                                                
                                                 <a href="eliminar_artigo.php?id=<?= $art['id']; ?>" 
                                                    class="btn-action-square btn-delete-user" 
                                                    title="Eliminar Artigo do Acervo"
@@ -313,95 +329,98 @@ try {
         </main>
     </div>
 
-    <div id="editUserModal" class="modal-overlay">
-        <div class="modal-card">
+    <div id="modalEditarUtilizador" class="modal-overlay">
+        <div class="modal-box">
             <div class="modal-header">
-                <div>
-                    <span class="modal-tag">[ EDITAR UTILIZADOR ]</span>
-                    <h2 id="modalUserTitle" class="modal-title">Nome do Utilizador</h2>
-                </div>
-                <button type="button" class="modal-close-btn" id="closeModalBtn">&times;</button>
+                <h2>✏️ Editar Perfil do Utilizador</h2>
+                <button class="btn-close-modal" onclick="fecharModalEditar()">✕</button>
             </div>
+            
+            <form action="editar_utilizadores.php" method="POST">
+                <input type="hidden" name="acao" value="atualizar_completo">
+                <input type="hidden" id="modal_id" name="utilizador_id">
 
-            <form action="atualiza_utilizador_painel.php" method="POST" class="modal-form">
-                <input type="hidden" name="id" id="modalInputId">
-
-                <div class="modal-form-grid">
-                    <div class="input-group-admin">
-                        <label>USERNAME / NOME</label>
-                        <input type="text" name="nome" id="modalInputNome" required>
-                    </div>
-
-                    <div class="input-group-admin">
-                        <label>EMAIL</label>
-                        <input type="email" name="email" id="modalInputEmail" required>
-                    </div>
+                <div class="form-group-modal">
+                    <label for="modal_nome">Nome Completo</label>
+                    <input type="text" id="modal_nome" name="nome" required>
                 </div>
 
-                <div class="modal-form-grid">
-                    <div class="input-group-admin">
-                        <label>NOVA PASSWORD (OPCIONAL)</label>
-                        <input type="password" name="nova_pw" placeholder="Deixa em branco para não alterar">
-                    </div>
-                    <div class="input-group-admin"></div>
+                <div class="form-group-modal">
+                    <label for="modal_email">Endereço de Email</label>
+                    <input type="email" id="modal_email" name="email" required>
                 </div>
 
-                <div class="modal-form-grid">
-                    <div class="input-group-admin">
-                        <label>ESTADO DA CONTA</label>
-                        <select name="ativo" id="modalSelectAtivo">
-                            <option value="1">Ativo</option>
-                            <option value="0">Inativo</option>
-                        </select>
-                    </div>
-
-                    <div class="input-group-admin">
-                        <label>PERMISSÃO ADMIN</label>
-                        <select name="tipo" id="modalSelectTipo">
-                            <option value="user">Utilizador</option>
-                            <option value="admin">Administrador</option>
-                        </select>
-                    </div>
+                <div class="form-group-modal">
+                    <label for="modal_tipo">Cargo / Nível de Acesso</label>
+                    <select id="modal_tipo" name="tipo">
+                        <option value="user">Utilizador Comum</option>
+                        <option value="admin">Administrador</option>
+                    </select>
                 </div>
+
+                <div class="form-group-modal">
+                    <label for="modal_ativo">Estado da Conta</label>
+                    <select id="modal_ativo" name="ativo">
+                        <option value="1">🟢 Ativo</option>
+                        <option value="0">🔴 Inativo</option>
+                    </select>
+                </div>
+
+                <p id="aviso_self_edit" style="color: #eab308; font-size: 0.75rem; display: none; margin-top: 10px; background: rgba(234,179,8,0.1); padding: 8px; border-radius: 4px;">
+                    ⚠️ Nota: Por segurança, não pode alterar o seu próprio cargo nem desativar a sua conta atual.
+                </p>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn-modal-cancel" id="cancelModalBtn">Cancelar</button>
-                    <button type="submit" class="btn-modal-save">💾 Guardar</button>
+                    <button type="button" class="btn-modal btn-modal-cancel" onclick="fecharModalEditar()">Cancelar</button>
+                    <button type="submit" class="btn-modal btn-modal-save">Guardar Alterações</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const modal = document.getElementById('editUserModal');
-        const closeBtn = document.getElementById('closeModalBtn');
-        const cancelBtn = document.getElementById('cancelModalBtn');
+        function abrirModalEditar(botao) {
+            // Extrair as informações embutidas do utilizador selecionado
+            const id = botao.getAttribute('data-id');
+            const nome = botao.getAttribute('data-nome');
+            const email = botao.getAttribute('data-email');
+            const tipo = botao.getAttribute('data-tipo');
+            const ativo = botao.getAttribute('data-ativo');
+            const isSelf = botao.getAttribute('data-self') === 'true';
 
-        // Escuta os cliques em botões de edição de utilizador
-        document.querySelectorAll('.btn-open-modal').forEach(button => {
-            button.addEventListener('click', function() {
-                document.getElementById('modalInputId').value = this.dataset.id;
-                document.getElementById('modalInputNome').value = this.dataset.nome;
-                document.getElementById('modalInputEmail').value = this.dataset.email;
-                document.getElementById('modalSelectAtivo').value = this.dataset.ativo;
-                
-                const tipoVal = this.dataset.tipo;
-                document.getElementById('modalSelectTipo').value = (tipoVal === '1' || tipoVal === 'admin') ? 'admin' : 'user';
-                
-                document.getElementById('modalUserTitle').textContent = this.dataset.nome;
-                modal.classList.add('show');
-            });
-        });
+            // Alimentar dinamicamente os inputs do Pop-up
+            document.getElementById('modal_id').value = id;
+            document.getElementById('modal_nome').value = nome;
+            document.getElementById('modal_email').value = email;
+            document.getElementById('modal_tipo').value = tipo;
+            document.getElementById('modal_ativo').value = ativo;
 
-        const closeModal = () => modal.classList.remove('show');
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
-        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+            // Restrição de segurança no Front-end: Trava selects se for a própria conta conectada
+            if (isSelf) {
+                document.getElementById('modal_tipo').disabled = true;
+                document.getElementById('modal_ativo').disabled = true;
+                document.getElementById('aviso_self_edit').style.display = 'block';
+            } else {
+                document.getElementById('modal_tipo').disabled = false;
+                document.getElementById('modal_ativo').disabled = false;
+                document.getElementById('aviso_self_edit').style.display = 'none';
+            }
 
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) closeModal();
-        });
-    });
+            // Ativa o display do Pop-up
+            document.getElementById('modalEditarUtilizador').classList.add('active');
+        }
+
+        function fecharModalEditar() {
+            document.getElementById('modalEditarUtilizador').classList.remove('active');
+        }
+
+        // Fecha automaticamente se o utilizador clicar na área escura (fora da caixa)
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalEditarUtilizador');
+            if (event.target === modal) {
+                fecharModalEditar();
+            }
+        }
     </script>
 
 </body>

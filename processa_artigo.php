@@ -2,6 +2,12 @@
 session_start();
 require 'config.php';
 
+// 1. Bloqueio de Segurança: Apenas administradores podem inserir artigos
+if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !== 1 && $_SESSION['utilizador_tipo'] !== 'admin')) {
+    header("Location: index.php");
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $titulo = trim($_POST['titulo']);
     $autor_artista = trim($_POST['autor_artista']);
@@ -25,10 +31,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 mkdir('Uploads', 0777, true);
             }
             
-            // CORRIGIDO: Agora a função nativa está escrita corretamente
+            // Função nativa de upload
             move_uploaded_file($_FILES['imagem']['tmp_name'], $destino);
         }
     }
+
+    // Determina dinamicamente a página de origem para onde o utilizador deve voltar
+    $origem = $_SERVER['HTTP_REFERER'] ?? 'index.php';
 
     // Se faltar a imagem ou dados obrigatórios, devolve erro
     if (empty($titulo) || empty($autor_artista) || empty($categoria_id) || !$imagem_nome) {
@@ -36,14 +45,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'tipo' => 'erro',
             'mensagem' => '❌ Erro: Preencha todos os campos e envie uma imagem válida.'
         ];
-        header('Location: index.php');
+        
+        // REDIRECIONAMENTO INTELIGENTE: Volta para a página onde o formulário foi preenchido
+        header("Location: " . $origem);
         exit;
     }
 
     try {
-        // Inserção na Base de Dados
+        // Inserção na Base de Dados com o campo correto: imagem_url
         $query = "INSERT INTO itens (titulo, autor_artista, categoria_id, estado, descricao, imagem_url) 
-          VALUES (:titulo, :autor, :categoria, :estado, :descricao, :imagem)";
+                  VALUES (:titulo, :autor, :categoria, :estado, :descricao, :imagem)";
         $stmt = $pdo->prepare($query);
         $stmt->execute([
             'titulo' => $titulo,
@@ -67,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
     }
 
-    // Redireciona de volta para atualizar o catálogo instantaneamente
-    header('Location: index.php');
+    // REDIRECIONAMENTO INTELIGENTE: Se criaste no index, ficas no index. Se criaste no admin, ficas no admin!
+    header("Location: " . $origem);
     exit;
 }

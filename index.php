@@ -2,7 +2,7 @@
 session_start();
 require 'config.php'; 
 
-// 1. Consulta corrigida para usar exatamente os campos da tua tabela 'itens'
+// 1. Consulta para usar exatamente os campos da tua tabela 'itens'
 $query = "SELECT itens.*, categorias.nome as cat_nome 
           FROM itens 
           LEFT JOIN categorias ON itens.categoria_id = categorias.id";
@@ -22,6 +22,23 @@ try {
 $itens_para_reservar = array_filter($itens, function($item) {
     return $item['estado'] === 'disponivel';
 });
+
+// 4. NOVO: Procurar as reservas ativas do utilizador que está atualmente logado
+$minhas_reservas = [];
+if (isset($_SESSION['utilizador_id'])) {
+    try {
+        $query_minhas_res = "SELECT reservas.*, itens.titulo, itens.autor_artista, itens.imagem_url 
+                             FROM reservas 
+                             INNER JOIN itens ON reservas.item_id = itens.id 
+                             WHERE reservas.utilizador_id = ? AND reservas.estado = 'ativa'
+                             ORDER BY reservas.data_inicio ASC";
+        $stmt_minhas_res = $pdo->prepare($query_minhas_res);
+        $stmt_minhas_res->execute([$_SESSION['utilizador_id']]);
+        $minhas_reservas = $stmt_minhas_res->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Falha silenciosa caso a tabela de reservas ainda não esteja totalmente integrada
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -95,19 +112,59 @@ $itens_para_reservar = array_filter($itens, function($item) {
     </div>
 </header>
 
+<!-- NOVO: ZONA DINÂMICA DAS RESERVAS ATIVAS DO UTILIZADOR -->
+<section class="reservas-container" style="margin-bottom: 20px;">
+    <h3 style="color: white; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600; text-align: left; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;">
+        📌 As Minhas Reservas Ativas
+    </h3>
+    <p style="color: #64748b; font-size: 0.85rem; text-align: left; margin: 0 0 20px 0;">Artigos que reservou e o respetivo período de levantamento/utilização.</p>
+
+    <?php if (!isset($_SESSION['utilizador_id'])): ?>
+        <div style="background: rgba(30, 41, 59, 0.3); border: 1px dashed rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 8px; text-align: center; color: #94a3b8; font-size: 0.9rem;">
+            🔑 <a href="login.php" style="color: #3b82f6; text-decoration: none; font-weight: 600;">Inicie sessão</a> para conseguir visualizar e gerir as suas reservas pessoais.
+        </div>
+    <?php elseif (!empty($minhas_reservas)): ?>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+            <?php foreach ($minhas_reservas as $reserva): 
+                $imgReserva = !empty($reserva['imagem_url']) ? 'Uploads/'.$reserva['imagem_url'] : 'Images/default-cover.png';
+                $dtInicio = date('d/m/Y', strtotime($reserva['data_inicio']));
+                $dtFim = date('d/m/Y', strtotime($reserva['data_fim']));
+            ?>
+                <div style="background: #0f172a; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 14px; display: flex; gap: 14px; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                    <img src="<?= $imgReserva ?>" alt="Capa" style="width: 60px; height: 85px; object-fit: cover; border-radius: 6px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="flex-grow: 1; text-align: left; overflow: hidden;">
+                        <h4 style="color: white; margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($reserva['titulo']) ?></h4>
+                        <p style="color: #64748b; margin: 0 0 8px 0; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($reserva['autor_artista']) ?></p>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <span style="font-size: 0.75rem; color: #94a3b8;">🗓️ De: <strong style="color: #cbd5e1;"><?= $dtInicio ?></strong></span>
+                            <span style="font-size: 0.75rem; color: #94a3b8;">⌛ Até: <strong style="color: #60a5fa;"><?= $dtFim ?></strong></span>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+        <div style="background: rgba(30, 41, 59, 0.15); border: 1px solid rgba(255, 255, 255, 0.04); padding: 25px; border-radius: 8px; text-align: center; color: #64748b; font-size: 0.88rem;">
+            Dica: Explore o catálogo abaixo e clique em "Reservar" em qualquer exemplar disponível!
+        </div>
+    <?php endif; ?>
+</section>
+
 <section class="reservas-container">
     <h3 style="color: white; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600; text-align: left; margin-bottom: 5px;">
         ⚡ Disponível Para Reservar Já
     </h3>
-    <p style="color: #64748b; font-size: 0.85rem; text-align: left; margin: 0 0 15px 0;">Clique diretamente no cubo para gerir ou criar a reserva.</p>
+    <p style="color: #64748b; font-size: 0.85rem; text-align: left; margin: 0 0 15px 0;">Clique diretamente no cubo para abrir as opções de marcação de data.</p>
 
     <?php if (!empty($itens_para_reservar)): ?>
         <div class="reservas-grid">
             <?php foreach ($itens_para_reservar as $item_res): 
-                // CORRIGIDO: Mapeado para 'imagem_url' que vem da tua tabela original
                 $fotoCapa = !empty($item_res['imagem_url']) ? 'Uploads/'.$item_res['imagem_url'] : 'Images/default-cover.png';
             ?>
-                <a href="reservar.php?id=<?= $item_res['id'] ?>" class="reserva-cube">
+                <a href="javascript:void(0);" class="reserva-cube js-open-reserve" 
+                   data-id="<?= $item_res['id'] ?>" 
+                   data-titulo="<?= htmlspecialchars($item_res['titulo']) ?>">
                     <img src="<?= $fotoCapa ?>" alt="Capa" class="reserva-img">
                     <div class="reserva-info">
                         <h4><?= htmlspecialchars($item_res['titulo']) ?></h4>
@@ -142,10 +199,7 @@ $itens_para_reservar = array_filter($itens, function($item) {
     
     <div class="grid-itens">
         <?php foreach($itens as $item): 
-            // CORRIGIDO: Lido do campo 'imagem_url' da tabela original
             $itemImagem = !empty($item['imagem_url']) ? 'Uploads/'.$item['imagem_url'] : 'Images/default-cover.png';
-            
-            // LÓGICA SEGURO: Como apenas admins adicionam ao acervo, assume Administrador
             $criadorTipo = 'Administrador'; 
         ?>
         <div class="card">
@@ -175,7 +229,12 @@ $itens_para_reservar = array_filter($itens, function($item) {
                     </button>
 
                     <?php if($item['estado'] == 'disponivel'): ?>
-                        <a href="reservar.php?id=<?= $item['id'] ?>" class="btn-action">Reservar</a>
+                        <button type="button" class="btn-action js-open-reserve" 
+                                data-id="<?= $item['id'] ?>" 
+                                data-titulo="<?= htmlspecialchars($item['titulo']) ?>"
+                                style="border:none; cursor:pointer;">
+                            Reservar
+                        </button>
                     <?php else: ?>
                         <button disabled class="btn-disabled">Indisponível</button>
                     <?php endif; ?>
@@ -190,9 +249,9 @@ $itens_para_reservar = array_filter($itens, function($item) {
     <p>&copy; 2026 BiblioBase - Sistema de Gestão de Biblioteca</p>
 </footer>
 
+<!-- MODAL DE DETALHES -->
 <div id="detailsCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 650px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
-        
         <div style="padding: 20px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
             <div>
                 <span id="txtDetailCategoria" style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">CATEGORIA</span>
@@ -200,44 +259,38 @@ $itens_para_reservar = array_filter($itens, function($item) {
             </div>
             <button type="button" id="closeDetailModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1; transition: color 0.2s;">&times;</button>
         </div>
-
         <div style="padding: 28px; display: flex; gap: 24px; box-sizing: border-box;">
             <div style="flex-shrink: 0;">
                 <img id="imgDetailCapa" src="Images/default-cover.png" alt="Capa" style="width: 140px; height: 190px; object-fit: cover; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);">
             </div>
-
             <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 14px; text-align: left;">
                 <div>
                     <label style="font-size: 0.65rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">AUTOR / ARTISTA</label>
                     <span id="txtDetailAutor" style="color: #cbd5e1; font-size: 0.95rem; font-weight: 500;">-</span>
                 </div>
-
                 <div>
                     <label style="font-size: 0.65rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">ESTADO DO EXEMPLAR</label>
                     <span id="txtDetailEstado" style="font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; font-weight: 600; text-transform: uppercase; display: inline-block;">-</span>
                 </div>
-
                 <div>
                     <label style="font-size: 0.65rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">SINOPSE / DESCRIÇÃO</label>
                     <p id="txtDetailDescricao" style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5; margin: 0; max-height: 100px; overflow-y: auto; padding-right: 5px;">-</p>
                 </div>
-
                 <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 6px;">
                     <span style="font-size: 0.8rem; color: #64748b;">Criado por:</span>
                     <strong id="txtDetailCriador" style="font-size: 0.8rem; color: #60a5fa;">Administrador</strong>
                 </div>
             </div>
         </div>
-
         <div style="padding: 16px 28px; background: rgba(11, 15, 25, 0.4); border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: flex-end;">
             <button type="button" id="cancelDetailModalBtn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: 'Inter', sans-serif;">Fechar Janela</button>
         </div>
     </div>
 </div>
 
+<!-- MODAL DE ADICIONAR ARTIGO -->
 <div id="addCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
-        
         <div style="padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
             <div>
                 <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ ACERVO DIGITAL ]</span>
@@ -245,7 +298,6 @@ $itens_para_reservar = array_filter($itens, function($item) {
             </div>
             <button type="button" id="closeAddModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1; transition: color 0.2s;">&times;</button>
         </div>
-
         <form action="processa_artigo.php" method="POST" enctype="multipart/form-data" style="padding: 28px; margin: 0; box-sizing: border-box;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
@@ -257,7 +309,6 @@ $itens_para_reservar = array_filter($itens, function($item) {
                     <input type="text" name="autor_artista" class="modal-field" placeholder="Ex: Herman Melville" required>
                 </div>
             </div>
-
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">CATEGORIA *</label>
@@ -276,18 +327,15 @@ $itens_para_reservar = array_filter($itens, function($item) {
                     </select>
                 </div>
             </div>
-
             <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; margin-bottom: 20px;">
                 <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">DESCRIÇÃO / RESUMO *</label>
                 <textarea name="descricao" rows="4" class="modal-field" placeholder="Escreva uma breve sinopse ou detalhes do artigo..." required style="resize: vertical;"></textarea>
             </div>
-
             <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; margin-bottom: 2px;">
                 <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">IMAGEM DE CAPA (OBRIGATÓRIO) *</label>
                 <input type="file" name="imagem" accept="image/*" required class="modal-field" style="padding: 8px 10px !important;">
                 <small style="color: #64748b; font-size: 0.75rem; margin-top: 4px; display:block;">Apenas ficheiros de imagem válidos (JPG, PNG, WEBP).</small>
             </div>
-
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px;">
                 <button type="button" id="cancelAddModalBtn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-family: 'Inter', sans-serif;">Cancelar Criação</button>
                 <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; font-family: 'Inter', sans-serif;">Confirmar Criação</button>
@@ -295,6 +343,52 @@ $itens_para_reservar = array_filter($itens, function($item) {
         </form>
     </div>
 </div>
+
+<!-- MODAL POP-UP DE RESERVA COM CALENDÁRIO BRANCO -->
+<div id="reserveCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+    <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 450px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
+        
+        <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
+            <div>
+                <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ SOLICITAR RESERVA ]</span>
+                <h2 id="txtReserveTitulo" style="font-size: 1.2rem; color: white; font-weight: 600; margin: 0; text-align: left;">Reservar Artigo</h2>
+            </div>
+            <button type="button" id="closeReserveModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1; transition: color 0.2s;">&times;</button>
+        </div>
+
+        <form action="processo_reserva.php" method="POST" style="padding: 24px; margin: 0; box-sizing: border-box;">
+            <input type="hidden" name="item_id" id="formReserveItemId">
+
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">DATA DE INÍCIO *</label>
+                    <input type="date" name="data_inicio" id="resDataInicio" required 
+                           style="width: 100%; box-sizing: border-box; height: 45px; background-color: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 12px; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; outline: none;">
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">DATA DE FIM *</label>
+                    <input type="date" name="data_fim" id="resDataFim" required 
+                           style="width: 100%; box-sizing: border-box; height: 45px; background-color: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 12px; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; outline: none;">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px;">
+                <button type="button" id="cancelReserveModalBtn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: 'Inter', sans-serif;">Cancelar</button>
+                <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; font-family: 'Inter', sans-serif;">Confirmar Reserva</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    #resDataInicio::-webkit-calendar-picker-indicator,
+    #resDataFim::-webkit-calendar-picker-indicator {
+        background-color: transparent;
+        cursor: pointer;
+        filter: invert(0);
+    }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -357,6 +451,51 @@ document.addEventListener('DOMContentLoaded', function() {
     if (closeDetailBtn) closeDetailBtn.addEventListener('click', closeDetailModal);
     if (cancelDetailBtn) cancelDetailBtn.addEventListener('click', closeDetailModal);
     detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeDetailModal(); });
+
+    // CONTROLO DO POP-UP DE RESERVA
+    const reserveModal = document.getElementById('reserveCatalogModal');
+    const closeReserveBtn = document.getElementById('closeReserveModalBtn');
+    const cancelReserveBtn = document.getElementById('cancelReserveModalBtn');
+    
+    const inputInicio = document.getElementById('resDataInicio');
+    const inputFim = document.getElementById('resDataFim');
+
+    const hoje = new Date().toISOString().split('T')[0];
+
+    document.querySelectorAll('.js-open-reserve').forEach(element => {
+        element.addEventListener('click', function(e) {
+            e.preventDefault(); 
+            
+            const id = this.dataset.id;
+            const titulo = this.dataset.titulo;
+
+            document.getElementById('formReserveItemId').value = id;
+            document.getElementById('txtReserveTitulo').innerText = 'Reservar: ' + titulo;
+
+            inputInicio.min = hoje;
+            inputInicio.value = hoje; 
+
+            inputFim.min = hoje;
+            inputFim.value = hoje;
+
+            reserveModal.style.display = 'flex';
+        });
+    });
+
+    inputInicio.addEventListener('change', function() {
+        const dataSelecionada = this.value;
+        inputFim.min = dataSelecionada;
+        
+        if (inputFim.value < dataSelecionada) {
+            inputFim.value = dataSelecionada;
+        }
+    });
+
+    const closeReserveModal = () => { reserveModal.style.display = 'none'; };
+
+    if (closeReserveBtn) closeReserveBtn.addEventListener('click', closeReserveModal);
+    if (cancelReserveBtn) cancelReserveBtn.addEventListener('click', closeReserveModal);
+    reserveModal.addEventListener('click', function(e) { if (e.target === reserveModal) closeReserveModal(); });
 
     // TOAST
     const toast = document.getElementById('toastAlert');
