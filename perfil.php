@@ -102,7 +102,7 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
                     <label>Nova palavra-passe</label>
                     <div class="pw-wrapper">
                         <input type="password" name="nova_pw" placeholder="Mínimo 8 caracteres">
-                        <span class="eye-icon" style="cursor: pointer;">👁️</span>
+                        
                     </div>
                 </div>
 
@@ -110,7 +110,7 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
                     <label>Confirmar nova palavra-passe</label>
                     <div class="pw-wrapper">
                         <input type="password" name="confirma_pw" placeholder="Repetir palavra-passe">
-                        <span class="eye-icon" style="cursor: pointer;">👁️</span>
+                        
                     </div>
                 </div>
 
