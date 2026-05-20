@@ -86,10 +86,7 @@ try {
                 Pesquise, reserve e acompanhe livros, CDs e Blu-rays em tempo real.
             </p>
             
-            <form action="pesquisa.php" method="GET" class="search-group">
-                <input type="text" name="q" class="search-bar" placeholder="Pesquisar por título, autor...">
-                <button type="submit" class="btn-search">Pesquisar</button>
-            </form>
+           
         </div>
     </div>
 </header>
@@ -216,7 +213,7 @@ try {
     <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
         <div style="padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
             <div>
-                <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ ACERVO DIGITAL ]</span>
+                <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ Adicionar ao Catálogo ]</span>
                 <h2 style="font-size: 1.3rem; color: white; font-weight: 600; margin: 0; text-align: left;">Novo Artigo no Catálogo</h2>
             </div>
             <button type="button" id="closeAddModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1; transition: color 0.2s;">&times;</button>

@@ -46,7 +46,7 @@ try {
         $utilizadores = $stmt_u->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // LÓGICA DA SECÇÃO RESERVAS (NOVA!)
+    // LÓGICA DA SECÇÃO RESERVAS
     if ($seccao === 'reservas') {
         // Puxa as reservas ativas interligando com o nome do utilizador e título do item
         $sql_reservas = "SELECT reservas.*, utilizadores.nome as user_nome, itens.titulo as item_titulo 
@@ -58,7 +58,7 @@ try {
         $reservas = $pdo->query($sql_reservas)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // LÓGICA DA SECÇÃO ARTIGOS
+    // LÓGICA DA SECÇÃO ARTIGOS (CORRIGIDA)
     if ($seccao === 'artigos') {
         $pesquisa_artigo = $_GET['q_artigo'] ?? '';
         $filtro_estado = $_GET['estado'] ?? '';
@@ -77,10 +77,10 @@ try {
             $params['q'] = "%$pesquisa_artigo%";
         }
 
-        // Filtro por Estado (CORRIGIDO: se escolher 'indisponivel', procura por 'reservado')
+        // Filtro por Estado (CORRIGIDO para puxar qualquer estado que não seja 'disponivel')
         if (!empty($filtro_estado)) {
             if ($filtro_estado === 'indisponivel') {
-                $sql_artigos .= " AND itens.estado = 'reservado'";
+                $sql_artigos .= " AND itens.estado != 'disponivel'";
             } else {
                 $sql_artigos .= " AND itens.estado = :estado";
                 $params['estado'] = $filtro_estado;

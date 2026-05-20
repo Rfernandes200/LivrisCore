@@ -33,6 +33,12 @@
             <h1>Bem-vindo de volta</h1>
             <p class="subtitle">Inicie sessão para aceder ao seu catálogo e empréstimos.</p>
 
+            <?php if (isset($_GET['erro'])): ?>
+                <div style="color: #ef4444; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; font-weight: 500;">
+                    <?php echo htmlspecialchars($_GET['erro']); ?>
+                </div>
+            <?php endif; ?>
+
             <form action="processo_login.php" method="POST">
                 <div class="input-group">
                     <label>Email</label>
@@ -44,10 +50,7 @@
                     <input type="password" name="password" class="input-control" placeholder="••••••••" required>
                 </div>
 
-                <div class="remember-me">
-                    <input type="checkbox" id="remember">
-                    <label for="remember">Manter sessão iniciada</label>
-                </div>
+                
 
                 <button type="submit" class="btn-login-submit">Entrar</button>
             </form>
