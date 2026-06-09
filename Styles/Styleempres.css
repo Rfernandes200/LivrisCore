@@ -1,0 +1,427 @@
+/* ==========================================================================
+   ESTILOS ADICIONAIS PARA A PÁGINA DE EMPRÉSTIMOS E MODAL POP-UP
+   ========================================================================== */
+
+/* Navbar e Layout Geral */
+.navbar-fixed {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    box-sizing: border-box;
+}
+
+.admin-container-block {
+    padding-top: 100px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: block;
+}
+
+.admin-content-padded {
+    padding: 0 20px;
+}
+
+.admin-subtitle-margin {
+    margin-bottom: 40px;
+}
+
+/* Alertas de Feedback */
+.alert-box {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.alert-sucesso {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.alert-erro {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Tabelas e Títulos */
+.table-section-title {
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.title-pendente {
+    color: #eab308;
+}
+
+.title-ativo {
+    color: #f8fafc;
+}
+
+.title-historico {
+    color: #64748b;
+}
+
+.table-wrapper {
+    margin-top: 15px;
+    margin-bottom: 50px;
+}
+
+.table-wrapper-large {
+    margin-top: 15px;
+    margin-bottom: 60px;
+}
+
+/* Badges e Botões */
+.badge-status-ativo {
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-status-devolvido {
+    color: #64748b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.btn-confirmar-modal {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.btn-cancelar-inline {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.data-aviso-urgente {
+    font-weight: 500;
+    color: #ef4444;
+}
+
+.data-aviso-normal {
+    font-weight: 500;
+    color: #3b82f6;
+}
+
+.data-subtexto {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* ESTRUTURA DO MODAL POP-UP */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(11, 15, 25, 0.95);
+    backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: none;
+    /* Controlado pelo JS */
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.modal-box {
+    background: #0b0f19;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    width: 100%;
+    max-width: 460px;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+.modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(30, 41, 59, 0.2);
+}
+
+.modal-header-tag {
+    font-size: 0.7rem;
+    color: #10b981;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+    text-align: left;
+}
+
+.modal-header-title {
+    font-size: 1.2rem;
+    color: white;
+    font-weight: 600;
+    margin: 0;
+    text-align: left;
+}
+
+.modal-close-x {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 1.8rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-form {
+    padding: 24px;
+    margin: 0;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+.modal-grid-datas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.modal-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.modal-input-group label {
+    font-size: 0.65rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.modal-input-date {
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    outline: none;
+    font-family: inherit;
+}
+
+/* Secção de Código de 3 Dígitos */
+.modal-code-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: rgba(16, 185, 129, 0.03);
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.modal-code-section label {
+    font-size: 0.7rem;
+    color: #10b981;
+    font-weight: 600;
+}
+
+.modal-input-code {
+    background: #0f172a;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #10b981;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 4px;
+    outline: none;
+}
+
+.modal-code-help {
+    color: #64748b;
+    font-size: 0.75rem;
+    text-align: center;
+    display: block;
+    margin-top: 2px;
+}
+
+/* Rodapé do Pop-up */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 20px;
+}
+
+.btn-modal-back {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.btn-modal-submit {
+    background: #10b981;
+    border: none;
+    color: #0f172a;
+    padding: 10px 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.footer-page {
+    margin-top: 40px;
+    text-align: center;
+    padding: 20px;
+    color: #64748b;
+    font-size: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+/* Alinhamento da célula de ações */
+.acoes-alinhamento {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* Botão Base da Tabela */
+.btn-acao-tabela {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+/* Estilo do Confirmar (Verde) */
+.btn-confirmar-moderno {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.btn-confirmar-moderno:hover {
+    background-color: #10b981;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+/* Estilo do Cancelar (Vermelho) */
+.btn-cancelar-moderno {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-cancelar-moderno:hover {
+    background-color: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+
+/* Garante o alinhamento correto e espaçamento entre os botões na célula */
+.agent-table td display-flex-gap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 1. Botão Confirmar (Verde Moderno) */
+.btn-confirmar-modal {
+    background-color: rgba(16, 185, 129, 0.12) !important;
+    color: #10b981 !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
+    padding: 7px 14px !important;
+    border-radius: 6px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* Efeito Hover do Confirmar */
+.btn-confirmar-modal:hover {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2) !important;
+    transform: translateY(-1px);
+}
+
+/* 2. Botão Cancelar (Vermelho Moderno) */
+.btn-cancelar-inline {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    color: #ef4444 !important;
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
+    padding: 7px 14px !important;
+    border-radius: 6px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* Efeito Hover do Cancelar */
+.btn-cancelar-inline:hover {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
+    transform: translateY(-1px);
+}
+
+/* Efeito ao clicar (Active State) para ambos */
+.btn-confirmar-modal:active,
+.btn-cancelar-inline:active {
+    transform: translateY(1px);
+    box-shadow: none !important;
+}

@@ -42,14 +42,38 @@ try {
     <?php unset($_SESSION['alerta']); ?>
 <?php endif; ?>
 
+<?php if (isset($_SESSION['reserva_sucesso_codigo'])): ?>
+<div id="codeSuccessModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 100000; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+    <div style="background: #0b0f19; border: 1px solid rgba(16, 185, 129, 0.3); width: 100%; max-width: 420px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); pading: 30px; text-align: center; font-family: 'Inter', sans-serif; padding: 30px;">
+        <span style="font-size: 3rem;">🎉</span>
+        <h2 style="color: white; font-size: 1.5rem; margin-top: 10px; margin-bottom: 5px;">Reserva Confirmada!</h2>
+        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 25px;">Apresente o código abaixo ao funcionário para levantar o seu exemplar.</p>
+        
+        <div style="background: rgba(16, 185, 129, 0.1); border: 2px dashed #10b981; color: #10b981; font-size: 2.5rem; font-weight: 700; letter-spacing: 5px; padding: 15px; border-radius: 8px; display: inline-block; margin-bottom: 25px; font-variant-numeric: tabular-nums;">
+            <?= $_SESSION['reserva_sucesso_codigo']; ?>
+        </div>
+        
+        <p style="color: #eab308; font-size: 0.8rem; font-weight: 500; margin-bottom: 20px;">
+            ⚠️ Atenção: Este código expira em exatamente 4 horas!
+        </p>
+        
+        <button type="button" id="closeCodeModalBtn" style="background: #10b981; border: none; color: #0f172a; font-weight: 600; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; width: 100%;">
+            Guardei o Código, Fechar
+        </button>
+    </div>
+</div>
+<?php unset($_SESSION['reserva_sucesso_codigo']); ?>
+<?php endif; ?>
+
 <header>
     <nav class="navbar">
         <div class="nav-left">
             <div class="logo"><strong>B</strong> BiblioBase</div>
             <div class="menu">
                 <a href="index.php" class="active">Catálogo</a>
-                <a href="#">Empréstimos</a>
-                <a href="#">Reservas</a>
+                <a href="emprestimos.php">Empréstimos</a>
+                <a href="reservas.php">Reservas</a>
+                <a href="Anuncios.php">Meus anúncios</a>
         
                 <?php if (isset($_SESSION['utilizador_tipo']) && ((int)$_SESSION['utilizador_tipo'] === 1 || $_SESSION['utilizador_tipo'] === 'admin')): ?>
                     <a href="admin.php" style="color: #60a5fa; font-weight: 600; margin-left: 15px;">⚡ Administração</a>
@@ -85,8 +109,6 @@ try {
             <p class="hero-subtitle">
                 Pesquise, reserve e acompanhe livros, CDs e Blu-rays em tempo real.
             </p>
-            
-           
         </div>
     </div>
 </header>
@@ -171,14 +193,14 @@ try {
     <p>&copy; 2026 BiblioBase - Sistema de Gestão de Biblioteca</p>
 </footer>
 
-<div id="detailsCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+<div id="detailsCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 650px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
         <div style="padding: 20px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
             <div>
                 <span id="txtDetailCategoria" style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">CATEGORIA</span>
                 <h2 id="txtDetailTitulo" style="font-size: 1.4rem; color: white; font-weight: 600; margin: 0; text-align: left;">Título do Artigo</h2>
             </div>
-            <button type="button" id="closeDetailModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1; transition: color 0.2s;">&times;</button>
+            <button type="button" id="closeDetailModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
         <div style="padding: 28px; display: flex; gap: 24px; box-sizing: border-box;">
             <div style="flex-shrink: 0;">
@@ -209,14 +231,14 @@ try {
     </div>
 </div>
 
-<div id="addCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+<div id="addCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
         <div style="padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
             <div>
                 <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ Adicionar ao Catálogo ]</span>
                 <h2 style="font-size: 1.3rem; color: white; font-weight: 600; margin: 0; text-align: left;">Novo Artigo no Catálogo</h2>
             </div>
-            <button type="button" id="closeAddModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1; transition: color 0.2s;">&times;</button>
+            <button type="button" id="closeAddModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
         <form action="processa_artigo.php" method="POST" enctype="multipart/form-data" style="padding: 28px; margin: 0; box-sizing: border-box;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
@@ -258,14 +280,14 @@ try {
                 <small style="color: #64748b; font-size: 0.75rem; margin-top: 4px; display:block;">Apenas ficheiros de imagem válidos (JPG, PNG, WEBP).</small>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px;">
-                <button type="button" id="cancelAddModalBtn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-family: 'Inter', sans-serif;">Cancelar Criação</button>
-                <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; font-family: 'Inter', sans-serif;">Confirmar Criação</button>
+                <button type="button" id="cancelAddModalBtn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Cancelar Criação</button>
+                <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600;">Confirmar Criação</button>
             </div>
         </form>
     </div>
 </div>
 
-<div id="reserveCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+<div id="reserveCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 450px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
         
         <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
@@ -273,45 +295,38 @@ try {
                 <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ SOLICITAR RESERVA ]</span>
                 <h2 id="txtReserveTitulo" style="font-size: 1.2rem; color: white; font-weight: 600; margin: 0; text-align: left;">Reservar Artigo</h2>
             </div>
-            <button type="button" id="closeReserveModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1; transition: color 0.2s;">&times;</button>
+            <button type="button" id="closeReserveModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
 
-        <form action="processo_reserva.php" method="POST" style="padding: 24px; margin: 0; box-sizing: border-box;">
+        <form action="processo_reserva.php" method="POST" style="padding: 24px; margin: 0; box-sizing: border-box; text-align: left;">
             <input type="hidden" name="item_id" id="formReserveItemId">
 
-            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">DATA DE INÍCIO *</label>
-                    <input type="date" name="data_inicio" id="resDataInicio" required 
-                           style="width: 100%; box-sizing: border-box; height: 45px; background-color: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 12px; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; outline: none;">
-                </div>
-                
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">DATA DE FIM *</label>
-                    <input type="date" name="data_fim" id="resDataFim" required 
-                           style="width: 100%; box-sizing: border-box; height: 45px; background-color: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 12px; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; outline: none;">
-                </div>
-            </div>
+            <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin: 0; margin-bottom: 15px;">
+                Deseja confirmar a reserva imediata deste exemplar? 
+            </p>
+            <p style="color: #eab308; background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.2); padding: 10px; border-radius: 6px; font-size: 0.8rem; line-height: 1.4; margin: 0;">
+                ℹ️ Após confirmar, será gerado um **código de levantamento**. Terá um prazo máximo de **4 horas** para levantar o artigo na biblioteca.
+            </p>
 
-            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px;">
-                <button type="button" id="cancelReserveModalBtn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: 'Inter', sans-serif;">Cancelar</button>
-                <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; font-family: 'Inter', sans-serif;">Confirmar Reserva</button>
+            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; margin-top: 25px;">
+                <button type="button" id="cancelReserveModalBtn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">Cancelar</button>
+                <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">Confirmar Reserva</button>
             </div>
         </form>
     </div>
 </div>
 
-<style>
-    #resDataInicio::-webkit-calendar-picker-indicator,
-    #resDataFim::-webkit-calendar-picker-indicator {
-        background-color: transparent;
-        cursor: pointer;
-        filter: invert(0);
-    }
-</style>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // CONTROLO DO POP-UP DO CÓDIGO GERADO (NOVO)
+    const codeModal = document.getElementById('codeSuccessModal');
+    const closeCodeBtn = document.getElementById('closeCodeModalBtn');
+    if (codeModal && closeCodeBtn) {
+        closeCodeBtn.addEventListener('click', function() {
+            codeModal.style.display = 'none';
+        });
+    }
+
     // CONTROLO DO MODAL DE ADICIONAR ARTIGO
     const addModal = document.getElementById('addCatalogModal');
     const openBtn = document.getElementById('openAddCatalogBtn');
@@ -325,10 +340,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const closeAddModal = () => { addModal.style.display = 'none'; };
-    
     if (closeBtn) closeBtn.addEventListener('click', closeAddModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeAddModal);
-    addModal.addEventListener('click', function(e) { if (e.target === addModal) closeAddModal(); });
+    if (addModal) addModal.addEventListener('click', function(e) { if (e.target === addModal) closeAddModal(); });
 
     // CONTROLO DO MODAL DE DETALHES
     const detailModal = document.getElementById('detailsCatalogModal');
@@ -371,20 +385,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     const closeDetailModal = () => { detailModal.style.display = 'none'; };
-
     if (closeDetailBtn) closeDetailBtn.addEventListener('click', closeDetailModal);
     if (cancelDetailBtn) cancelDetailBtn.addEventListener('click', closeDetailModal);
-    detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeDetailModal(); });
+    if (detailModal) detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeDetailModal(); });
 
-    // CONTROLO DO POP-UP DE RESERVA
+    // CONTROLO DO POP-UP DE RESERVA (SIMPLIFICADO)
     const reserveModal = document.getElementById('reserveCatalogModal');
     const closeReserveBtn = document.getElementById('closeReserveModalBtn');
     const cancelReserveBtn = document.getElementById('cancelReserveModalBtn');
-    
-    const inputInicio = document.getElementById('resDataInicio');
-    const inputFim = document.getElementById('resDataFim');
-
-    const hoje = new Date().toISOString().split('T')[0];
 
     document.querySelectorAll('.js-open-reserve').forEach(element => {
         element.addEventListener('click', function(e) {
@@ -396,32 +404,16 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('formReserveItemId').value = id;
             document.getElementById('txtReserveTitulo').innerText = 'Reservar: ' + titulo;
 
-            inputInicio.min = hoje;
-            inputInicio.value = hoje; 
-
-            inputFim.min = hoje;
-            inputFim.value = hoje;
-
             reserveModal.style.display = 'flex';
         });
     });
 
-    inputInicio.addEventListener('change', function() {
-        const dataSelecionada = this.value;
-        inputFim.min = dataSelecionada;
-        
-        if (inputFim.value < dataSelecionada) {
-            inputFim.value = dataSelecionada;
-        }
-    });
-
     const closeReserveModal = () => { reserveModal.style.display = 'none'; };
-
     if (closeReserveBtn) closeReserveBtn.addEventListener('click', closeReserveModal);
     if (cancelReserveBtn) cancelReserveBtn.addEventListener('click', closeReserveModal);
-    reserveModal.addEventListener('click', function(e) { if (e.target === reserveModal) closeReserveModal(); });
+    if (reserveModal) reserveModal.addEventListener('click', function(e) { if (e.target === reserveModal) closeReserveModal(); });
 
-    // TOAST
+    // TOAST ALERT
     const toast = document.getElementById('toastAlert');
     if (toast) {
         setTimeout(() => { toast.classList.add('show'); }, 200);
