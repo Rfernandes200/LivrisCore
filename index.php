@@ -66,41 +66,9 @@ try {
 <?php endif; ?>
 
 <header>
-    <nav class="navbar">
-        <div class="nav-left">
-            <div class="logo"><strong>B</strong> BiblioBase</div>
-            <div class="menu">
-                <a href="index.php" class="active">Catálogo</a>
-                <a href="emprestimos.php">Empréstimos</a>
-                <a href="reservas.php">Reservas</a>
-                <a href="Anuncios.php">Meus anúncios</a>
-        
-                <?php if (isset($_SESSION['utilizador_tipo']) && ((int)$_SESSION['utilizador_tipo'] === 1 || $_SESSION['utilizador_tipo'] === 'admin')): ?>
-                    <a href="admin.php" style="color: #60a5fa; font-weight: 600; margin-left: 15px;">⚡ Administração</a>
-                <?php endif; ?>
-            </div>
-        </div>
+    <?php require 'navbar.php'; ?>
 
-        <div class="nav-right">
-            <?php if (isset($_SESSION['utilizador_nome'])): 
-                $nome = $_SESSION['utilizador_nome'];
-                $exibirNome = !empty($nome) ? $nome : "Utilizador";
-                $inicial = strtoupper(substr($exibirNome, 0, 1));
-            ?>
-                <div class="profile-box">
-                    <div class="user-avatar">
-                        <?php echo $inicial; ?>
-                    </div>
-                    <a href="perfil.php" class="user-name" style="text-decoration: none; color: inherit;">
-                        <?php echo htmlspecialchars($exibirNome); ?>
-                    </a>
-                    <a href="logout.php" class="logout-link">Sair</a>
-                </div>
-            <?php else: ?>
-                <a href="login.php" class="btn-login">Entrar</a>
-            <?php endif; ?>
-        </div>
-    </nav>
+    
 
     <div class="hero-container">
         <div class="hero-text">

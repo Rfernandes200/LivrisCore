@@ -111,14 +111,7 @@ try {
 </head>
 <body>
 
-    <nav class="navbar" style="position: fixed; width: 100%; top: 0; left: 0; z-index: 100; box-sizing: border-box;">
-        <div class="nav-left">
-            <div class="logo"><strong>B</strong> BiblioBase <span style="font-size: 0.75rem; background: #3b82f6; padding: 2px 8px; border-radius: 4px; margin-left: 10px;">ADMIN</span></div>
-        </div>
-        <div class="nav-right">
-            <a href="index.php" class="btn-login" style="background: none; border: 1px solid rgba(255,255,255,0.1);">Sair do Painel</a>
-        </div>
-    </nav>
+    <?php require 'navbar.php'; ?>
 
     <div class="admin-container" style="padding-top: 70px;">
         <aside class="sidebar">

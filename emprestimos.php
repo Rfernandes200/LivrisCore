@@ -66,33 +66,7 @@ try {
 </head>
 <body>
 
-    <nav class="navbar navbar-fixed">
-        <div class="nav-left">
-            <div class="logo"><strong>B</strong> BiblioBase</div>
-            <div class="menu">
-                <a href="index.php">Catálogo</a>
-                <a href="emprestimos.php" class="active">Empréstimos</a>
-                <a href="reservas.php">Reservas</a>
-        
-                <?php if (isset($_SESSION['utilizador_tipo']) && ((int)$_SESSION['utilizador_tipo'] === 1 || $_SESSION['utilizador_tipo'] === 'admin')): ?>
-                    <a href="admin.php" style="color: #60a5fa; font-weight: 600; margin-left: 15px;">⚡ Administração</a>
-                <?php endif; ?>
-            </div>
-        </div>
-        <div class="nav-right">
-            <?php 
-                $nome = $_SESSION['utilizador_nome'] ?? "Utilizador";
-                $inicial = strtoupper(substr($nome, 0, 1));
-            ?>
-            <div class="profile-box">
-                <div class="user-avatar"><?php echo $inicial; ?></div>
-                <a href="perfil.php" class="user-name" style="text-decoration: none; color: inherit; font-size:0.9rem; font-weight:500; margin-right:10px;">
-                    <?php echo htmlspecialchars($nome); ?>
-                </a>
-                <a href="logout.php" class="logout-link" style="font-size:0.85rem; color:#ef4444; text-decoration:none;">Sair</a>
-            </div>
-        </div>
-    </nav>
+    <?php require 'navbar.php'; ?>
 
     <div class="admin-container admin-container-block">
         <main class="admin-content admin-content-padded">
@@ -200,73 +174,66 @@ try {
             </div>
 
             <form action="processo_emprestimo.php" method="POST" id="modalFormEmprestimo">
-    <input type="hidden" name="acao" value="oficializar_emprestimo">
-    <input type="hidden" name="reserva_id" id="modalTargetReservaId">
+                <input type="hidden" name="acao" value="oficializar_emprestimo">
+                <input type="hidden" name="reserva_id" id="modalTargetReservaId">
 
-    <div style="display: flex; gap: 15px; margin-bottom: 25px;">
-        <div style="flex: 1; position: relative;">
-            <label style="color: #94a3b8; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE INÍCIO</label>
-            <input type="date" name="data_inicio" id="modalInputDataInicio" required 
-                   onkeydown="return false" 
-                   onclick="if(typeof this.showPicker === 'function') this.showPicker();"
-                   style="width: 100%; padding: 11px; padding-right: 30px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 6px; font-size:0.9rem; cursor: pointer;">
-        </div>
-        
-        <div style="flex: 1; position: relative;">
-            <label style="color: #94a3b8; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE FIM (MÁX. <?=$limite_dias?> DIAS)</label>
-            <input type="date" name="data_fim" id="modalInputDataFim" required 
-                   onkeydown="return false" 
-                   onclick="if(typeof this.showPicker === 'function') this.showPicker();"
-                   style="width: 100%; padding: 11px; padding-right: 30px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 6px; font-size:0.9rem; cursor: pointer;">
-        </div>
-    </div>
+                <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+                    <div style="flex: 1; position: relative;">
+                        <label style="color: #94a3b8; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE INÍCIO</label>
+                        <input type="date" name="data_inicio" id="modalInputDataInicio" required 
+                               onkeydown="return false" 
+                               onclick="if(typeof this.showPicker === 'function') this.showPicker();"
+                               style="width: 100%; padding: 11px; padding-right: 30px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 6px; font-size:0.9rem; cursor: pointer;">
+                    </div>
+                    
+                    <div style="flex: 1; position: relative;">
+                        <label style="color: #94a3b8; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE FIM (MÁX. <?=$limite_dias?> DIAS)</label>
+                        <input type="date" name="data_fim" id="modalInputDataFim" required 
+                               onkeydown="return false" 
+                               onclick="if(typeof this.showPicker === 'function') this.showPicker();"
+                               style="width: 100%; padding: 11px; padding-right: 30px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 6px; font-size:0.9rem; cursor: pointer;">
+                    </div>
+                </div>
 
-    <div style="margin-bottom: 25px; border-top: 1px solid #334155; padding-top: 15px;">
-        <label style="color: #94a3b8; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 8px;">CÓDIGO DE SEGURANÇA (3 DÍGITOS) *</label>
-        <input type="text" name="codigo_validacao" required maxlength="3" pattern="\d{3}" placeholder="000" style="width: 100%; padding: 12px; background: #0f172a; color: #34d399; font-size: 1.6rem; text-align: center; font-weight: bold; border: 1px solid #334155; border-radius: 6px; letter-spacing: 6px;">
-    </div>
+                <div style="margin-bottom: 25px; border-top: 1px solid #334155; padding-top: 15px;">
+                    <label style="color: #94a3b8; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 8px;">CÓDIGO DE SEGURANÇA (3 DÍGITOS) *</label>
+                    <input type="text" name="codigo_validacao" required maxlength="3" pattern="\d{3}" placeholder="000" style="width: 100%; padding: 12px; background: #0f172a; color: #34d399; font-size: 1.6rem; text-align: center; font-weight: bold; border: 1px solid #334155; border-radius: 6px; letter-spacing: 6px;">
+                </div>
 
-    <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #334155; padding-top: 15px;">
-        <button type="button" id="cancelConfirmModalBtn" style="padding: 10px 18px; background: transparent; color: #94a3b8; border: 1px solid #334155; border-radius: 6px; cursor: pointer; font-weight:500;">Voltar</button>
-        <button type="submit" style="padding: 10px 18px; background: #34d399; color: #0f172a; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Confirmar</button>
-    </div>
-</form>
+                <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #334155; padding-top: 15px;">
+                    <button type="button" id="cancelConfirmModalBtn" style="padding: 10px 18px; background: transparent; color: #94a3b8; border: 1px solid #334155; border-radius: 6px; cursor: pointer; font-weight:500;">Voltar</button>
+                    <button type="submit" style="padding: 10px 18px; background: #34d399; color: #0f172a; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Confirmar</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-    // Configurações vindas de forma totalmente segura do PHP
     const DATA_HOJE_SISTEMA = "<?php echo $hoje_php; ?>";
     const TETOS_DIAS_REGRA  = <?php echo $limite_dias; ?>;
 
-    // Função auxiliar simples para adicionar dias no formato YYYY-MM-DD
     function somarDias(dataBaseStr, quantidadeDias) {
         const d = new Date(dataBaseStr);
         d.setDate(d.getDate() + quantidadeDias);
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
-    // Executada no clique do botão da tabela
     function abrirModalComDias(reservaId, tituloItem) {
         const modal = document.getElementById('confirmReserveModal');
         const inputInicio = document.getElementById('modalInputDataInicio');
         const inputFim = document.getElementById('modalInputDataFim');
 
-        // Preencher identificadores textuais
         document.getElementById('modalTargetReservaId').value = reservaId;
         document.getElementById('modalTargetTitulo').innerText = 'Validar: ' + tituloItem;
 
-        // Configurar regras do input "Data de Início"
         inputInicio.min = DATA_HOJE_SISTEMA;
         inputInicio.value = DATA_HOJE_SISTEMA;
 
-        // Configurar regras do input "Data de Fim" (Não deixa escolher mais do que o limite estipulado)
         const dataMaximaCalculada = somarDias(DATA_HOJE_SISTEMA, TETOS_DIAS_REGRA);
         inputFim.min = DATA_HOJE_SISTEMA;
         inputFim.max = dataMaximaCalculada;
-        inputFim.value = dataMaximaCalculada; // Sugere logo a data limite máxima
+        inputFim.value = dataMaximaCalculada;
 
-        // Forçar exibição soberana sobre qualquer outra regra de CSS da página
         modal.style.setProperty('display', 'flex', 'important');
     }
 
@@ -277,7 +244,6 @@ try {
         const inputInicio = document.getElementById('modalInputDataInicio');
         const inputFim = document.getElementById('modalInputDataFim');
 
-        // Sempre que o utilizador alterar o dia de início, recalculamos os limites permitidos do fim
         inputInicio.addEventListener('change', function() {
             if (this.value < DATA_HOJE_SISTEMA) {
                 alert('A data de início não pode ser anterior ao dia de hoje!');
@@ -295,7 +261,6 @@ try {
             }
         });
 
-        // Monitorização reativa para a Data de Fim no calendário
         inputFim.addEventListener('change', function() {
             const limiteMaximoCorrente = somarDias(inputInicio.value, TETOS_DIAS_REGRA);
             if (this.value < inputInicio.value) {
@@ -307,7 +272,6 @@ try {
             }
         });
 
-        // Fechar o modal de forma limpa
         const fecharModal = () => { 
             modal.style.setProperty('display', 'none', 'important'); 
         };
