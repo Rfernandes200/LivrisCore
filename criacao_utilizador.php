@@ -7,6 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Receber e limpar espaços inúteis nas extremidades
     $nome = trim($_POST['nome'] ?? '');
     $email = trim($_POST['email'] ?? '');
+    $telemovel = trim($_POST['telemovel'] ?? '');
     
     // Aplicamos trim também na password para capturar se enviaram apenas espaços vazios
     $password_bruta = $_POST['password'] ?? '';
@@ -20,13 +21,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // 2. Verificar se o email é válido (Filtro nativo que exige o formato "texto@dominio.algo")
+    // 2. Verificar se o email é válido
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         header("Location: registo.php?erro=O email não é válido e precisa de conter \"@\" e depois \".\"");
         exit();
     }
 
-    // 3. Verificar se a password está totalmente vazia (ou continha apenas espaços)
+    // 3. Verificar se a password está totalmente vazia
     if ($password_bruta === '' || empty($password_limpa)) {
         header("Location: registo.php?erro=A password não pode estar vazia");
         exit();
@@ -44,13 +45,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Criar o hash seguro usando a password original
         $password_segura = password_hash($password_bruta, PASSWORD_DEFAULT);
 
-        // Preparar o SQL para inserir o utilizador
-        $sql = "INSERT INTO utilizadores (nome, email, password_hash, tipo) VALUES (:nome, :email, :pass, 'utilizador')";
+        // Preparar o SQL para inserir o utilizador (incluindo telemovel e ajustando tipo para 0)
+        $sql = "INSERT INTO utilizadores (nome, email, telemovel, password_hash, tipo) VALUES (:nome, :email, :telemovel, :pass, 0)";
         $stmt = $pdo->prepare($sql);
         
         // Bind dos parâmetros
         $stmt->bindParam(':nome', $nome);
         $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':telemovel', $telemovel);
         $stmt->bindParam(':pass', $password_segura);
         
         if ($stmt->execute()) {

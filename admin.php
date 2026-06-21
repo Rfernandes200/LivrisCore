@@ -20,79 +20,38 @@ $total_reservas = 0;
 $utilizadores = [];
 $artigos = [];
 $reservas = [];
+$todas_categorias = [];
+$todos_autores = [];
 
 try {
-    // Conta os utilizadores diretamente da tabela
+    // 1. Conta os utilizadores diretamente da tabela
     $stmt_users = $pdo->query("SELECT COUNT(*) FROM utilizadores");
     $total_utilizadores = $stmt_users->fetchColumn();
 
-    // Conta os itens do catálogo diretamente da tabela itens
-    $stmt_itens = $pdo->query("SELECT COUNT(*) FROM itens");
+    // 2. Conta os itens do catálogo diretamente da tabela livros
+    $stmt_itens = $pdo->query("SELECT COUNT(*) FROM livros");
     $total_artigos = $stmt_itens->fetchColumn();
 
-    // Conta as reservas pendentes/ativas diretamente da tabela reservas
+    // 3. Conta as reservas pendentes/ativas diretamente da tabela reservas
     $stmt_res_count = $pdo->query("SELECT COUNT(*) FROM reservas WHERE status = 'pendente'");
     $total_reservas = $stmt_res_count->fetchColumn();
 
     // LÓGICA DA SECÇÃO UTILIZADORES
-    if ($seccao === 'utilizadores') {
-        $pesquisa = $_GET['q'] ?? '';
-        if (!empty($pesquisa)) {
-            $stmt_u = $pdo->prepare("SELECT id, nome, email, tipo, ativo, data_registo FROM utilizadores WHERE nome LIKE :q OR email LIKE :q ORDER BY id DESC");
-            $stmt_u->execute(['q' => "%$pesquisa%"]);
-        } else {
-            $stmt_u = $pdo->query("SELECT id, nome, email, tipo, ativo, data_registo FROM utilizadores ORDER BY id DESC");
-        }
-        $utilizadores = $stmt_u->fetchAll(PDO::FETCH_ASSOC);
-    }
+    
 
     // LÓGICA DA SECÇÃO RESERVAS
     if ($seccao === 'reservas') {
-        // Puxa as reservas ativas interligando com o nome do utilizador e título do item
-        $sql_reservas = "SELECT reservas.*, utilizadores.nome as user_nome, itens.titulo as item_titulo 
+        $sql_reservas = "SELECT reservas.*, utilizadores.nome as user_nome, livros.titulo as item_titulo 
                          FROM reservas 
                          INNER JOIN utilizadores ON reservas.utilizador_id = utilizadores.id 
-                         INNER JOIN itens ON reservas.item_id = itens.id 
+                         INNER JOIN livros ON reservas.livro_id = livros.id 
                          WHERE reservas.status = 'pendente' 
                          ORDER BY reservas.id DESC";
         $reservas = $pdo->query($sql_reservas)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // LÓGICA DA SECÇÃO ARTIGOS (CORRIGIDA)
-    if ($seccao === 'artigos') {
-        $pesquisa_artigo = $_GET['q_artigo'] ?? '';
-        $filtro_estado = $_GET['estado'] ?? '';
-
-        // Base da Query com JOIN para trazer o nome legível da categoria
-        $sql_artigos = "SELECT itens.*, categorias.nome as cat_nome 
-                        FROM itens 
-                        LEFT JOIN categorias ON itens.categoria_id = categorias.id 
-                        WHERE 1=1";
-        
-        $params = [];
-
-        // Filtro por texto (Título do anúncio)
-        if (!empty($pesquisa_artigo)) {
-            $sql_artigos .= " AND itens.titulo LIKE :q";
-            $params['q'] = "%$pesquisa_artigo%";
-        }
-
-        // Filtro por Estado (CORRIGIDO para puxar qualquer estado que não seja 'disponivel')
-        if (!empty($filtro_estado)) {
-            if ($filtro_estado === 'indisponivel') {
-                $sql_artigos .= " AND itens.estado != 'disponivel'";
-            } else {
-                $sql_artigos .= " AND itens.estado = :estado";
-                $params['estado'] = $filtro_estado;
-            }
-        }
-
-        $sql_artigos .= " ORDER BY itens.id DESC";
-        
-        $stmt_a = $pdo->prepare($sql_artigos);
-        $stmt_a->execute($params);
-        $artigos = $stmt_a->fetchAll(PDO::FETCH_ASSOC);
-    }
+    // LÓGICA DA SECÇÃO ARTIGOS
+    
 
 } catch (PDOException $e) {
     die("Erro na Base de Dados: " . $e->getMessage());
@@ -143,89 +102,7 @@ try {
                 </div>
 
             <?php elseif ($seccao === 'utilizadores'): ?>
-                <h1>Lista de Utilizadores</h1>
-                <p class="admin-subtitle">Consulta de contas com acesso à biblioteca.</p>
-
-                <div class="admin-toolbar">
-                    <form action="admin.php" method="GET" class="search-container-admin">
-                        <input type="hidden" name="seccao" value="utilizadores">
-                        <span class="search-icon-admin">🔍</span>
-                        <input type="text" name="q" class="search-input-admin" placeholder="Pesquisar por username ou nome..." value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
-                    </form>
-                    <div class="counter-badge">
-                        <span><?= count($utilizadores); ?> utilizador(s) encontrado(s)</span>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="agent-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 60px;">ID</th>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Registo</th>
-                                <th>Cargo</th>
-                                <th>Estado</th>
-                                <th style="width: 180px; text-align: center;">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($utilizadores)): ?>
-                                <tr>
-                                    <td colspan="7" style="text-align: center; color: #64748b; padding: 30px;">Nenhum utilizador encontrado.</td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach ($utilizadores as $u): 
-                                    $u_tipo_normalizado = trim(strtolower($u['tipo']));
-                                    $isAdmin = ($u_tipo_normalizado === 'admin' || (int)$u['tipo'] === 1);
-                                    $eProprioAdmin = ($id_admin_atual !== null && (int)$u['id'] === (int)$id_admin_atual);
-                                ?>
-                                    <tr>
-                                        <td class="td-id">#<?= $u['id']; ?></td>
-                                        <td>
-                                            <div class="user-profile-cell">
-                                                <span class="user-name-text"><?= htmlspecialchars($u['nome']); ?></span>
-                                                <?php if ($isAdmin): ?>
-                                                    <span class="badge-admin-tag">Admin</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </td>
-                                        <td><?= htmlspecialchars($u['email']); ?></td>
-                                        <td style="color: #64748b;"><?= date('d/m/Y', strtotime($u['data_registo'])); ?></td>
-                                        <td><?= $isAdmin ? 'Administrador' : 'Utilizador'; ?></td>
-                                        <td>
-                                            <span class="status-active" style="<?= (int)$u['ativo'] !== 1 ? 'color: #ef4444; border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.1);' : '' ?>">
-                                                <?= (int)$u['ativo'] === 1 ? 'Ativo' : 'Inativo'; ?>
-                                            </span>
-                                        </td>
-                                        <td style="text-align: center;">
-                                            <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
-                                                <button class="btn-edit-trigger" 
-                                                        data-id="<?= $u['id']; ?>" 
-                                                        data-nome="<?= htmlspecialchars($u['nome']); ?>" 
-                                                        data-email="<?= htmlspecialchars($u['email']); ?>" 
-                                                        data-tipo="<?= $isAdmin ? 'admin' : 'user'; ?>" 
-                                                        data-ativo="<?= $u['ativo']; ?>"
-                                                        data-self="<?= $eProprioAdmin ? 'true' : 'false'; ?>"
-                                                        onclick="abrirModalEditar(this)">✏️ Editar</button>
-
-                                                <?php if (!$eProprioAdmin): ?>
-                                                    <form action="editar_utilizadores.php" method="POST" style="margin:0;" onsubmit="return confirm('Tem a certeza absoluta que deseja eliminar permanentemente a conta de: <?= htmlspecialchars($u['nome']); ?>?');">
-                                                        <input type="hidden" name="acao" value="eliminar_utilizador">
-                                                        <input type="hidden" name="utilizador_id" value="<?= $u['id']; ?>">
-                                                        <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 4px;" title="Eliminar Utilizador">🗑️</button>
-                                                    </form>
-                                                <?php else: ?>
-                                                    <span style="font-size: 0.75rem; color: #64748b; font-style: italic;">Sua Conta</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
+               <?php include 'seccao_utilizadores.php'; ?>
                 </div>
 
             <?php elseif ($seccao === 'reservas'): ?>
@@ -256,7 +133,9 @@ try {
                                         <td style="font-weight: 500; color: #f8fafc;"><?= htmlspecialchars($res['user_nome']); ?></td>
                                         <td style="color: #cbd5e1;"><?= htmlspecialchars($res['item_titulo']); ?></td>
                                         <td><?= date('d/m/Y', strtotime($res['data_inicio'])); ?></td>
-                                        <td style="color: #f59e0b; font-weight: 500;"><?= date('d/m/Y', strtotime($res['data_fim'])); ?></td>
+                                        <td style="color: #f59e0b; font-weight: 500;">
+                                            <?= !empty($res['data_fim']) ? date('d/m/Y', strtotime($res['data_fim'])) : 'N/A'; ?>
+                                        </td>
                                         <td>
                                             <span style="color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); background: rgba(59,130,246,0.1); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
                                                 <?= htmlspecialchars($res['status']); ?>
@@ -274,121 +153,33 @@ try {
                 <p class="admin-subtitle">Histórico e devoluções dentro do prazo.</p>
 
             <?php elseif ($seccao === 'artigos'): ?>
-                <h1>Gerir Artigos (Catálogo)</h1>
-                <p class="admin-subtitle">Monitorize, filtre e remova permanentemente os exemplares do acervo.</p>
-
-                <div class="admin-toolbar" style="display: flex; gap: 15px; align-items: center; justify-content: space-between;">
-                    <form action="admin.php" method="GET" style="display: flex; gap: 12px; width: 100%; max-width: 700px;">
-                        <input type="hidden" name="seccao" value="artigos">
-                        
-                        <div class="search-container-admin" style="flex-grow: 2; margin: 0;">
-                            <span class="search-icon-admin">🔍</span>
-                            <input type="text" name="q_artigo" class="search-input-admin" placeholder="Pesquisar pelo nome do anúncio/artigo..." value="<?= htmlspecialchars($_GET['q_artigo'] ?? '') ?>">
-                        </div>
-
-                        <select name="estado" onchange="this.form.submit()" style="background: #0f172a; border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; padding: 0 15px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; outline: none; cursor: pointer; min-width: 180px; height: 45px;">
-                            <option value="">⚙️ Todos os Estados</option>
-                            <option value="disponivel" <?= ($_GET['estado'] ?? '') === 'disponivel' ? 'selected' : '' ?>>🟢 Disponível</option>
-                            <option value="indisponivel" <?= ($_GET['estado'] ?? '') === 'indisponivel' ? 'selected' : '' ?>>🔴 Indisponível</option>
-                        </select>
-                        
-                        <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 0 20px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; height: 45px; transition: background 0.2s;">Filtrar</button>
-                    </form>
-
-                    <div class="counter-badge" style="white-space: nowrap;">
-                        <span><?= count($artigos); ?> artigo(s) listado(s)</span>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="agent-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 60px;">ID</th>
-                                <th style="width: 70px;">Capa</th>
-                                <th>Título do Anúncio</th>
-                                <th>Autor / Artista</th>
-                                <th>Categoria</th>
-                                <th>Estado</th>
-                                <th style="width: 110px; text-align: center;">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($artigos)): ?>
-                                <tr>
-                                    <td colspan="7" style="text-align: center; color: #64748b; padding: 40px;">❌ Nenhum artigo corresponde aos filtros aplicados.</td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach ($artigos as $art): 
-                                    $capaPath = !empty($art['imagem_url']) ? 'Uploads/'.$art['imagem_url'] : 'Images/default-cover.png';
-                                    $estadoLimpo = strtolower(trim($art['estado']));
-
-                                    if ($estadoLimpo === 'disponivel' || $estadoLimpo === 'disponível') {
-                                        $textoExibido = "Disponível";
-                                        $corEstado = 'color: #10b981; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.1);';
-                                    } else {
-                                        $textoExibido = "Indisponível";
-                                        $corEstado = 'color: #ef4444; border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);';
-                                    }
-                                ?>
-                                    <tr>
-                                        <td class="td-id">#<?= $art['id']; ?></td>
-                                        <td>
-                                            <img src="<?= $capaPath; ?>" alt="Capa" style="width: 42px; height: 55px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05);">
-                                        </td>
-                                        <td>
-                                            <span class="user-name-text" style="font-weight: 600; color: #f8fafc;"><?= htmlspecialchars($art['titulo']); ?></span>
-                                        </td>
-                                        <td style="color: #cbd5e1;"><?= htmlspecialchars($art['autor_artista'] ?? 'N/A'); ?></td>
-                                        <td>
-                                            <span style="font-size: 0.75rem; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; color: #94a3b8;">
-                                                <?= htmlspecialchars($art['cat_nome'] ?? 'Sem Categoria'); ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; min-width: 110px; border-radius: 6px; text-transform: uppercase; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; <?= $corEstado ?>">
-                                                <?= $textoExibido; ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="actions-cell" style="justify-content: center;">
-                                                <a href="eliminar_artigo.php?id=<?= $art['id']; ?>" 
-                                                   class="btn-action-square btn-delete-user" 
-                                                   title="Eliminar Artigo do Acervo"
-                                                   onclick="return confirm('Tem a certeza que deseja remover permanentemente o anúncio: <?= htmlspecialchars($art['titulo']); ?>?');">🗑️</a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
+                <?php include 'seccao_artigos.php'; ?>
             <?php endif; ?>
         </main>
     </div>
 
+    <!-- MODAL: EDITAR UTILIZADOR -->
     <div id="modalEditarUtilizador" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
                 <h2>✏️ Editar Perfil do Utilizador</h2>
                 <button class="btn-close-modal" onclick="fecharModalEditar()">✕</button>
             </div>
-            
-            <form action="editar_utilizadores.php" method="POST">
+            <form id="formEditarUtilizador" action="editar_utilizadores.php" method="POST">
                 <input type="hidden" name="acao" value="actualizar_completo">
                 <input type="hidden" id="modal_id" name="utilizador_id">
-
                 <div class="form-group-modal">
                     <label for="modal_nome">Nome Completo</label>
                     <input type="text" id="modal_nome" name="nome" required>
                 </div>
-
                 <div class="form-group-modal">
                     <label for="modal_email">Endereço de Email</label>
                     <input type="email" id="modal_email" name="email" required>
                 </div>
-
+                <div class="form-group-modal">
+                    <label for="modal_telemovel">Número de Telemóvel</label>
+                    <input type="tel" id="modal_telemovel" name="telemovel">
+                </div>
                 <div class="form-group-modal">
                     <label for="modal_tipo">Cargo / Nível de Acesso</label>
                     <select id="modal_tipo" name="tipo">
@@ -396,7 +187,6 @@ try {
                         <option value="admin">Administrador</option>
                     </select>
                 </div>
-
                 <div class="form-group-modal">
                     <label for="modal_ativo">Estado da Conta</label>
                     <select id="modal_ativo" name="ativo">
@@ -404,11 +194,9 @@ try {
                         <option value="0">🔴 Inativo</option>
                     </select>
                 </div>
-
                 <p id="aviso_self_edit" style="color: #eab308; font-size: 0.75rem; display: none; margin-top: 10px; background: rgba(234,179,8,0.1); padding: 8px; border-radius: 4px;">
                     ⚠️ Nota: Por segurança, não pode alterar o seu próprio cargo nem desativar a sua conta atual.
                 </p>
-
                 <div class="modal-footer">
                     <button type="button" class="btn-modal btn-modal-cancel" onclick="fecharModalEditar()">Cancelar</button>
                     <button type="submit" class="btn-modal btn-modal-save">Guardar Alterações</button>
@@ -417,11 +205,159 @@ try {
         </div>
     </div>
 
+    <!-- MODAL: ADICIONAR ARTIGO -->
+    <div id="modalAdicionarArtigo" class="modal-overlay">
+        <div class="modal-box" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>➕ Adicionar Novo Artigo ao Catálogo</h2>
+                <button class="btn-close-modal" onclick="fecharModalAdicionarArtigo()">✕</button>
+            </div>
+            <form action="inserir_artigo.php" method="POST" enctype="multipart/form-data">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group-modal">
+                        <label>Título do Livro/Artigo</label>
+                        <input type="text" name="titulo" placeholder="Ex: O Principezinho" required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label>ISBN</label>
+                        <input type="text" name="isbn" placeholder="Ex: 9789722524223">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                    <div class="form-group-modal">
+                        <label>Editora</label>
+                        <input type="text" name="editora" placeholder="Ex: Porto Editora">
+                    </div>
+                    <div class="form-group-modal">
+                        <label>Ano de Edição</label>
+                        <input type="number" name="ano_edicao" min="1000" max="2026" placeholder="Ex: 2020">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                    <div class="form-group-modal">
+                        <label>Autor Principal</label>
+                        <select name="autor_id" required style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
+                            <option value="">Selecione o Autor...</option>
+                            <?php foreach ($todos_autores as $autor): ?>
+                                <option value="<?= $autor['id']; ?>"><?= htmlspecialchars($autor['nome']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group-modal">
+                        <label>Categoria (CDU)</label>
+                        <select name="cdu_codigo" required style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
+                            <option value="">Selecione a Classe...</option>
+                            <?php foreach ($todas_categorias as $cat): ?>
+                                <option value="<?= htmlspecialchars($cat['codigo']); ?>"><?= htmlspecialchars($cat['codigo'] . ' - ' . $cat['descricao']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                    <div class="form-group-modal">
+                        <label>Estado Inicial</label>
+                        <select name="estado" style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
+                            <option value="disponivel">🟢 Disponível</option>
+                            <option value="indisponivel">🔴 Indisponível</option>
+                        </select>
+                    </div>
+                    <div class="form-group-modal">
+                        <label>Imagem da Capa</label>
+                        <input type="file" name="imagem_capa" accept="image/*" style="padding: 5px 0;">
+                    </div>
+                </div>
+                <div class="form-group-modal" style="margin-top: 10px;">
+                    <label>Descrição / Resumo</label>
+                    <textarea name="descricao" rows="3" placeholder="Insira a sinopse ou notas do exemplar..." style="width: 100%; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 10px; font-family: inherit; resize: vertical;"></textarea>
+                </div>
+                <div class="modal-footer" style="margin-top: 20px;">
+                    <button type="button" class="btn-modal btn-modal-cancel" onclick="fecharModalAdicionarArtigo()">Cancelar</button>
+                    <button type="submit" class="btn-modal btn-modal-save" style="background: #10b981;">Adicionar </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR ARTIGO EXISTENTE -->
+    <div id="modalEditarArtigo" class="modal-overlay">
+        <div class="modal-box" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>✏️ Editar Detalhes do Artigo</h2>
+                <button class="btn-close-modal" onclick="fecharModalEditarArtigo()">✕</button>
+            </div>
+            <form action="editar_artigo.php" method="POST" enctype="multipart/form-data">
+                <input type="hidden" id="edit_artigo_id" name="artigo_id">
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group-modal">
+                        <label>Título do Livro/Artigo</label>
+                        <input type="text" id="edit_titulo" name="titulo" required>
+                    </div>
+                    <div class="form-group-modal">
+                        <label>ISBN</label>
+                        <input type="text" id="edit_isbn" name="isbn">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                    <div class="form-group-modal">
+                        <label>Editora</label>
+                        <input type="text" id="edit_editora" name="editora">
+                    </div>
+                    <div class="form-group-modal">
+                        <label>Ano de Edição</label>
+                        <input type="number" id="edit_ano" name="ano_edicao" min="1000" max="2026">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                    <div class="form-group-modal">
+                        <label>Autor Principal</label>
+                        <select id="edit_autor_id" name="autor_id" required style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
+                            <?php foreach ($todos_autores as $autor): ?>
+                                <option value="<?= $autor['id']; ?>"><?= htmlspecialchars($autor['nome']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group-modal">
+                        <label>Categoria (CDU)</label>
+                        <select id="edit_cdu_codigo" name="cdu_codigo" required style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
+                            <?php foreach ($todas_categorias as $cat): ?>
+                                <option value="<?= htmlspecialchars($cat['codigo']); ?>"><?= htmlspecialchars($cat['codigo'] . ' - ' . $cat['descricao']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                    <div class="form-group-modal">
+                        <label>Estado</label>
+                        <select id="edit_estado" name="estado" style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
+                            <option value="disponivel">🟢 Disponível</option>
+                            <option value="indisponivel">🔴 Indisponível</option>
+                        </select>
+                    </div>
+                    <div class="form-group-modal">
+                        <label>Substituir Capa (Opcional)</label>
+                        <input type="file" name="imagem_capa" accept="image/*" style="padding: 5px 0;">
+                    </div>
+                </div>
+                <div class="form-group-modal" style="margin-top: 10px;">
+                    <label>Descrição / Resumo</label>
+                    <textarea id="edit_descricao" name="descricao" rows="3" style="width: 100%; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 10px; font-family: inherit; resize: vertical;"></textarea>
+                </div>
+                <div class="modal-footer" style="margin-top: 20px;">
+                    <button type="button" class="btn-modal btn-modal-cancel" onclick="fecharModalEditarArtigo()">Cancelar</button>
+                    <button type="submit" class="btn-modal btn-modal-save" style="background: #3b82f6;">Atualizar Artigo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        // Funções do Modal de Utilizadores
         function abrirModalEditar(botao) {
             const id = botao.getAttribute('data-id');
             const nome = botao.getAttribute('data-nome');
             const email = botao.getAttribute('data-email');
+            const telemovel = botao.getAttribute('data-telemovel');
             const tipo = botao.getAttribute('data-tipo');
             const ativo = botao.getAttribute('data-ativo');
             const isSelf = botao.getAttribute('data-self') === 'true';
@@ -429,6 +365,7 @@ try {
             document.getElementById('modal_id').value = id;
             document.getElementById('modal_nome').value = nome;
             document.getElementById('modal_email').value = email;
+            document.getElementById('modal_telemovel').value = telemovel;
             document.getElementById('modal_tipo').value = tipo;
             document.getElementById('modal_ativo').value = ativo;
 
@@ -441,19 +378,36 @@ try {
                 document.getElementById('modal_ativo').disabled = false;
                 document.getElementById('aviso_self_edit').style.display = 'none';
             }
-
             document.getElementById('modalEditarUtilizador').classList.add('active');
         }
-
         function fecharModalEditar() {
             document.getElementById('modalEditarUtilizador').classList.remove('active');
         }
 
-        window.onclick = function(event) {
-            const modal = document.getElementById('modalEditarUtilizador');
-            if (event.target === modal) {
-                fecharModalEditar();
-            }
+        // Funções do Modal Adicionar Artigo
+        function abrirModalAdicionarArtigo() {
+            document.getElementById('modalAdicionarArtigo').classList.add('active');
+        }
+        function fecharModalAdicionarArtigo() {
+            document.getElementById('modalAdicionarArtigo').classList.remove('active');
+        }
+
+        // Funções do Modal Editar Artigo
+        function abrirModalEditarArtigo(botao) {
+            document.getElementById('edit_artigo_id').value = botao.getAttribute('data-id');
+            document.getElementById('edit_titulo').value = botao.getAttribute('data-titulo');
+            document.getElementById('edit_isbn').value = botao.getAttribute('data-isbn');
+            document.getElementById('edit_editora').value = botao.getAttribute('data-editora');
+            document.getElementById('edit_ano').value = botao.getAttribute('data-ano');
+            document.getElementById('edit_autor_id').value = botao.getAttribute('data-autor');
+            document.getElementById('edit_cdu_codigo').value = botao.getAttribute('data-cdu');
+            document.getElementById('edit_estado').value = botao.getAttribute('data-estado');
+            document.getElementById('edit_descricao').value = botao.getAttribute('data-descricao');
+
+            document.getElementById('modalEditarArtigo').classList.add('active');
+        }
+        function fecharModalEditarArtigo() {
+            document.getElementById('modalEditarArtigo').classList.remove('active');
         }
     </script>
 </body>

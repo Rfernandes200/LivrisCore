@@ -9,14 +9,14 @@ if (!isset($_SESSION['utilizador_id'])) {
 
 $id = $_SESSION['utilizador_id'];
 
-// CORREÇÃO: Busca os dados certos usando as colunas exatas da tua BD (tipo e data_registo)
+// CORREÇÃO: Busca os dados certos incluindo o telemovel usando as colunas exatas da BD
 try {
-    $stmt = $pdo->prepare("SELECT nome, email, tipo, data_registo FROM utilizadores WHERE id = :id");
+    $stmt = $pdo->prepare("SELECT nome, email, telemovel, tipo, data_registo FROM utilizadores WHERE id = :id");
     $stmt->execute(['id' => $id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     // Caso ocorra alguma falha, mantém um plano de contingência seguro
-    $stmt = $pdo->prepare("SELECT nome, email, tipo FROM utilizadores WHERE id = :id");
+    $stmt = $pdo->prepare("SELECT nome, email, telemovel, tipo FROM utilizadores WHERE id = :id");
     $stmt->execute(['id' => $id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     $user['data_registo'] = date('Y-m-d H:i:s'); 
@@ -57,7 +57,6 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
                 <h1><?php echo htmlspecialchars($user['nome'] ?? ''); ?></h1>
                 <p><?php echo htmlspecialchars($user['email'] ?? ''); ?></p>
                 <div class="badges">
-                    
                     <?php if (isset($user['tipo']) && ($user['tipo'] == 'admin' || (int)$user['tipo'] === 1)): ?>
                         <span class="badge-role" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">⚡ Administrador</span>
                     <?php else: ?>
@@ -87,12 +86,25 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
             <form action="atualiza_perfil.php" method="POST">
                 <div class="input-group">
                     <label>Nome completo</label>
-                    <input type="text" name="nome" value="<?php echo htmlspecialchars($user['nome'] ?? ''); ?>">
+                    <input type="text" name="nome" value="<?php echo htmlspecialchars($user['nome'] ?? ''); ?>" required>
                 </div>
 
                 <div class="input-group">
                     <label>Email</label>
-                    <input type="email" name="email" value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>">
+                    <input type="email" name="email" value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Telemóvel</label>
+                    <input 
+                        type="tel" 
+                        name="telemovel" 
+                        value="<?php echo htmlspecialchars($user['telemovel'] ?? ''); ?>" 
+                        placeholder="9xxxxxxxx" 
+                        pattern="[0-9]{9}" 
+                        maxlength="9"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9)"
+                        title="O número de telemóvel deve ter exatamente 9 dígitos numéricos.">
                 </div>
 
                 <hr class="divider">
@@ -102,7 +114,6 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
                     <label>Nova palavra-passe</label>
                     <div class="pw-wrapper">
                         <input type="password" name="nova_pw" placeholder="Mínimo 8 caracteres">
-                        
                     </div>
                 </div>
 
@@ -110,7 +121,6 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
                     <label>Confirmar nova palavra-passe</label>
                     <div class="pw-wrapper">
                         <input type="password" name="confirma_pw" placeholder="Repetir palavra-passe">
-                        
                     </div>
                 </div>
 

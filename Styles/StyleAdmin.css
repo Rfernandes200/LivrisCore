@@ -569,7 +569,7 @@
 .btn-edit-trigger {
     background: rgba(59, 130, 246, 0.1);
     border: 1px solid rgba(59, 130, 246, 0.2);
-    color: #3b82f6;
+    color: #c1c1c1;
     padding: 6px 12px;
     border-radius: 6px;
     font-size: 0.8rem;
@@ -579,6 +579,6 @@
 }
 
 .btn-edit-trigger:hover {
-    background: #3b82f6;
+    background: #ffffff;
     color: white;
 }

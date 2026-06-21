@@ -73,7 +73,8 @@ if ($acao === 'oficializar_emprestimo') {
             }
 
             // 1. Atualizar o estado da reserva para concluído
-            $stmt_up_res = $pdo->prepare("UPDATE reservas SET status = 'concluido' WHERE id = :id");
+            // (Nota: Ajustado para 'concluida' para bater certo com o ENUM da sua tabela: 'pendente','concluida','cancelada')
+            $stmt_up_res = $pdo->prepare("UPDATE reservas SET status = 'concluida' WHERE id = :id");
             $stmt_up_res->execute(['id' => $reserva_id]);
 
             // 2. Criar o registo oficial na tabela de empréstimos com as datas do Pop-up
@@ -88,8 +89,8 @@ if ($acao === 'oficializar_emprestimo') {
                 'data_fim' => $data_fim
             ]);
 
-            // 3. Garantir que o artigo fica marcado como indisponível para outros utilizadores
-            $stmt_item = $pdo->prepare("UPDATE itens SET estado = 'indisponivel' WHERE id = :item_id");
+            // 3. Garantir que o artigo fica marcado como 'emprestado' (Ajustado com base no ENUM do seu banco de dados)
+            $stmt_item = $pdo->prepare("UPDATE itens SET estado = 'emprestado' WHERE id = :item_id");
             $stmt_item->execute(['item_id' => $reserva['item_id']]);
 
             $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'Empréstimo confirmado com sucesso! Boa leitura. 🎉'];
@@ -104,6 +105,41 @@ if ($acao === 'oficializar_emprestimo') {
     }
 }
 
-// Redireciona sempre de volta para a página visual limpa
+// ==========================================
+// AÇÃO 3: ENTREGAR / DEVOLVER EMPRÉSTIMO ATIVO
+// ==========================================
+if ($acao === 'entregar_emprestimo') {
+    $emprestimo_id = (int)$_POST['emprestimo_id'];
+
+    try {
+        $pdo->beginTransaction();
+
+        // Verificar se o empréstimo pertence mesmo ao utilizador ativo e ainda não foi devolvido
+        $stmt = $pdo->prepare("SELECT item_id FROM emprestimos WHERE id = :id AND utilizador_id = :user_id AND data_devolucao_real IS NULL");
+        $stmt->execute(['id' => $emprestimo_id, 'user_id' => $id_logado]);
+        $emprestimo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($emprestimo) {
+            // 1. Regista a data atual como a data de devolução real
+            $stmt_devolucao = $pdo->prepare("UPDATE emprestimos SET data_devolucao_real = NOW() WHERE id = :id");
+            $stmt_devolucao->execute(['id' => $emprestimo_id]);
+
+            // 2. Liberta o item voltando a colocá-lo como 'disponivel' para outros utilizadores no catálogo
+            $stmt_item = $pdo->prepare("UPDATE itens SET estado = 'disponivel' WHERE id = :item_id");
+            $stmt_item->execute(['item_id' => $emprestimo['item_id']]);
+
+            $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'Artigo entregue e devolvido com sucesso! Obrigado. 👍'];
+        } else {
+            $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Empréstimo inválido ou já finalizado anteriormente.'];
+        }
+
+        $pdo->commit();
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Erro ao processar a devolução: ' . $e->getMessage()];
+    }
+}
+
+// Redireciona sempre de volta para a página visual limpa dos empréstimos
 header("Location: emprestimos.php");
 exit();

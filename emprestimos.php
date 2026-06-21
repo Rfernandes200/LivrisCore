@@ -63,6 +63,23 @@ try {
     <link rel="stylesheet" href="Styles/StyleAdmin.css">
     <link rel="stylesheet" href="Styles/Styleempres.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        .btn-entregar-inline {
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-entregar-inline:hover {
+            background: #2563eb;
+        }
+    </style>
 </head>
 <body>
 
@@ -130,6 +147,16 @@ try {
             <h2 class="table-section-title title-ativo">📖 Artigos Contigo (Em Curso)</h2>
             <div class="table-responsive table-wrapper">
                 <table class="agent-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th>Artigo</th>
+                            <th>Formato</th>
+                            <th>Data de Saída</th>
+                            <th>Data Limite</th>
+                            <th style="width: 200px; text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         <?php if (empty($emprestimos_ativos)): ?>
                             <tr>
@@ -150,8 +177,14 @@ try {
                                         <?= date('d/m/Y', strtotime($emp['data_prevista_devolucao'])); ?>
                                         <small class="data-subtexto">(Faltam <?= $dias_restantes; ?> dias)</small>
                                     </td>
-                                    <td style="text-align: center;">
+                                    <td style="text-align: center; display: flex; gap: 8px; justify-content: center; align-items: center; border: none;">
                                         <span class="badge-status-ativo">Ativo</span>
+                                        
+                                        <form action="processo_emprestimo.php" method="POST" style="margin:0;" onsubmit="return confirm('Confirmas que queres proceder à entrega deste artigo?');">
+                                            <input type="hidden" name="acao" value="entregar_emprestimo">
+                                            <input type="hidden" name="emprestimo_id" value="<?= $emp['id']; ?>">
+                                            <button type="submit" class="btn-entregar-inline">Entregar</button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

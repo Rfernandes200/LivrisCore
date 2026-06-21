@@ -21,57 +21,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // ==========================================
-        // 1. GRAVAR DADOS DO POP-UP (NOME, EMAIL, CARGO, ESTADO)
+        // 1. GRAVAR DADOS DO POP-UP (NOME, EMAIL, TELEMÓVEL, CARGO, ESTADO)
         // ==========================================
-        if ($acao === 'actualizar_completo') { // Ajustado para bater com o name 'actualizar_completo' do admin.php
+        if ($acao === 'actualizar_completo') {
             $nome = trim($_POST['nome'] ?? '');
             $email = trim($_POST['email'] ?? '');
-            
+            $telemovel = trim($_POST['telemovel'] ?? '');
+
             if (empty($nome) || empty($email)) {
                 $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => '❌ Os campos Nome e Email são obrigatórios.'];
                 header("Location: admin.php?seccao=utilizadores");
                 exit();
             }
 
+            // NOVA VALIDAÇÃO: Se o telemóvel não estiver vazio, valida se tem apenas números e exatamente 9 dígitos
+            if (!empty($telemovel)) {
+                if (!preg_match('/^[0-9]{9}$/', $telemovel)) {
+                    $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => '❌ O número de telemóvel deve conter apenas números e ter exatamente 9 dígitos.'];
+                    header("Location: admin.php?seccao=utilizadores");
+                    exit();
+                }
+            } else {
+                $telemovel = null; // Caso queiras permitir limpar o telemóvel (deixar em branco)
+            }
+
             // Salvaguarda no Servidor: Se o admin estiver a modificar-se a si próprio...
             if ($id_alvo === $id_admin_atual) {
-                // ...Atualiza apenas nome e email por segurança (não mexe no cargo nem no estado ativo)
-                $stmt = $pdo->prepare("UPDATE utilizadores SET nome = :nome, email = :email WHERE id = :id");
-                $stmt->execute(['nome' => $nome, 'email' => $email, 'id' => $id_alvo]);
+                // ...Atualiza nome, email e telemóvel por segurança (não mexe no cargo nem no estado ativo)
+                $stmt = $pdo->prepare("UPDATE utilizadores SET nome = :nome, email = :email, telemovel = :telemovel WHERE id = :id");
+                $stmt->execute([
+                    'nome' => $nome, 
+                    'email' => $email, 
+                    'telemovel' => $telemovel, 
+                    'id' => $id_alvo
+                ]);
             } else {
                 $tipo_vindo = trim($_POST['tipo'] ?? 'user');
                 $ativo = (int)($_POST['ativo'] ?? 1);
 
                 // Tratamento inteligente do Cargo (Aceita 'admin', '1', 'user' ou '0')
                 if ($tipo_vindo === 'admin' || $tipo_vindo === '1') {
-                    // Se a tua BD usar INT, grava 1. Se usar VARCHAR, o PDO converte o 1 para '1' (que o admin.php aceita)
                     $tipo_final = 1; 
                 } else {
-                    $tipo_final = 0; // Utilizador comum numérico
+                    $tipo_final = 0; 
                 }
 
-                // Executa a primeira tentativa (Formato Numérico Avançado)
-                $stmt = $pdo->prepare("UPDATE utilizadores SET nome = :nome, email = :email, tipo = :tipo, ativo = :ativo WHERE id = :id");
+                // Executa a primeira tentativa (Formato Numérico Avançado) com telemovel
+                $stmt = $pdo->prepare("UPDATE utilizadores SET nome = :nome, email = :email, telemovel = :telemovel, tipo = :tipo, ativo = :ativo WHERE id = :id");
                 
                 try {
                     $stmt->execute([
-                        'nome'   => $nome,
-                        'email'  => $email,
-                        'tipo'   => $tipo_final,
-                        'ativo'  => $ativo,
-                        'id'     => $id_alvo
+                        'nome'      => $nome,
+                        'email'     => $email,
+                        'telemovel' => $telemovel,
+                        'tipo'      => $tipo_final,
+                        'ativo'     => $ativo,
+                        'id'        => $id_alvo
                     ]);
                 } catch (PDOException $e) {
                     // CASO DE RECURSO: Se a tua tabela usar estritamente Texto/VARCHAR ('admin' / 'user') e rejeitar números:
                     $tipo_texto = ($tipo_vindo === 'admin' || $tipo_vindo === '1') ? 'admin' : 'user';
                     
-                    $stmt = $pdo->prepare("UPDATE utilizadores SET nome = :nome, email = :email, tipo = :tipo, ativo = :ativo WHERE id = :id");
+                    $stmt = $pdo->prepare("UPDATE utilizadores SET nome = :nome, email = :email, telemovel = :telemovel, tipo = :tipo, ativo = :ativo WHERE id = :id");
                     $stmt->execute([
-                        'nome'   => $nome,
-                        'email'  => $email,
-                        'tipo'   => $tipo_texto,
-                        'ativo'  => $ativo,
-                        'id'     => $id_alvo
+                        'nome'      => $nome,
+                        'email'     => $email,
+                        'telemovel' => $telemovel,
+                        'tipo'      => $tipo_texto,
+                        'ativo'     => $ativo,
+                        'id'        => $id_alvo
                     ]);
                 }
             }
