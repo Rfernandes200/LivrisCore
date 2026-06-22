@@ -36,7 +36,7 @@ try {
     // Falha silenciosa
 }
 
-// 3. Procurar os autores na Base de Dados para preencher o Select do Pop-up (NOVO)
+// 3. Procurar os autores na Base de Dados para preencher o Select do Pop-up
 $todos_autores = [];
 try {
     $stmt_autores = $pdo->query("SELECT id, nome FROM autores ORDER BY nome ASC");
@@ -219,41 +219,51 @@ try {
 </div>
 
 <div id="addCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
-    <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
-        <div style="padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
+    
+    <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 600px; max-height: 90vh; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); display: flex; flex-direction: column; overflow: hidden; font-family: 'Inter', sans-serif;">
+        
+        <div style="padding: 20px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2); flex-shrink: 0;">
             <div>
                 <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ Adicionar Livro ]</span>
                 <h2 style="font-size: 1.3rem; color: white; font-weight: 600; margin: 0; text-align: left;">Novo Livro no Catálogo</h2>
             </div>
             <button type="button" id="closeAddModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
-        <form action="processa_artigo.php" method="POST" enctype="multipart/form-data" style="padding: 28px; margin: 0; box-sizing: border-box;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+
+        <form action="processa_artigo.php" method="POST" enctype="multipart/form-data" style="margin: 0; padding: 28px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">TÍTULO DO LIVRO *</label>
-                    <input type="text" name="titulo" class="modal-field" placeholder="Ex: Os Maias" required>
+                    <input type="text" name="titulo" class="modal-field" placeholder="Ex: Os Maias" required style="width: 100%; box-sizing: border-box;">
                 </div>
+                
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">AUTOR DO LIVRO *</label>
-                    <select name="autor_id" class="modal-field" required style="height: 45px;">
-                        <option value="" disabled selected style="background:#0b0f19;">Selecione um Autor...</option>
-                        <?php foreach($todos_autores as $autor): ?>
-                            <option value="<?= $autor['id']; ?>" style="background:#0b0f19; color:white;">
-                                <?= htmlspecialchars($autor['nome']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">AUTOR(ES) DO LIVRO *</label>
+                    <div id="container-autores" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <select name="autor_id[]" class="modal-field select-autor-dinamico" required style="height: 45px; flex-grow: 1; box-sizing: border-box;">
+                                <option value="" disabled selected style="background:#0b0f19;">Selecione um Autor...</option>
+                                <?php foreach($todos_autores as $autor): ?>
+                                    <option value="<?= $autor['id']; ?>" style="background:#0b0f19; color:white;">
+                                        <?= htmlspecialchars($autor['nome']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="button" id="btn-add-autor-row" style="height: 45px; width: 45px; min-width: 45px; background: #10b981; border: none; border-radius: 6px; color: white; font-size: 1.3rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">CÓDIGO ISBN *</label>
-                    <input type="text" name="isbn" class="modal-field" placeholder="Ex: 978-972-0-04671-0" required>
+                    <input type="text" name="isbn" class="modal-field" placeholder="Ex: 978-972-0-04671-0" required style="width: 100%; box-sizing: border-box;">
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">CLASSIFICAÇÃO CDU *</label>
-                    <select name="cdu_codigo" class="modal-field" required style="height: 45px;">
+                    <select name="cdu_codigo" class="modal-field" required style="height: 45px; width: 100%; box-sizing: border-box;">
                         <option value="" disabled selected style="background:#0b0f19;">Selecione a Classe CDU...</option>
                         <?php foreach($cdu_classes as $classe): ?>
                             <option value="<?= $classe['codigo']; ?>" style="background:#0b0f19; color:white;">
@@ -264,18 +274,18 @@ try {
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">EDITORA *</label>
-                    <input type="text" name="editora" class="modal-field" placeholder="Ex: Porto Editora" required>
+                    <input type="text" name="editora" class="modal-field" placeholder="Ex: Porto Editora" required style="width: 100%; box-sizing: border-box;">
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">ANO DE EDIÇÃO *</label>
-                    <input type="number" name="ano_edicao" class="modal-field" placeholder="Ex: 2026" min="1000" max="2026" required>
+                    <input type="number" name="ano_edicao" class="modal-field" placeholder="Ex: 2026" min="1000" max="2026" required style="width: 100%; box-sizing: border-box;">
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">ESTADO INICIAL *</label>
-                    <select name="estado" class="modal-field" required style="height: 45px;">
+                    <select name="estado" class="modal-field" required style="height: 45px; width: 100%; box-sizing: border-box;">
                         <option value="disponivel" selected style="background:#0b0f19;">Disponível</option>
                         <option value="reservado" style="background:#0b0f19;">Reservado</option>
                         <option value="indisponivel" style="background:#0b0f19;">Indisponível</option>
@@ -283,16 +293,18 @@ try {
                 </div>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; margin-bottom: 20px;">
+            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                 <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">SINOPSE / RESUMO *</label>
-                <textarea name="descricao" rows="4" class="modal-field" placeholder="Escreva uma breve sinopse do livro..." required style="resize: vertical;"></textarea>
+                <textarea name="descricao" rows="4" class="modal-field" placeholder="Escreva uma breve sinopse do livro..." required style="resize: vertical; width: 100%; box-sizing: border-box;"></textarea>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; margin-bottom: 2px;">
+
+            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                 <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">IMAGEM DE CAPA (OBRIGATÓRIO) *</label>
-                <input type="file" name="imagem" accept="image/*" required class="modal-field" style="padding: 8px 10px !important;">
+                <input type="file" name="imagem" accept="image/*" required class="modal-field" style="padding: 8px 10px !important; width: 100%; box-sizing: border-box;">
                 <small style="color: #64748b; font-size: 0.75rem; margin-top: 4px; display:block;">Apenas ficheiros de imagem válidos (JPG, PNG, WEBP).</small>
             </div>
-            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px;">
+            
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; flex-shrink: 0;">
                 <button type="button" id="cancelAddModalBtn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Cancelar Criação</button>
                 <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600;">Confirmar Criação</button>
             </div>
@@ -320,6 +332,84 @@ document.addEventListener('DOMContentLoaded', function() {
     if (closeBtn) closeBtn.addEventListener('click', closeAddModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeAddModal);
     if (addModal) addModal.addEventListener('click', function(e) { if (e.target === addModal) closeAddModal(); });
+
+    // ==========================================================
+    // LÓGICA DINÂMICA DE MÚLTIPLOS AUTORES SEM REPETIÇÃO
+    // ==========================================================
+    const containerAutores = document.getElementById('container-autores');
+    const btnAddAutor = document.getElementById('btn-add-autor-row');
+
+    function atualizarAutoresDisponiveis() {
+        const todosSelects = document.querySelectorAll('.select-autor-dinamico');
+        const valoresSelecionados = Array.from(todosSelects).map(s => s.value).filter(val => val !== "");
+
+        todosSelects.forEach(selectAtual => {
+            const opcoes = selectAtual.querySelectorAll('option');
+            opcoes.forEach(opcao => {
+                if (opcao.value !== "") {
+                    if (valoresSelecionados.includes(opcao.value) && selectAtual.value !== opcao.value) {
+                        opcao.disabled = true;
+                        opcao.style.display = 'none';
+                    } else {
+                        opcao.disabled = false;
+                        opcao.style.display = 'block';
+                    }
+                }
+            });
+        });
+    }
+
+    if(containerAutores) {
+        containerAutores.addEventListener('change', function(e) {
+            if (e.target.classList.contains('select-autor-dinamico')) {
+                atualizarAutoresDisponiveis();
+            }
+        });
+    }
+
+    if (btnAddAutor) {
+        btnAddAutor.addEventListener('click', function() {
+            const todosSelects = document.querySelectorAll('.select-autor-dinamico');
+            if (todosSelects[todosSelects.length - 1].value === "") {
+                alert("Por favor, selecione o autor na linha anterior antes de adicionar um novo.");
+                return;
+            }
+
+            const primeiroSelect = document.querySelector('.select-autor-dinamico');
+            const novaLinha = document.createElement('div');
+            novaLinha.style.display = 'flex';
+            novaLinha.style.gap = '6px';
+            novaLinha.style.alignItems = 'center';
+            novaLinha.style.marginTop = '8px';
+
+            const novoSelect = primeiroSelect.cloneNode(true);
+            novoSelect.value = ""; 
+            novoSelect.required = true;
+
+            const btnRemover = document.createElement('button');
+            btnRemover.type = 'button';
+            btnRemover.style.height = '45px';
+            btnRemover.style.width = '45px';
+            btnRemover.style.background = '#ef4444';
+            btnRemover.style.border = 'none';
+            btnRemover.style.borderRadius = '6px';
+            btnRemover.style.color = 'white';
+            btnRemover.style.fontSize = '1.2rem';
+            btnRemover.style.cursor = 'pointer';
+            btnRemover.innerText = '✕';
+
+            btnRemover.addEventListener('click', function() {
+                novaLinha.remove();
+                atualizarAutoresDisponiveis();
+            });
+
+            novaLinha.appendChild(novoSelect);
+            novaLinha.appendChild(btnRemover);
+            containerAutores.appendChild(novaLinha);
+
+            atualizarAutoresDisponiveis();
+        });
+    }
 
     // CONTROLO DO MODAL DE DETALHES
     const detailModal = document.getElementById('detailsCatalogModal');

@@ -9,14 +9,17 @@ if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $titulo        = trim($_POST['titulo'] ?? '');
-    $autor_id      = (int)($_POST['autor_id'] ?? 0); // Recebe o ID obrigatório selecionado
-    $cdu_codigo    = trim($_POST['cdu_codigo'] ?? ''); 
-    $estado        = trim($_POST['estado'] ?? 'disponivel');
-    $descricao     = trim($_POST['descricao'] ?? '');
-    $isbn          = trim($_POST['isbn'] ?? '');
-    $editora       = trim($_POST['editora'] ?? '');
-    $ano_edicao    = (int)($_POST['ano_edicao'] ?? 0);
+    $titulo         = trim($_POST['titulo'] ?? '');
+    
+    // Recebe o array de autores vindo do Select2 múltiplo
+    $autores_ids    = $_POST['autor_id'] ?? []; 
+    
+    $cdu_codigo     = trim($_POST['cdu_codigo'] ?? ''); 
+    $estado         = trim($_POST['estado'] ?? 'disponivel');
+    $descricao      = trim($_POST['descricao'] ?? '');
+    $isbn           = trim($_POST['isbn'] ?? '');
+    $editora        = trim($_POST['editora'] ?? '');
+    $ano_edicao     = (int)($_POST['ano_edicao'] ?? 0);
     
     $nome_imagem_bd = null;
     
@@ -41,11 +44,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $origem = $_SERVER['HTTP_REFERER'] ?? 'index.php';
 
-    // VALIDAÇÃO ESTRETA: Verifica se o autor_id é maior que 0 (ou seja, se foi selecionado)
-    if (empty($titulo) || $autor_id === 0 || empty($cdu_codigo) || empty($isbn) || empty($editora) || $ano_edicao === 0 || empty($descricao) || !$nome_imagem_bd) {
+    // TRATAMENTO DOS AUTORES: Garantir formato numérico, remover vazios e duplicados
+    if (is_array($autores_ids)) {
+        $autores_ids = array_map('intval', $autores_ids);
+        $autores_ids = array_filter($autores_ids, function($id) { return $id > 0; });
+        $autores_ids = array_unique($autores_ids); 
+    } else {
+        $autores_ids = [];
+    }
+
+    // VALIDAÇÃO: Verifica se pelo menos 1 autor foi selecionado e se os restantes campos estão preenchidos
+    if (empty($titulo) || empty($autores_ids) || empty($cdu_codigo) || empty($isbn) || empty($editora) || $ano_edicao === 0 || empty($descricao) || !$nome_imagem_bd) {
         $_SESSION['alerta'] = [
             'tipo' => 'erro',
-            'mensagem' => '❌ Erro: Seleção de Autor e todos os outros campos são obrigatórios!'
+            'mensagem' => '❌ Erro: Seleção de pelo menos um Autor e todos os outros campos são obrigatórios!'
         ];
         header("Location: " . $origem);
         exit;
@@ -54,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
-        // 1. Inserir o livro
+        // 1. Inserir o livro na tabela 'livros'
         $query_livro = "INSERT INTO livros (titulo, cdu_codigo, isbn, editora, ano_edicao, estado, descricao, imagem, imagem_url) 
                         VALUES (:titulo, :cdu, :isbn, :editora, :ano, :estado, :descricao, :imagem, :imagem_url)";
         
@@ -71,20 +83,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'imagem_url' => $nome_imagem_bd
         ]);
 
+        // Pega no ID do livro que acabou de ser criado
         $livro_id = $pdo->lastInsertId();
 
-        // 2. Criar o vínculo direto na tabela intermédia com o ID selecionado
+        // 2. Criar os múltiplos vínculos na tabela intermédia 'livro_autores'
         $stmt_vinculo = $pdo->prepare("INSERT INTO livro_autores (livro_id, autor_id) VALUES (:livro_id, :autor_id)");
-        $stmt_vinculo->execute([
-            'livro_id' => $livro_id,
-            'autor_id' => $autor_id
-        ]);
+        
+        foreach ($autores_ids as $autor_id) {
+            $stmt_vinculo->execute([
+                'livro_id' => $livro_id,
+                'autor_id' => $autor_id
+            ]);
+        }
 
         $pdo->commit();
 
         $_SESSION['alerta'] = [
             'tipo' => 'sucesso',
-            'mensagem' => '🎉 Livro adicionado e vinculado ao autor com sucesso!'
+            'mensagem' => '🎉 Livro adicionado e vinculado aos autores com sucesso!'
         ];
 
     } catch (PDOException $e) {
@@ -100,3 +116,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: " . $origem);
     exit;
 }
+?>
