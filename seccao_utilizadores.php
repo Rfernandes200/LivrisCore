@@ -23,19 +23,34 @@ try {
 }
 ?>
 
-<h1>Lista de Utilizadores</h1>
-<p class="admin-subtitle">Consulta de contas com acesso à biblioteca.</p>
-<button type="button" onclick="abrirModalAdicionarUtilizador()" style="background: #10b981; color: #ffffff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 20px; font-family: 'Inter', sans-serif;">
-    ➕ Novo Utilizador
-</button>
-<div class="admin-toolbar">
-    <form action="admin.php" method="GET" class="search-container-admin">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; width: 100%;">
+    <div>
+       <h1 style="font-size: 2.2rem; color: white; font-weight: 600; margin: 0; font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif;">Lista de Utilizadores</h1>
+        <p style="color: #64748b; margin: 8px 0 0 0; font-size: 1rem;">Consulta de contas com acesso à biblioteca.</p>
+    </div>
+
+    <button onclick="abrirModalAdicionarUtilizador()" style="background: #3b82f6; color: white; border: none; padding: 12px 22px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; font-size: 0.9rem; margin-top: 5px;">
+        <span style="font-size: 1.1rem; font-weight: bold;">+</span> Novo Utilizador
+    </button>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; width: 100%;">
+    
+    <form action="admin.php" method="GET" style="display: flex; align-items: center; gap: 10px; margin: 0;">
         <input type="hidden" name="seccao" value="utilizadores">
-        <span class="search-icon-admin">🔍</span>
-        <input type="text" name="q" class="search-input-admin" placeholder="Pesquisar por username ou nome..." value="<?= htmlspecialchars($pesquisa) ?>">
+        
+        <div style="position: relative; width: 300px;">
+            <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 0.9rem;">🔍</span>
+            <input type="text" name="q" placeholder="Pesquisar por username ou nome..." value="<?= htmlspecialchars($pesquisa) ?>" style="width: 100%; background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); padding: 12px 14px 12px 38px; border-radius: 6px; color: white; font-size: 0.9rem; outline: none; transition: border-color 0.2s;">
+        </div>
+        
+        <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: background 0.2s;">
+            Filtrar
+        </button>
     </form>
-    <div class="counter-badge">
-        <span><?= count($utilizadores); ?> utilizador(s) encontrado(s)</span>
+
+    <div style="color: #64748b; font-size: 0.9rem; font-weight: 500;">
+        <span><?= count($utilizadores); ?> utilizador(es) encontrado(s)</span>
     </div>
 </div>
 
@@ -90,16 +105,16 @@ try {
                         <td style="text-align: center;">
                             <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
                               <button type="button" 
-                                      class="btn-edit-trigger"
-                                      onclick="abrirModalEditar(this)" 
-                                      data-id="<?= $u['id']; ?>" 
-                                      data-nome="<?= htmlspecialchars($u['nome']); ?>" 
-                                      data-email="<?= htmlspecialchars($u['email']); ?>" 
-                                      data-telemovel="<?= htmlspecialchars($u['telemovel'] ?? ''); ?>" 
-                                      data-tipo="<?= $isAdmin ? 'admin' : 'user'; ?>" 
-                                      data-ativo="<?= $u['ativo']; ?>" 
-                                      data-self="<?= $eProprioAdmin ? 'true' : 'false'; ?>">
-                                  ✏️ Editar
+                                onclick="abrirModalEditar(this)" 
+                                data-id="<?= $u['id']; ?>" 
+                                data-nome="<?= htmlspecialchars($u['nome']); ?>" 
+                                data-email="<?= htmlspecialchars($u['email']); ?>" 
+                                data-telemovel="<?= htmlspecialchars($u['telemovel'] ?? ''); ?>" 
+                                data-tipo="<?= $isAdmin ? 'admin' : 'user'; ?>" 
+                                data-ativo="<?= $u['ativo']; ?>" 
+                                data-self="<?= $eProprioAdmin ? 'true' : 'false'; ?>"
+                                style="background: #3b82f6; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; transition: background 0.2s;">
+                                Editar
                               </button>
 
                                 <?php if (!$eProprioAdmin): ?>
