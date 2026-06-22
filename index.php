@@ -15,17 +15,35 @@ if ($id_logado) {
     }
 }
 
-// 1. Consulta Atualizada: foca na tabela 'livros', traz a classe CDU e agrega os múltiplos autores (N:N)
+// CAPTURAR TERMO DE PESQUISA (Para a barra de filtros de todos os utilizadores)
+$pesquisa = isset($_GET['pesquisa']) ? trim($_GET['pesquisa']) : '';
+
+// 1. Consulta Atualizada com suporte a Filtro/Pesquisa
 $query = "SELECT livros.*, cdu_classes.descricao as cdu_nome, reservas.utilizador_id as quem_reservou,
                  GROUP_CONCAT(autores.nome SEPARATOR ', ') as autor_artista
           FROM livros 
           LEFT JOIN cdu_classes ON livros.cdu_codigo = cdu_classes.codigo
           LEFT JOIN livro_autores ON livros.id = livro_autores.livro_id
           LEFT JOIN autores ON livro_autores.autor_id = autores.id
-          LEFT JOIN reservas ON livros.id = reservas.livro_id AND reservas.status = 'pendente'
-          GROUP BY livros.id";
-$stmt = $pdo->query($query);
-$itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+          LEFT JOIN reservas ON livros.id = reservas.livro_id AND reservas.status = 'pendente'";
+
+// Se houver pesquisa, adicionamos as condições adequadas
+if (!empty($pesquisa)) {
+    // Usamos HAVING para conseguir pesquisar também pelo resultado gerado no GROUP_CONCAT (autor_artista)
+    $query .= " GROUP BY livros.id 
+                HAVING livros.titulo LIKE :pesquisa 
+                OR autor_artista LIKE :pesquisa 
+                OR livros.isbn LIKE :pesquisa
+                ORDER BY livros.id DESC";
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute(['pesquisa' => "%$pesquisa%"]);
+    $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    // Sem pesquisa ativa, roda a listagem padrão
+    $query .= " GROUP BY livros.id ORDER BY livros.id DESC";
+    $itens = $pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
+}
 
 // 2. Procurar as classes CDU na Base de Dados para preencher o Select do Pop-up
 $cdu_classes = [];
@@ -79,18 +97,45 @@ try {
     </div>
 </header>
 
+
 <main class="catalog-container" style="margin-top: 40px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 0 10px;">
-        <h2 class="section-title" style="margin: 0;">Catálogo de Livros</h2>
+    
+    <div style="margin-bottom: 20px; padding: 0 10px; width: 100%;">
+        <h2 class="section-title" style="margin: 0; font-family: 'Playfair Display', 'Georgia', serif; font-size: 2.2rem; color: black;">Catálogo de Livros</h2>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 35px; padding: 0 10px; width: 100%; flex-wrap: wrap;">
         
+        <form method="GET" action="index.php" style="display: flex; align-items: center; gap: 12px; margin: 0; flex: 1; max-width: 580px;">
+            
+            <div style="position: relative; width: 100%;">
+                <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 1.1rem;">🔍</span>
+                <input type="text" 
+                       name="pesquisa" 
+                       value="<?= htmlspecialchars($pesquisa) ?>" 
+                       placeholder="Pesquisar por título, autor ou ISBN..." 
+                       style="width: 100%; background: #0f172a; border: 1px solid #1e293b; color: white; padding: 13px 16px 13px 44px; border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.2s; box-sizing: border-box;"
+                       onfocus="this.style.borderColor='#3b82f6'" 
+                       onblur="this.style.borderColor='#1e293b'">
+            </div>
+
+            <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 13px 28px; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                Filtrar
+            </button>
+            
+            <?php if (!empty($pesquisa)): ?>
+                <a href="index.php" style="color: #64748b; font-size: 0.9rem; text-decoration: none; margin-left: 5px; white-space: nowrap;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#64748b'">Limpar</a>
+            <?php endif; ?>
+        </form>
+
         <?php if (isset($_SESSION['utilizador_tipo']) && ((int)$_SESSION['utilizador_tipo'] === 1 || $_SESSION['utilizador_tipo'] === 'admin')): ?>
-            <button type="button" class="btn-add-catalog" id="openAddCatalogBtn" style="background: #3b82f6; color: white;">
-                <svg viewBox="0 0 24 24" fill="white" style="width: 16px; height: 16px; margin-right: 5px;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <button type="button" class="btn-add-catalog" id="openAddCatalogBtn" style="background: #3b82f6; color: white; border: none; padding: 13px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 1rem; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                <svg viewBox="0 0 24 24" fill="white" style="width: 18px; height: 18px;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                 Adicionar Livro
             </button>
         <?php endif; ?>
     </div>
-    
+
     <div class="grid-itens">
         <?php foreach($itens as $item): 
             $itemImagem = !empty($item['imagem_url']) ? 'Uploads/'.$item['imagem_url'] : 'Images/default-cover.png';
@@ -99,15 +144,18 @@ try {
             $quemReservou = !empty($item['quem_reservou']) ? (int)$item['quem_reservou'] : null;
         ?>
         <div class="card">
-            <div class="card-header">
-                <span class="status-badge <?= $item['estado'] ?>" style="<?php 
+            <div class="card-header" style="position: relative; width: 100%; height: 220px; background: rgba(255, 255, 255, 0.03); display: flex; align-items: center; justify-content: center; overflow: hidden; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                
+                <span class="status-badge <?= $item['estado'] ?>" style="position: absolute; top: 12px; right: 12px; z-index: 10; <?php 
                     if($estadoLimpo === 'reservado') {
                         echo 'background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3);';
                     } ?>">
                     <?= strtoupper($item['estado']) ?>
                 </span>
-                <span class="category-icon">📖</span>
+                
+                <img src="<?= $itemImagem ?>" alt="Capa de <?= htmlspecialchars($item['titulo']) ?>" style="width: 100%; height: 100%; object-fit: contain; padding: 15px; filter: drop-shadow(0px 8px 16px rgba(0, 0, 0, 0.3));">
             </div>
+
             <div class="card-body">
                 <small class="category-label">CDU <?= htmlspecialchars($item['cdu_codigo']) ?></small>
                 <h3><?= htmlspecialchars($item['titulo']) ?></h3>
