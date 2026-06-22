@@ -15,6 +15,19 @@ if (!isset($_SESSION['utilizador_id'])) {
 $id_utilizador = (int)$_SESSION['utilizador_id'];
 $id_livro = isset($_POST['livro_id']) ? (int)$_POST['livro_id'] : 0;
 
+$stmt_check = $pdo->prepare("SELECT COUNT(*) FROM reservas WHERE utilizador_id = :user_id AND status = 'pendente'");
+$stmt_check->execute(['user_id' => $utilizador_id]);
+$total_reservas = (int)$stmt_check->fetchColumn();
+
+if ($total_reservas >= 2) {
+    $_SESSION['alerta'] = [
+        'tipo' => 'erro', 
+        'mensagem' => 'Atingiu o limite máximo de 2 reservas pendentes em simultâneo!'
+    ];
+    header("Location: index.php"); // Ou a página do teu catálogo
+    exit();
+}
+
 // Valida se o ID do livro é aceitável
 if ($id_livro <= 0) {
     $_SESSION['alerta'] = [

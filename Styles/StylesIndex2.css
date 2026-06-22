@@ -299,3 +299,501 @@
         border-color: #3b82f6 !important;
         background: rgba(30, 41, 59, 0.8) !important;
     }
+
+    /* ==========================================================================
+   1. DESIGN DOS CARDS (LIVROS)
+   ========================================================================== */
+    .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(59, 130, 246, 0.25);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-header {
+        padding: 16px 20px 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-body {
+        padding: 16px 20px 20px 20px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .category-label {
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: var(--azul-principal);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+
+    .card-body h3 {
+        font-size: 1.15rem;
+        color: #ffffff;
+        margin: 0 0 6px 0;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    .author-text {
+        font-size: 0.85rem;
+        color: var(--texto-escuro);
+        margin: 0 0 20px 0;
+    }
+
+    .category-icon {
+        font-size: 1.1rem;
+        opacity: 0.7;
+    }
+
+    /* ==========================================================================
+   2. BADGES DE ESTADO (DISPONÍVEL, RESERVADO, INDISPONÍVEL)
+   ========================================================================== */
+    .status-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        padding: 4px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+    }
+
+    .status-badge.disponivel {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--verde-sucesso);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-badge.reservado {
+        background: rgba(234, 179, 8, 0.15);
+        color: var(--amarelo-alerta);
+        border: 1px solid rgba(234, 179, 8, 0.3);
+    }
+
+    .status-badge.indisponivel {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--vermelho-erro);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* ==========================================================================
+   3. BOTÕES E COMPONENTES DE AÇÃO DOS CARDS
+   ========================================================================== */
+    .card-footer {
+        margin-top: auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.04);
+        padding-top: 16px;
+    }
+
+    .btn-details,
+    .btn-action,
+    .btn-disabled {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 9px 12px;
+        border-radius: 6px;
+        transition: all 0.15s ease;
+        text-align: center;
+        box-sizing: border-box;
+        text-decoration: none;
+    }
+
+    .btn-details {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--texto-claro);
+        cursor: pointer;
+    }
+
+    .btn-details:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+    }
+
+    .btn-action {
+        background: var(--azul-principal);
+        border: none;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-action:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+    }
+
+    .btn-disabled {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        color: #475569;
+        cursor: not-allowed;
+    }
+
+    /* Variações específicas de botões extraídos do PHP */
+    .btn-limit-reached {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        font-size: 0.8rem;
+        padding: 8px 12px;
+    }
+
+    .btn-state-reserved {
+        background: rgba(234, 179, 8, 0.1);
+        color: #eab308;
+        border: 1px solid rgba(234, 179, 8, 0.2);
+    }
+
+    .btn-cancel {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-cancel:hover {
+        background: #dc2626;
+    }
+
+    .form-inline {
+        margin: 0;
+        display: inline;
+    }
+
+    /* ==========================================================================
+   4. SISTEMA COMPLETO DE JANELAS MODAIS (POPUPS)
+   ========================================================================== */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(11, 15, 25, 0.95);
+        backdrop-filter: blur(8px);
+        z-index: 99999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .modal-container {
+        background: #0b0f19;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        overflow: hidden;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .max-w-650 {
+        max-width: 650px;
+    }
+
+    .max-w-600 {
+        max-width: 600px;
+    }
+
+    .modal-header {
+        padding: 20px 28px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(30, 41, 59, 0.2);
+    }
+
+    .modal-subtitle-tag {
+        font-size: 0.7rem;
+        color: #3b82f6;
+        letter-spacing: 0.15em;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+        text-align: left;
+    }
+
+    .modal-title {
+        font-size: 1.4rem;
+        color: white;
+        font-weight: 600;
+        margin: 0;
+        text-align: left;
+    }
+
+    .modal-close-x {
+        background: transparent;
+        border: none;
+        color: #64748b;
+        font-size: 1.8rem;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    /* Estrutura interna da modal de detalhes */
+    .modal-body-layout {
+        padding: 28px;
+        display: flex;
+        gap: 24px;
+        box-sizing: border-box;
+    }
+
+    .modal-aside-cover {
+        flex-shrink: 0;
+    }
+
+    .modal-cover-img {
+        width: 140px;
+        height: 190px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .modal-main-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        text-align: left;
+    }
+
+    .modal-grid-2col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .modal-grid-3col {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+    }
+
+    .modal-label {
+        font-size: 0.65rem;
+        color: #64748b;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .modal-value-text {
+        color: #cbd5e1;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    .modal-badge-dynamic {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    .modal-synopsis-text {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin: 0;
+        max-height: 100px;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+
+    .modal-creator-footer {
+        margin-top: auto;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .modal-creator-footer strong {
+        color: #60a5fa;
+    }
+
+    .modal-footer {
+        padding: 16px 28px;
+        background: rgba(11, 15, 25, 0.4);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-modal-close {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #cbd5e1;
+        padding: 8px 18px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Estrutura interna da modal de criação (Formulários) */
+    .modal-form-wrapper {
+        padding: 28px;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        text-align: left;
+    }
+
+    .modal-field {
+        background: #060913;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        color: white;
+        padding: 10px 14px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.2s ease;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .modal-field:focus {
+        border-color: var(--azul-principal);
+    }
+
+    .modal-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 25px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 20px;
+    }
+
+    .btn-modal-cancel {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #cbd5e1;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .btn-modal-submit {
+        background: #3b82f6;
+        border: none;
+        color: white;
+        padding: 10px 22px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    /* Classes utilitárias auxiliares */
+    .m-b-20 {
+        margin-bottom: 20px;
+    }
+
+    .m-b-2 {
+        margin-bottom: 2px;
+    }
+
+    .h-45 {
+        height: 45px;
+    }
+
+    .bg-dark {
+        background: #0b0f19;
+    }
+
+    .text-white {
+        color: white;
+    }
+
+    .resize-v {
+        resize: vertical;
+    }
+
+    .p-file {
+        padding: 8px 10px !important;
+    }
+
+    .input-help-text {
+        color: #64748b;
+        font-size: 0.75rem;
+        margin-top: 4px;
+        display: block;
+    }
+
+    /* ==========================================================================
+   5. SISTEMA DE TOAST NOTIFICATION (POPUP DE ALERTAS)
+   ========================================================================== */
+    .alert-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        transform: translateX(120%);
+        background: #0b0f19;
+        padding: 14px 24px;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        z-index: 999999;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        pointer-events: none;
+    }
+
+    .alert-toast.show {
+        transform: translateX(0);
+    }
+
+    .alert-toast.sucesso {
+        border-left: 4px solid var(--verde-sucesso);
+        color: #a7f3d0;
+    }
+
+    .alert-toast.erro {
+        border-left: 4px solid var(--vermelho-erro);
+        color: #fca5a5;
+    }
+
+    .alert-toast.aviso {
+        border-left: 4px solid var(--amarelo-alerta);
+        color: #fef08a;
+    }

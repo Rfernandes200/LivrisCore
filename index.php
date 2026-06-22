@@ -5,6 +5,16 @@ require 'config.php';
 // Pegar o ID do utilizador logado (caso exista sessão) para usar na comparação dos botões
 $id_logado = isset($_SESSION['utilizador_id']) ? (int)$_SESSION['utilizador_id'] : null;
 
+// REGRA DO MÁXIMO DE 2 RESERVAS: Verificar se o utilizador já atingiu o limite máximo de reservas pendentes
+$bloqueado_por_limite = false;
+if ($id_logado) {
+    $stmt_limite = $pdo->prepare("SELECT COUNT(*) FROM reservas WHERE utilizador_id = :user_id AND status = 'pendente'");
+    $stmt_limite->execute(['user_id' => $id_logado]);
+    if ((int)$stmt_limite->fetchColumn() >= 2) {
+        $bloqueado_por_limite = true;
+    }
+}
+
 // 1. Consulta Atualizada: foca na tabela 'livros', traz a classe CDU e agrega os múltiplos autores (N:N)
 $query = "SELECT livros.*, cdu_classes.descricao as cdu_nome, reservas.utilizador_id as quem_reservou,
                  GROUP_CONCAT(autores.nome SEPARATOR ', ') as autor_artista
@@ -23,7 +33,16 @@ try {
     $stmt_cdu = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER BY codigo ASC");
     $cdu_classes = $stmt_cdu->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    // Falha silenciosa caso a tabela ainda não exista
+    // Falha silenciosa
+}
+
+// 3. Procurar os autores na Base de Dados para preencher o Select do Pop-up (NOVO)
+$todos_autores = [];
+try {
+    $stmt_autores = $pdo->query("SELECT id, nome FROM autores ORDER BY nome ASC");
+    $todos_autores = $stmt_autores->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // Falha silenciosa
 }
 ?>
 
@@ -46,29 +65,6 @@ try {
     <?php unset($_SESSION['alerta']); ?>
 <?php endif; ?>
 
-<?php if (isset($_SESSION['reserva_sucesso_codigo'])): ?>
-<div id="codeSuccessModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 100000; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
-    <div style="background: #0b0f19; border: 1px solid rgba(16, 185, 129, 0.3); width: 100%; max-width: 420px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); text-align: center; font-family: 'Inter', sans-serif; padding: 30px;">
-        <span style="font-size: 3rem;">🎉</span>
-        <h2 style="color: white; font-size: 1.5rem; margin-top: 10px; margin-bottom: 5px;">Reserva Confirmada!</h2>
-        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 25px;">Apresente o código abaixo ao funcionário para levantar o seu livro.</p>
-        
-        <div style="background: rgba(16, 185, 129, 0.1); border: 2px dashed #10b981; color: #10b981; font-size: 2.5rem; font-weight: 700; letter-spacing: 5px; padding: 15px; border-radius: 8px; display: inline-block; margin-bottom: 25px; font-variant-numeric: tabular-nums;">
-            <?= $_SESSION['reserva_sucesso_codigo']; ?>
-        </div>
-        
-        <p style="color: #eab308; font-size: 0.8rem; font-weight: 500; margin-bottom: 20px;">
-            ⚠️ Atenção: Este código expira em exatamente 4 horas!
-        </p>
-        
-        <button type="button" id="closeCodeModalBtn" style="background: #10b981; border: none; color: #0f172a; font-weight: 600; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; width: 100%;">
-            Guardei o Código, Fechar
-        </button>
-    </div>
-</div>
-<?php unset($_SESSION['reserva_sucesso_codigo']); ?>
-<?php endif; ?>
-
 <header>
     <?php require 'navbar.php'; ?>
 
@@ -88,8 +84,8 @@ try {
         <h2 class="section-title" style="margin: 0;">Catálogo de Livros</h2>
         
         <?php if (isset($_SESSION['utilizador_tipo']) && ((int)$_SESSION['utilizador_tipo'] === 1 || $_SESSION['utilizador_tipo'] === 'admin')): ?>
-            <button type="button" class="btn-add-catalog" id="openAddCatalogBtn">
-                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <button type="button" class="btn-add-catalog" id="openAddCatalogBtn" style="background: #3b82f6; color: white;">
+                <svg viewBox="0 0 24 24" fill="white" style="width: 16px; height: 16px; margin-right: 5px;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                 Adicionar Livro
             </button>
         <?php endif; ?>
@@ -115,12 +111,12 @@ try {
             <div class="card-body">
                 <small class="category-label">CDU <?= htmlspecialchars($item['cdu_codigo']) ?></small>
                 <h3><?= htmlspecialchars($item['titulo']) ?></h3>
-                <p class="author-text"><?= htmlspecialchars($item['autor_artista']) ?></p>
+                <p class="author-text"><?= htmlspecialchars($item['autor_artista'] ?? 'Autor Não Associado') ?></p>
                 
                 <div class="card-footer">
                     <button type="button" class="btn-details js-open-details" 
                             data-titulo="<?= htmlspecialchars($item['titulo']) ?>"
-                            data-autor="<?= htmlspecialchars($item['autor_artista']) ?>"
+                            data-autor="<?= htmlspecialchars($item['autor_artista'] ?? 'Não Associado') ?>"
                             data-cdu="CDU <?= htmlspecialchars($item['cdu_codigo']) ?> - <?= htmlspecialchars($item['cdu_nome']) ?>"
                             data-isbn="<?= htmlspecialchars($item['isbn']) ?>"
                             data-editora="<?= htmlspecialchars($item['editora']) ?>"
@@ -133,12 +129,18 @@ try {
                     </button>
 
                     <?php if($estadoLimpo === 'disponivel'): ?>
-                        <button type="button" class="btn-action js-open-reserve" 
-                                data-id="<?= $item['id'] ?>" 
-                                data-titulo="<?= htmlspecialchars($item['titulo']) ?>"
-                                style="border:none; cursor:pointer;">
-                            Reservar
-                        </button>
+                        <?php if ($bloqueado_por_limite): ?>
+                            <button disabled class="btn-disabled" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); cursor: not-allowed; font-size: 0.8rem; padding: 8px 12px; border-radius: 6px;" title="Atingiu o limite de 2 reservas pendentes.">
+                                Limite Atingido
+                            </button>
+                        <?php else: ?>
+                            <button type="button" class="btn-action js-open-reserve" 
+                                    data-id="<?= $item['id'] ?>" 
+                                    data-titulo="<?= htmlspecialchars($item['titulo']) ?>"
+                                    style="border:none; cursor:pointer;">
+                                Reservar
+                            </button>
+                        <?php endif; ?>
                     <?php elseif($estadoLimpo === 'reservado'): ?>
                         <?php if($id_logado && $id_logado === $quemReservou): ?>
                             <form action="cancela_reserva.php" method="POST" style="margin:0; display:inline;">
@@ -232,8 +234,15 @@ try {
                     <input type="text" name="titulo" class="modal-field" placeholder="Ex: Os Maias" required>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">AUTOR(ES) * <small style="color:#64748b;">(Separados por vírgula)</small></label>
-                    <input type="text" name="autor_artista" class="modal-field" placeholder="Ex: Eça de Queirós" required>
+                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">AUTOR DO LIVRO *</label>
+                    <select name="autor_id" class="modal-field" required style="height: 45px;">
+                        <option value="" disabled selected style="background:#0b0f19;">Selecione um Autor...</option>
+                        <?php foreach($todos_autores as $autor): ?>
+                            <option value="<?= $autor['id']; ?>" style="background:#0b0f19; color:white;">
+                                <?= htmlspecialchars($autor['nome']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             </div>
             
@@ -291,45 +300,10 @@ try {
     </div>
 </div>
 
-<div id="reserveCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
-    <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 450px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
-        <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
-            <div>
-                <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ SOLICITAR RESERVA ]</span>
-                <h2 id="txtReserveTitulo" style="font-size: 1.2rem; color: white; font-weight: 600; margin: 0; text-align: left;">Reservar Livro</h2>
-            </div>
-            <button type="button" id="closeReserveModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
-        </div>
-
-        <form action="processo_reserva.php" method="POST" style="padding: 24px; margin: 0; box-sizing: border-box; text-align: left;">
-            <input type="hidden" name="livro_id" id="formReserveItemId">
-
-            <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin: 0; margin-bottom: 15px;">
-                Deseja confirmar a reserva imediata deste livro? 
-            </p>
-            <p style="color: #eab308; background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.2); padding: 10px; border-radius: 6px; font-size: 0.8rem; line-height: 1.4; margin: 0;">
-                ℹ️ Após confirmar, será gerado um **código de levantamento**. Terá um prazo máximo de **4 horas** para levantar o livro na biblioteca.
-            </p>
-
-            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; margin-top: 25px;">
-                <button type="button" id="cancelReserveModalBtn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">Cancelar</button>
-                <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">Confirmar Reserva</button>
-            </div>
-        </form>
-    </div>
-</div>
+<?php require 'index_reservas.php'; ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // CONTROLO DO POP-UP DO CÓDIGO GERADO
-    const codeModal = document.getElementById('codeSuccessModal');
-    const closeCodeBtn = document.getElementById('closeCodeModalBtn');
-    if (codeModal && closeCodeBtn) {
-        closeCodeBtn.addEventListener('click', function() {
-            codeModal.style.display = 'none';
-        });
-    }
-
     // CONTROLO DO MODAL DE ADICIONAR LIVRO
     const addModal = document.getElementById('addCatalogModal');
     const openBtn = document.getElementById('openAddCatalogBtn');
@@ -386,29 +360,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (closeDetailBtn) closeDetailBtn.addEventListener('click', closeDetailModal);
     if (cancelDetailBtn) cancelDetailBtn.addEventListener('click', closeDetailModal);
     if (detailModal) detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeDetailModal(); });
-
-    // CONTROLO DO POP-UP DE RESERVA
-    const reserveModal = document.getElementById('reserveCatalogModal');
-    const closeReserveBtn = document.getElementById('closeReserveModalBtn');
-    const cancelReserveBtn = document.getElementById('cancelReserveModalBtn');
-
-    document.querySelectorAll('.js-open-reserve').forEach(element => {
-        element.addEventListener('click', function(e) {
-            e.preventDefault(); 
-            const id = this.dataset.id;
-            const titulo = this.dataset.titulo;
-
-            document.getElementById('formReserveItemId').value = id;
-            document.getElementById('txtReserveTitulo').innerText = 'Reservar: ' + titulo;
-
-            reserveModal.style.display = 'flex';
-        });
-    });
-
-    const closeReserveModal = () => { reserveModal.style.display = 'none'; };
-    if (closeReserveBtn) closeReserveBtn.addEventListener('click', closeReserveModal);
-    if (cancelReserveBtn) cancelReserveBtn.addEventListener('click', closeReserveModal);
-    if (reserveModal) reserveModal.addEventListener('click', function(e) { if (e.target === reserveModal) closeReserveModal(); });
 
     // TOAST ALERT
     const toast = document.getElementById('toastAlert');

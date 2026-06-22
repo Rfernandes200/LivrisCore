@@ -630,3 +630,150 @@ header {
     background: #2563eb;
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
+
+/* ==========================================================================
+   1. VARIABLES, RESET & GLOBAL STYLES
+   ========================================================================== */
+:root {
+    --bg-principal: #0b0f19;
+    --bg-card: rgba(30, 41, 59, 0.2);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --texto-claro: #cbd5e1;
+    --texto-escuro: #64748b;
+    --azul-principal: #3b82f6;
+    --verde-sucesso: #10b981;
+    --amarelo-alerta: #eab308;
+    --vermelho-erro: #ef4444;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #060913;
+    color: var(--texto-claro);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   2. HERO SECTION (CABEÇALHO)
+   ========================================================================== */
+header {
+    background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 60%),
+        radial-gradient(circle at top left, rgba(15, 23, 42, 0.95), var(--bg-principal));
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 40px;
+}
+
+.hero-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px 20px 20px;
+}
+
+.hero-text {
+    max-width: 600px;
+}
+
+.hero-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--azul-principal);
+    margin-bottom: 12px;
+}
+
+.hero-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 400;
+    line-height: 1.15;
+    color: #ffffff;
+    margin: 0 0 16px 0;
+}
+
+.hero-text h1 span {
+    font-style: italic;
+    color: var(--azul-principal);
+}
+
+.hero-subtitle {
+    font-size: 1.05rem;
+    color: var(--texto-escuro);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ==========================================================================
+   3. ESTRUTURA DO CATÁLOGO E GRELHA (GRID)
+   ========================================================================== */
+.catalog-container {
+    max-width: 1200px;
+    margin: 40px auto 80px auto;
+    padding: 0 20px;
+}
+
+.catalog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 0 10px;
+}
+
+.section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: #ffffff;
+    margin: 0;
+}
+
+.grid-itens {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+}
+
+/* Botão Superior para Adicionar no Catálogo */
+.btn-add-catalog {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.btn-add-catalog:hover {
+    background: #2563eb;
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-add-catalog svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+}
+
+/* Rodapé */
+footer {
+    border-top: 1px solid var(--border-color);
+    padding: 30px 20px;
+    text-align: center;
+    background: var(--bg-principal);
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--texto-escuro);
+}
