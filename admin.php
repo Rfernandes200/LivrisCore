@@ -10,6 +10,44 @@ if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !
 
 $id_admin_atual = $_SESSION['utilizador_id'] ?? null; 
 
+// ==========================================
+// PROCESSAMENTO EXTRA: CANCELAR RESERVA (ADMIN)
+// ==========================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_admin']) && $_POST['acao_admin'] === 'cancelar_reserva_admin') {
+    $reserva_id = (int)$_POST['reserva_id'];
+    
+    try {
+        $pdo->beginTransaction();
+        
+        // 1. Procurar o livro correspondente à reserva antes de a apagar
+        $stmt = $pdo->prepare("SELECT livro_id FROM reservas WHERE id = :id AND status = 'pendente'");
+        $stmt->execute(['id' => $reserva_id]);
+        $reserva = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($reserva) {
+            // 2. Colocar o livro novamente como 'disponivel'
+            $stmt_livro = $pdo->prepare("UPDATE livros SET estado = 'disponivel' WHERE id = :livro_id");
+            $stmt_livro->execute(['livro_id' => $reserva['livro_id']]);
+            
+            // 3. Eliminar o registo da reserva pendente
+            $stmt_del = $pdo->prepare("DELETE FROM reservas WHERE id = :id");
+            $stmt_del->execute(['id' => $reserva_id]);
+            
+            $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'A reserva #' . $reserva_id . ' foi cancelada administrativamente e o livro está novamente disponível.'];
+        } else {
+            $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'A reserva não foi encontrada ou já foi processada.'];
+        }
+        
+        $pdo->commit();
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Erro ao processar o cancelamento: ' . $e->getMessage()];
+    }
+    
+    header("Location: admin.php?seccao=reservas");
+    exit();
+}
+
 // Determinar qual secção mostrar (Geral por defeito)
 $seccao = $_GET['seccao'] ?? 'geral';
 
@@ -24,7 +62,7 @@ $todas_categorias = [];
 $todos_autores = [];
 
 try {
-    // 1. Conta os utilizadores diretamente da tabela
+    // 1. Conta os utilizadores
     $stmt_users = $pdo->query("SELECT COUNT(*) FROM utilizadores");
     $total_utilizadores = $stmt_users->fetchColumn();
 
@@ -32,12 +70,9 @@ try {
     $stmt_itens = $pdo->query("SELECT COUNT(*) FROM livros");
     $total_artigos = $stmt_itens->fetchColumn();
 
-    // 3. Conta as reservas pendentes/ativas diretamente da tabela reservas
+    // 3. Conta as reservas pendentes
     $stmt_res_count = $pdo->query("SELECT COUNT(*) FROM reservas WHERE status = 'pendente'");
     $total_reservas = $stmt_res_count->fetchColumn();
-
-    // LÓGICA DA SECÇÃO UTILIZADORES
-    
 
     // LÓGICA DA SECÇÃO RESERVAS
     if ($seccao === 'reservas') {
@@ -50,8 +85,11 @@ try {
         $reservas = $pdo->query($sql_reservas)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // LÓGICA DA SECÇÃO ARTIGOS
-    
+    // CORREÇÃO: Carregar tabelas mapeadas corretamente do diagrama da image_7f23a9.jpg
+    if ($seccao === 'artigos' || $seccao === 'geral') {
+        $todos_autores = $pdo->query("SELECT id, nome FROM autores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+        $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER BY codigo ASC")->fetchAll(PDO::FETCH_ASSOC);
+    }
 
 } catch (PDOException $e) {
     die("Erro na Base de Dados: " . $e->getMessage());
@@ -103,7 +141,6 @@ try {
 
             <?php elseif ($seccao === 'utilizadores'): ?>
                <?php include 'seccao_utilizadores.php'; ?>
-                </div>
 
             <?php elseif ($seccao === 'reservas'): ?>
                 <h1>Controlo de Reservas Ativas</h1>
@@ -119,12 +156,13 @@ try {
                                 <th>Data de Início</th>
                                 <th>Data Limite</th>
                                 <th>Estado</th>
+                                <th style="text-align: center; width: 150px;">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($reservas)): ?>
                                 <tr>
-                                    <td colspan="6" style="text-align: center; color: #64748b; padding: 40px;">📅 Não existem reservas ativas no sistema de momento.</td>
+                                    <td colspan="7" style="text-align: center; color: #64748b; padding: 40px;">📅 Não existem reservas ativas no sistema de momento.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($reservas as $res): ?>
@@ -141,6 +179,15 @@ try {
                                                 <?= htmlspecialchars($res['status']); ?>
                                             </span>
                                         </td>
+                                        <td style="text-align: center;">
+                                            <form action="admin.php" method="POST" onsubmit="return confirm('Tem a certeza que deseja cancelar esta reserva administrativamente?');" style="margin: 0;">
+                                                <input type="hidden" name="acao_admin" value="cancelar_reserva_admin">
+                                                <input type="hidden" name="reserva_id" value="<?= $res['id']; ?>">
+                                                <button type="submit" class="btn-cancelar-reserva" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                                                    ❌ Cancelar
+                                                </button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -149,8 +196,7 @@ try {
                 </div>
 
             <?php elseif ($seccao === 'emprestimos'): ?>
-                <h1>Empréstimos Ativos</h1>
-                <p class="admin-subtitle">Histórico e devoluções dentro do prazo.</p>
+                <?php include 'seccao_emprestimos.php'; ?>
 
             <?php elseif ($seccao === 'artigos'): ?>
                 <?php include 'seccao_artigos.php'; ?>

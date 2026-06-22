@@ -1,3 +1,9 @@
+/* --- Este estilo apesar do nome admin.css está aser usado tambem nos ficheiro de
+emprestimos por ter alguns atributos utilizados no emprestimo
+e tambem podem existir classes não utilizadas em nenhuma parte do projeto por causa
+das alterações ao longo do tempo
+--- */
+
 .admin-container {
     display: flex;
     min-height: 100vh;
@@ -581,4 +587,355 @@
 .btn-edit-trigger:hover {
     background: #ffffff;
     color: white;
+}
+
+/* ==========================================================================
+   TABELA GESTÃO DE EMPRÉSTIMOS (REPLICANDO O DESIGN DO TEU PAINEL)
+   ========================================================================== */
+.admin-table-container {
+    background-color: #0b1120;
+    /* Fundo escuro do teu painel */
+    border-radius: 8px;
+    padding: 10px;
+    overflow-x: auto;
+}
+
+.admin-custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+    background-color: #0b1120;
+}
+
+/* Cabeçalho da Tabela */
+.admin-custom-table th {
+    color: #64748b;
+    /* Texto cinza suave dos headers */
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 16px 12px;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: left;
+}
+
+/* Linhas e Células */
+.admin-custom-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    vertical-align: middle;
+    color: #cbd5e1;
+}
+
+.admin-custom-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.01);
+}
+
+/* Colunas Específicas */
+.col-id {
+    color: #3b82f6 !important;
+    /* ID azul destacado */
+    font-weight: 600;
+    font-size: 0.9rem;
+    width: 50px;
+}
+
+.col-capa {
+    width: 60px;
+}
+
+.table-book-cover {
+    width: 42px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Tipografia das Células */
+.cell-flex-column {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.table-main-title {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.table-main-text {
+    color: #cbd5e1;
+    font-size: 0.9rem;
+}
+
+.table-sub-detail {
+    color: #475569;
+    /* Azul acinzentado escuro para o ISBN/Emails */
+    font-size: 0.8rem;
+}
+
+/* Badges Dinâmicos (Idênticos aos da tua imagem) */
+.table-status-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.table-status-badge.badge-disponivel {
+    background-color: rgba(16, 185, 129, 0.06);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.table-status-badge.badge-indisponivel {
+    background-color: rgba(239, 68, 68, 0.06);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Grupo de Ações e Botões */
+.table-actions-flex {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn-action-icon {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s ease;
+}
+
+.btn-devolver {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.btn-devolver:hover {
+    background-color: #3b82f6;
+    color: #ffffff;
+}
+
+.btn-renovar {
+    background-color: rgba(234, 179, 8, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(234, 179, 8, 0.2);
+}
+
+.btn-renovar:hover {
+    background-color: #eab308;
+    color: #ffffff;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.form-inline {
+    display: inline;
+    margin: 0;
+}
+
+.empty-state-dark {
+    text-align: center;
+    padding: 40px;
+    color: #475569;
+}
+
+.col-capa {
+    width: 60px;
+    max-width: 600px;
+}
+
+.table-book-cover {
+    width: 42px !important;
+    height: 56px !important;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    display: block;
+}
+
+/* ==========================================================================
+   ESTILO PADRONIZADO DO PAINEL DE ADMINISTRAÇÃO (LIVROS & EMPRÉSTIMOS)
+   ========================================================================== */
+.admin-table-container {
+    background-color: #0c1322;
+    /* Fundo idêntico ao das tuas imagens */
+    padding: 10px;
+    width: 100%;
+}
+
+.admin-custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Headers do teu painel original */
+.admin-custom-table th {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 20px 16px;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Linhas e Células */
+.admin-custom-table td {
+    padding: 20px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    vertical-align: middle;
+}
+
+/* IDs acinzentados (#6, #5) */
+.col-id {
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.9rem;
+    width: 50px;
+}
+
+/* Tamanho exato das miniaturas de capa */
+.col-capa {
+    width: 70px;
+}
+
+.table-book-cover {
+    width: 44px;
+    height: 54px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* Tipografia */
+.cell-flex-column {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.table-main-title {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.table-main-text {
+    color: #cbd5e1;
+    font-size: 0.9rem;
+}
+
+.table-sub-detail {
+    color: #475569;
+    font-size: 0.8rem;
+}
+
+/* Badges de Estado (Idênticos ao DISPONÍVEL / INDISPONÍVEL das imagens) */
+.table-status-panel {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: inline-block;
+    text-transform: uppercase;
+}
+
+.table-status-panel.status-ativo {
+    background-color: rgba(16, 185, 129, 0.06);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.table-status-panel.status-atrasado {
+    background-color: rgba(239, 68, 68, 0.06);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.table-status-panel.status-devolvido {
+    background-color: rgba(71, 85, 105, 0.1);
+    color: #94a3b8;
+    border: 1px solid rgba(154, 163, 177, 0.15);
+}
+
+/* Botões do Painel para Devolução / Renovação */
+.table-actions-flex {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-panel-action {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.15s ease;
+}
+
+.btn-panel-devolver {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.btn-panel-devolver:hover {
+    background-color: #3b82f6;
+    color: #ffffff;
+}
+
+.btn-panel-renovar {
+    background-color: rgba(234, 179, 8, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(234, 179, 8, 0.2);
+}
+
+.btn-panel-renovar:hover {
+    background-color: #eab308;
+    color: #ffffff;
+}
+
+.action-disabled-dash {
+    color: #475569;
+    font-size: 1rem;
+}
+
+/* Alinhamentos */
+.text-left {
+    text-align: left;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.form-inline {
+    display: inline;
+    margin: 0;
+}
+
+.empty-state-dark {
+    text-align: center;
+    padding: 40px;
+    color: #475569;
 }
