@@ -68,7 +68,7 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
     <div class="admin-container" style="padding-top: 70px;">
         <!-- MENU LATERAL DE NAVEGAÇÃO -->
         <aside class="sidebar">
-            <div class="sidebar-title">Navegação</div>
+            <div class="sidebar-title">Administração</div>
             <a href="admin.php?seccao=geral" class="sidebar-link <?= $seccao === 'geral' ? 'active' : '' ?>">📊 Geral</a>
             <a href="admin.php?seccao=utilizadores" class="sidebar-link <?= $seccao === 'utilizadores' ? 'active' : '' ?>">👥 Utilizadores</a>
             <a href="admin.php?seccao=reservas" class="sidebar-link <?= $seccao === 'reservas' ? 'active' : '' ?>">📅 Reservas</a>
@@ -104,57 +104,8 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
 
             <!-- SECÇÃO: RESERVAS -->
             <?php elseif ($seccao === 'reservas'): ?>
-                <h1>Controlo de Reservas Ativas</h1>
-                <p class="admin-subtitle">Abaixo encontram-se todos os pedidos de reserva pendentes de levantamento.</p>
-
-                <div class="table-responsive" style="margin-top: 20px;">
-                    <table class="agent-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 60px;">ID</th>
-                                <th>Utilizador</th>
-                                <th>Artigo / Livro</th>
-                                <th>Data de Início</th>
-                                <th>Data Limite</th>
-                                <th>Estado</th>
-                                <th style="text-align: center; width: 150px;">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($reservas)): ?>
-                                <tr>
-                                    <td colspan="7" style="text-align: center; color: #64748b; padding: 40px;">📅 Não existem reservas ativas no sistema de momento.</td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach ($reservas as $res): ?>
-                                    <tr>
-                                        <td class="td-id">#<?= $res['id']; ?></td>
-                                        <td style="font-weight: 500; color: #f8fafc;"><?= htmlspecialchars($res['user_nome']); ?></td>
-                                        <td style="color: #cbd5e1;"><?= htmlspecialchars($res['item_titulo']); ?></td>
-                                        <td><?= date('d/m/Y', strtotime($res['data_inicio'])); ?></td>
-                                        <td style="color: #f59e0b; font-weight: 500;">
-                                            <?= !empty($res['data_fim']) ? date('d/m/Y', strtotime($res['data_fim'])) : 'N/A'; ?>
-                                        </td>
-                                        <td>
-                                            <span style="color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); background: rgba(59,130,246,0.1); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">
-                                                <?= htmlspecialchars($res['status']); ?>
-                                            </span>
-                                        </td>
-                                        <td style="text-align: center;">
-                                            <form action="admin.php" method="POST" onsubmit="return confirm('Tem a certeza que deseja cancelar esta reserva administrativamente?');" style="margin: 0;">
-                                                <input type="hidden" name="acao_admin" value="cancelar_reserva_admin">
-                                                <input type="hidden" name="reserva_id" value="<?= $res['id']; ?>">
-                                                <button type="submit" class="btn-cancelar-reserva" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s;">
-                                                    ❌ Cancelar
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
+                
+                <?php include 'seccao_reservas.php'; ?>
 
             <!-- SECÇÃO: EMPRÉSTIMOS -->
             <?php elseif ($seccao === 'emprestimos'): ?>
