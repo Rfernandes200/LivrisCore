@@ -1,48 +1,55 @@
-<?php 
+<?php
 session_start();
-require 'config.php'; 
+require 'config.php';
 
-// Pegar o ID do utilizador logado (caso exista sessão) para usar na comparação dos botões
-$id_logado = isset($_SESSION['utilizador_id']) ? (int)$_SESSION['utilizador_id'] : null;
-
-// REGRA DO MÁXIMO DE 2 RESERVAS: Verificar se o utilizador já atingiu o limite máximo de reservas pendentes
-$bloqueado_por_limite = false;
-if ($id_logado) {
-    $stmt_limite = $pdo->prepare("SELECT COUNT(*) FROM reservas WHERE utilizador_id = :user_id AND status = 'pendente'");
-    $stmt_limite->execute(['user_id' => $id_logado]);
-    if ((int)$stmt_limite->fetchColumn() >= 2) {
-        $bloqueado_por_limite = true;
-    }
+if (!isset($_SESSION['utilizador_id'])) {
+    header("Location: login.php");
+    exit();
 }
 
-// 1. Consulta Atualizada: foca na tabela 'livros', traz a classe CDU e agrega os múltiplos autores (N:N)
-$query = "SELECT livros.*, cdu_classes.descricao as cdu_nome, reservas.utilizador_id as quem_reservou,
-                 GROUP_CONCAT(autores.nome SEPARATOR ', ') as autor_artista
-          FROM livros 
-          LEFT JOIN cdu_classes ON livros.cdu_codigo = cdu_classes.codigo
-          LEFT JOIN livro_autores ON livros.id = livro_autores.livro_id
-          LEFT JOIN autores ON livro_autores.autor_id = autores.id
-          LEFT JOIN reservas ON livros.id = reservas.livro_id AND reservas.status = 'pendente'
-          GROUP BY livros.id";
-$stmt = $pdo->query($query);
-$itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$id_logado = (int)$_SESSION['utilizador_id'];
 
-// 2. Procurar as classes CDU na Base de Dados para preencher o Select do Pop-up
-$cdu_classes = [];
-try {
-    $stmt_cdu = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER BY codigo ASC");
-    $cdu_classes = $stmt_cdu->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    // Falha silenciosa
-}
+// ================= REGRAS DE NEGÓCIO (DIAS SEGUROS) =================
+$hoje_php    = date('Y-m-d');
+$limite_dias = 15; // Altera aqui se quiseres outro limite máximo de dias
+$max_fim_php = date('Y-m-d', strtotime("+$limite_dias days"));
 
-// 3. Procurar os autores na Base de Dados para preencher o Select do Pop-up (NOVO)
-$todos_autores = [];
 try {
-    $stmt_autores = $pdo->query("SELECT id, nome FROM autores ORDER BY nome ASC");
-    $todos_autores = $stmt_autores->fetchAll(PDO::FETCH_ASSOC);
+    // 1. Reservas Pendentes (Faz ligação à tabela 'livros' e traz a descrição da classe CDU se existir)
+    $sql_pendentes = "SELECT reservas.*, livros.titulo as item_titulo, cdu_classes.descricao as cat_nome
+                      FROM reservas
+                      INNER JOIN livros ON reservas.livro_id = livros.id
+                      LEFT JOIN cdu_classes ON livros.cdu_codigo = cdu_classes.codigo
+                      WHERE reservas.utilizador_id = :user_id AND reservas.status = 'pendente'
+                      ORDER BY reservas.id DESC";
+    $stmt_p = $pdo->prepare($sql_pendentes);
+    $stmt_p->execute(['user_id' => $id_logado]);
+    $reservas_pendentes = $stmt_p->fetchAll(PDO::FETCH_ASSOC);
+
+    // 2. Empréstimos Ativos (Ligado corretamente por livro_id e cdu_codigo)
+    $sql_ativos = "SELECT emprestimos.*, livros.titulo as item_titulo, cdu_classes.descricao as cat_nome
+                   FROM emprestimos 
+                   INNER JOIN livros ON emprestimos.livro_id = livros.id 
+                   LEFT JOIN cdu_classes ON livros.cdu_codigo = cdu_classes.codigo
+                   WHERE emprestimos.utilizador_id = :user_id AND emprestimos.data_devolucao_real IS NULL
+                   ORDER BY emprestimos.data_prevista_devolucao ASC";
+    $stmt_a = $pdo->prepare($sql_ativos);
+    $stmt_a->execute(['user_id' => $id_logado]);
+    $emprestimos_ativos = $stmt_a->fetchAll(PDO::FETCH_ASSOC);
+
+    // 3. Histórico de Empréstimos
+    $sql_historico = "SELECT emprestimos.*, livros.titulo as item_titulo, cdu_classes.descricao as cat_nome
+                      FROM emprestimos 
+                      INNER JOIN livros ON emprestimos.livro_id = livros.id 
+                      LEFT JOIN cdu_classes ON livros.cdu_codigo = cdu_classes.codigo
+                      WHERE emprestimos.utilizador_id = :user_id AND emprestimos.data_devolucao_real IS NOT NULL
+                      ORDER BY emprestimos.data_devolucao_real DESC";
+    $stmt_h = $pdo->prepare($sql_historico);
+    $stmt_h->execute(['user_id' => $id_logado]);
+    $historico_emprestimos = $stmt_h->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
-    // Falha silenciosa
+    die("Erro ao carregar dados: " . $e->getMessage());
 }
 ?>
 
@@ -51,413 +58,264 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiblioBase - Gestão de Biblioteca</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Os Meus Empréstimos - BiblioBase</title>
     <link rel="stylesheet" href="Styles/StylesIndex.css">
-    <link rel="stylesheet" href="Styles/StylesIndex2.css">
+    <link rel="stylesheet" href="Styles/StyleAdmin.css">
+    <link rel="stylesheet" href="Styles/Styleempres.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        .btn-entregar-inline {
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-entregar-inline:hover {
+            background: #2563eb;
+        }
+    </style>
 </head>
 <body>
 
-<?php if (isset($_SESSION['alerta'])): ?>
-    <div id="toastAlert" class="alert-toast <?= $_SESSION['alerta']['tipo'] ?>">
-        <span><?= $_SESSION['alerta']['mensagem'] ?></span>
-    </div>
-    <?php unset($_SESSION['alerta']); ?>
-<?php endif; ?>
-
-<header>
     <?php require 'navbar.php'; ?>
 
-    <div class="hero-container">
-        <div class="hero-text">
-            <p class="hero-tag">SISTEMA DE GESTÃO</p>
-            <h1>A sua biblioteca,<br><span>organizada.</span></h1>
-            <p class="hero-subtitle">
-                Pesquise, reserve e acompanhe todo o acervo de livros em tempo real.
-            </p>
-        </div>
-    </div>
-</header>
+    <div class="admin-container admin-container-block">
+        <main class="admin-content admin-content-padded">
+            
+            <?php if (isset($_SESSION['alerta'])): ?>
+                <div class="alert-box <?= $_SESSION['alerta']['tipo'] === 'sucesso' ? 'alert-sucesso' : 'alert-erro' ?>">
+                    <?= $_SESSION['alerta']['mensagem']; ?>
+                </div>
+                <?php unset($_SESSION['alerta']); ?>
+            <?php endif; ?>
 
-<main class="catalog-container" style="margin-top: 40px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 0 10px;">
-        <h2 class="section-title" style="margin: 0;">Catálogo de Livros</h2>
-        
-        <?php if (isset($_SESSION['utilizador_tipo']) && ((int)$_SESSION['utilizador_tipo'] === 1 || $_SESSION['utilizador_tipo'] === 'admin')): ?>
-            <button type="button" class="btn-add-catalog" id="openAddCatalogBtn" style="background: #3b82f6; color: white;">
-                <svg viewBox="0 0 24 24" fill="white" style="width: 16px; height: 16px; margin-right: 5px;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                Adicionar Livro
-            </button>
-        <?php endif; ?>
-    </div>
-    
-    <div class="grid-itens">
-        <?php foreach($itens as $item): 
-            $itemImagem = !empty($item['imagem_url']) ? 'Uploads/'.$item['imagem_url'] : 'Images/default-cover.png';
-            $criadorTipo = 'Administrador'; 
-            $estadoLimpo = strtolower(trim($item['estado']));
-            $quemReservou = !empty($item['quem_reservou']) ? (int)$item['quem_reservou'] : null;
-        ?>
-        <div class="card">
-            <div class="card-header">
-                <span class="status-badge <?= $item['estado'] ?>" style="<?php 
-                    if($estadoLimpo === 'reservado') {
-                        echo 'background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3);';
-                    } ?>">
-                    <?= strtoupper($item['estado']) ?>
-                </span>
-                <span class="category-icon">📖</span>
-            </div>
-            <div class="card-body">
-                <small class="category-label">CDU <?= htmlspecialchars($item['cdu_codigo']) ?></small>
-                <h3><?= htmlspecialchars($item['titulo']) ?></h3>
-                <p class="author-text"><?= htmlspecialchars($item['autor_artista'] ?? 'Autor Não Associado') ?></p>
-                
-                <div class="card-footer">
-                    <button type="button" class="btn-details js-open-details" 
-                            data-titulo="<?= htmlspecialchars($item['titulo']) ?>"
-                            data-autor="<?= htmlspecialchars($item['autor_artista'] ?? 'Não Associado') ?>"
-                            data-cdu="CDU <?= htmlspecialchars($item['cdu_codigo']) ?> - <?= htmlspecialchars($item['cdu_nome']) ?>"
-                            data-isbn="<?= htmlspecialchars($item['isbn']) ?>"
-                            data-editora="<?= htmlspecialchars($item['editora']) ?>"
-                            data-ano="<?= htmlspecialchars($item['ano_edicao']) ?>"
-                            data-estado="<?= htmlspecialchars($item['estado']) ?>"
-                            data-descricao="<?= htmlspecialchars($item['descricao']) ?>"
-                            data-imagem="<?= $itemImagem ?>"
-                            data-criador="<?= $criadorTipo ?>">
-                        Detalhes
-                    </button>
+            <h1>Os Meus Empréstimos e Solicitações</h1>
+            <p class="admin-subtitle admin-subtitle-margin">Confirme as suas reservas ativas inserindo o código ou acompanhe os artigos em sua posse.</p>
 
-                    <?php if($estadoLimpo === 'disponivel'): ?>
-                        <?php if ($bloqueado_por_limite): ?>
-                            <button disabled class="btn-disabled" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); cursor: not-allowed; font-size: 0.8rem; padding: 8px 12px; border-radius: 6px;" title="Atingiu o limite de 2 reservas pendentes.">
-                                Limite Atingido
-                            </button>
+            <h2 class="table-section-title title-pendente">⏳ Reservas Efetuadas (Aguardar Validação)</h2>
+            <div class="table-responsive table-wrapper">
+                <table class="agent-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th>Artigo Reservado</th>
+                            <th>Classificação (CDU)</th>
+                            <th>Hora da Solicitação</th>
+                            <th style="width: 240px; text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($reservas_pendentes)): ?>
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #64748b; padding: 25px;">Não tem nenhuma reserva pendente de validação.</td>
+                            </tr>
                         <?php else: ?>
-                            <button type="button" class="btn-action js-open-reserve" 
-                                    data-id="<?= $item['id'] ?>" 
-                                    data-titulo="<?= htmlspecialchars($item['titulo']) ?>"
-                                    style="border:none; cursor:pointer;">
-                                Reservar
-                            </button>
+                            <?php foreach ($reservas_pendentes as $res): ?>
+                                <tr>
+                                    <td class="td-id">#<?= $res['id']; ?></td>
+                                    <td style="font-weight: 600; color: #f8fafc;"><?= htmlspecialchars($res['item_titulo']); ?></td>
+                                    <td style="color: #94a3b8;"><?= $res['cat_nome'] ? htmlspecialchars($res['cat_nome']) : 'Sem classe'; ?></td>
+                                    <td><?= date('d/m/Y H:i', strtotime($res['data_inicio'])); ?></td>
+                                    <td style="text-align: center; display: flex; gap: 8px; justify-content: center; align-items: center; border:none;">
+                                        
+                                        <button type="button" class="btn-confirmar-modal" 
+                                                style="cursor: pointer;"
+                                                onclick='abrirModalComDias(<?= (int)$res['id']; ?>, <?= json_encode($res['item_titulo'], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>
+                                            Confirmar
+                                        </button>
+
+                                        <form action="processo_emprestimo.php" method="POST" style="margin:0;" onsubmit="return confirm('Tem a certeza que deseja cancelar esta reserva?');">
+                                            <input type="hidden" name="acao" value="cancelar_reserva">
+                                            <input type="hidden" name="reserva_id" value="<?= $res['id']; ?>">
+                                            <button type="submit" class="btn-cancelar-inline">Cancelar</button>
+                                        </form>
+
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
                         <?php endif; ?>
-                    <?php elseif($estadoLimpo === 'reservado'): ?>
-                        <?php if($id_logado && $id_logado === $quemReservou): ?>
-                            <form action="cancela_reserva.php" method="POST" style="margin:0; display:inline;">
-                                <input type="hidden" name="livro_id" value="<?= $item['id'] ?>">
-                                <button type="submit" class="btn-action" style="background: #ef4444; color: white; border:none; cursor:pointer;">
-                                    Cancelar
-                                </button>
-                            </form>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="table-section-title title-ativo">📖 Artigos Contigo (Em Curso)</h2>
+            <div class="table-responsive table-wrapper">
+                <table class="agent-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th>Artigo</th>
+                            <th>Classificação (CDU)</th>
+                            <th>Data de Saída</th>
+                            <th>Data Limite</th>
+                            <th style="width: 200px; text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($emprestimos_ativos)): ?>
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #64748b; padding: 25px;">Não tens nenhum artigo emprestado em tua posse de momento.</td>
+                            </tr>
                         <?php else: ?>
-                            <button disabled class="btn-disabled" style="background: rgba(234, 179, 8, 0.1); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.2); cursor: not-allowed;">Reservado</button>
+                            <?php foreach ($emprestimos_ativos as $emp): 
+                                $hoje = strtotime(date('Y-m-d'));
+                                $data_limite = strtotime($emp['data_prevista_devolucao']);
+                                $dias_restantes = round(($data_limite - $hoje) / (60 * 60 * 24));
+                            ?>
+                                <tr>
+                                    <td class="td-id">#<?= $emp['id']; ?></td>
+                                    <td style="font-weight: 500; color: #f8fafc;"><?= htmlspecialchars($emp['item_titulo']); ?></td>
+                                    <td style="color: #94a3b8;"><?= $emp['cat_nome'] ? htmlspecialchars($emp['cat_nome']) : 'Sem classe'; ?></td>
+                                    <td><?= date('d/m/Y', strtotime($emp['data_saida'])); ?></td>
+                                    <td class="<?= ($dias_restantes <= 2) ? 'data-aviso-urgente' : 'data-aviso-normal' ?>">
+                                        <?= date('d/m/Y', strtotime($emp['data_prevista_devolucao'])); ?>
+                                        <small class="data-subtexto">(Faltam <?= $dias_restantes; ?> dias)</small>
+                                    </td>
+                                    <td style="text-align: center; display: flex; gap: 8px; justify-content: center; align-items: center; border: none;">
+                                        <span class="badge-status-ativo">Ativo</span>
+                                        
+                                        <form action="processo_emprestimo.php" method="POST" style="margin:0;" onsubmit="return confirm('Confirmas que queres proceder à entrega deste artigo?');">
+                                            <input type="hidden" name="acao" value="entregar_emprestimo">
+                                            <input type="hidden" name="emprestimo_id" value="<?= $emp['id']; ?>">
+                                            <button type="submit" class="btn-entregar-inline">Entregar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
                         <?php endif; ?>
-                    <?php else: ?>
-                        <button disabled class="btn-disabled">Indisponível</button>
-                    <?php endif; ?>
-                </div>
+                    </tbody>
+                </table>
             </div>
-        </div>
-        <?php endforeach; ?>
+        </main>
     </div>
-</main>
 
-<footer>
-    <p>&copy; 2026 BiblioBase - Sistema de Gestão de Biblioteca</p>
-</footer>
-
-<div id="detailsCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
-    <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 650px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
-        <div style="padding: 20px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
-            <div>
-                <span id="txtDetailCdu" style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">CLASSIFICAÇÃO CDU</span>
-                <h2 id="txtDetailTitulo" style="font-size: 1.4rem; color: white; font-weight: 600; margin: 0; text-align: left;">Título do Livro</h2>
-            </div>
-            <button type="button" id="closeDetailModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
-        </div>
-        <div style="padding: 28px; display: flex; gap: 24px; box-sizing: border-box;">
-            <div style="flex-shrink: 0;">
-                <img id="imgDetailCapa" src="Images/default-cover.png" alt="Capa" style="width: 140px; height: 190px; object-fit: cover; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);">
-            </div>
-            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 14px; text-align: left;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div>
-                        <label style="font-size: 0.65rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">AUTOR(ES)</label>
-                        <span id="txtDetailAutor" style="color: #cbd5e1; font-size: 0.95rem; font-weight: 500;">-</span>
-                    </div>
-                    <div>
-                        <label style="font-size: 0.65rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">ISBN</label>
-                        <span id="txtDetailIsbn" style="color: #cbd5e1; font-size: 0.95rem; font-weight: 500;">-</span>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div>
-                        <label style="font-size: 0.65rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">EDITORA / ANO</label>
-                        <span id="txtDetailEditoraAno" style="color: #cbd5e1; font-size: 0.95rem; font-weight: 500;">-</span>
-                    </div>
-                    <div>
-                        <label style="font-size: 0.65rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">ESTADO</label>
-                        <span id="txtDetailEstado" style="font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; font-weight: 600; text-transform: uppercase; display: inline-block;">-</span>
-                    </div>
-                </div>
-
+    <div id="confirmReserveModal" style="display: none; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(10, 15, 30, 0.92) !important; justify-content: center; align-items: center; z-index: 999999999999 !important;">
+        <div style="background: #1e293b; padding: 30px; border-radius: 12px; max-width: 480px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); border: 1px solid #475569; font-family: 'Inter', sans-serif;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 12px;">
                 <div>
-                    <label style="font-size: 0.65rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">SINOPSE / RESUMO</label>
-                    <p id="txtDetailDescricao" style="color: #94a3b8; font-size: 0.85rem; line-height: 1.5; margin: 0; max-height: 100px; overflow-y: auto; padding-right: 5px;">-</p>
+                    <small style="color: #34d399; font-weight: bold; font-size: 0.75rem; letter-spacing: 1px; display:block; margin-bottom:4px;">VALIDAR RESERVA</small>
+                    <h2 id="modalTargetTitulo" style="color: #f8fafc; margin: 0; font-size: 1.25rem; font-weight: 600;">Oficializar Empréstimo</h2>
                 </div>
-                <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 6px;">
-                    <span style="font-size: 0.8rem; color: #64748b;">Criado por:</span>
-                    <strong id="txtDetailCriador" style="font-size: 0.8rem; color: #60a5fa;">Administrador</strong>
-                </div>
+                <button type="button" id="closeConfirmModalBtn" style="background: none; border: none; color: #94a3b8; font-size: 2.2rem; cursor: pointer; line-height: 0.8;">&times;</button>
             </div>
-        </div>
-        <div style="padding: 16px 28px; background: rgba(11, 15, 25, 0.4); border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: flex-end;">
-            <button type="button" id="cancelDetailModalBtn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: 'Inter', sans-serif;">Fechar Janela</button>
-        </div>
-    </div>
-</div>
 
-<div id="addCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
-    <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden; font-family: 'Inter', sans-serif;">
-        <div style="padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2);">
-            <div>
-                <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ Adicionar Livro ]</span>
-                <h2 style="font-size: 1.3rem; color: white; font-weight: 600; margin: 0; text-align: left;">Novo Livro no Catálogo</h2>
-            </div>
-            <button type="button" id="closeAddModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
-        </div>
-        <form action="processa_artigo.php" method="POST" enctype="multipart/form-data" style="padding: 28px; margin: 0; box-sizing: border-box;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">TÍTULO DO LIVRO *</label>
-                    <input type="text" name="titulo" class="modal-field" placeholder="Ex: Os Maias" required>
-                </div>
-                
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">AUTOR(ES) DO LIVRO *</label>
-                    <div id="container-autores" style="display: flex; flex-direction: column; gap: 8px;">
-                        <div style="display: flex; gap: 6px; align-items: center;">
-                            <select name="autor_id[]" class="modal-field select-autor-dinamico" required style="height: 45px; flex-grow: 1;">
-                                <option value="" disabled selected style="background:#0b0f19;">Selecione um Autor...</option>
-                                <?php foreach($todos_autores as $autor): ?>
-                                    <option value="<?= $autor['id']; ?>" style="background:#0b0f19; color:white;">
-                                        <?= htmlspecialchars($autor['nome']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <button type="button" id="btn-add-autor-row" style="height: 45px; width: 45px; background: #10b981; border: none; border-radius: 6px; color: white; font-size: 1.3rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">+</button>
-                        </div>
+            <form action="processo_emprestimo.php" method="POST" id="modalFormEmprestimo">
+                <input type="hidden" name="acao" value="oficializar_emprestimo">
+                <input type="hidden" name="reserva_id" id="modalTargetReservaId">
+
+                <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+                    <div style="flex: 1; position: relative;">
+                        <label style="color: #94a3b8; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE INÍCIO</label>
+                        <input type="date" name="data_inicio" id="modalInputDataInicio" required 
+                               onkeydown="return false" 
+                               onclick="if(typeof this.showPicker === 'function') this.showPicker();"
+                               style="width: 100%; padding: 11px; padding-right: 30px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 6px; font-size:0.9rem; cursor: pointer;">
+                    </div>
+                    
+                    <div style="flex: 1; position: relative;">
+                        <label style="color: #94a3b8; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE FIM (MÁX. <?=$limite_dias?> DIAS)</label>
+                        <input type="date" name="data_fim" id="modalInputDataFim" required 
+                               onkeydown="return false" 
+                               onclick="if(typeof this.showPicker === 'function') this.showPicker();"
+                               style="width: 100%; padding: 11px; padding-right: 30px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 6px; font-size:0.9rem; cursor: pointer;">
                     </div>
                 </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">CÓDIGO ISBN *</label>
-                    <input type="text" name="isbn" class="modal-field" placeholder="Ex: 978-972-0-04671-0" required>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">CLASSIFICAÇÃO CDU *</label>
-                    <select name="cdu_codigo" class="modal-field" required style="height: 45px;">
-                        <option value="" disabled selected style="background:#0b0f19;">Selecione a Classe CDU...</option>
-                        <?php foreach($cdu_classes as $classe): ?>
-                            <option value="<?= $classe['codigo']; ?>" style="background:#0b0f19; color:white;">
-                                <?= $classe['codigo'] . ' - ' . htmlspecialchars(mb_strimwidth($classe['descricao'], 0, 48, "...")); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">EDITORA *</label>
-                    <input type="text" name="editora" class="modal-field" placeholder="Ex: Porto Editora" required>
+                <div style="margin-bottom: 25px; border-top: 1px solid #334155; padding-top: 15px;">
+                    <label style="color: #94a3b8; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 8px;">CÓDIGO DE SEGURANÇA (3 DÍGITOS) *</label>
+                    <input type="text" name="codigo_validacao" required maxlength="3" pattern="\d{3}" placeholder="000" style="width: 100%; padding: 12px; background: #0f172a; color: #34d399; font-size: 1.6rem; text-align: center; font-weight: bold; border: 1px solid #334155; border-radius: 6px; letter-spacing: 6px;">
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">ANO DE EDIÇÃO *</label>
-                    <input type="number" name="ano_edicao" class="modal-field" placeholder="Ex: 2026" min="1000" max="2026" required>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">ESTADO INICIAL *</label>
-                    <select name="estado" class="modal-field" required style="height: 45px;">
-                        <option value="disponivel" selected style="background:#0b0f19;">Disponível</option>
-                        <option value="reservado" style="background:#0b0f19;">Reservado</option>
-                        <option value="indisponivel" style="background:#0b0f19;">Indisponível</option>
-                    </select>
-                </div>
-            </div>
 
-            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; margin-bottom: 20px;">
-                <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">SINOPSE / RESUMO *</label>
-                <textarea name="descricao" rows="4" class="modal-field" placeholder="Escreva uma breve sinopse do livro..." required style="resize: vertical;"></textarea>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; margin-bottom: 2px;">
-                <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">IMAGEM DE CAPA (OBRIGATÓRIO) *</label>
-                <input type="file" name="imagem" accept="image/*" required class="modal-field" style="padding: 8px 10px !important;">
-                <small style="color: #64748b; font-size: 0.75rem; margin-top: 4px; display:block;">Apenas ficheiros de imagem válidos (JPG, PNG, WEBP).</small>
-            </div>
-            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px;">
-                <button type="button" id="cancelAddModalBtn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Cancelar Criação</button>
-                <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600;">Confirmar Criação</button>
-            </div>
-        </form>
+                <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #334155; padding-top: 15px;">
+                    <button type="button" id="cancelConfirmModalBtn" style="padding: 10px 18px; background: transparent; color: #94a3b8; border: 1px solid #334155; border-radius: 6px; cursor: pointer; font-weight:500;">Voltar</button>
+                    <button type="submit" style="padding: 10px 18px; background: #34d399; color: #0f172a; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Confirmar</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<?php require 'index_reservas.php'; ?>
+    <script>
+    const DATA_HOJE_SISTEMA = "<?php echo $hoje_php; ?>";
+    const TETOS_DIAS_REGRA  = <?php echo $limite_dias; ?>;
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // CONTROLO DO MODAL DE ADICIONAR LIVRO
-    const addModal = document.getElementById('addCatalogModal');
-    const openBtn = document.getElementById('openAddCatalogBtn');
-    const closeBtn = document.getElementById('closeAddModalBtn');
-    const cancelBtn = document.getElementById('cancelAddModalBtn');
-
-    if (openBtn) {
-        openBtn.addEventListener('click', function() {
-            addModal.style.display = 'flex';
-        });
+    function somarDias(dataBaseStr, quantidadeDias) {
+        const d = new Date(dataBaseStr);
+        d.setDate(d.getDate() + quantidadeDias);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
-    const closeAddModal = () => { addModal.style.display = 'none'; };
-    if (closeBtn) closeBtn.addEventListener('click', closeAddModal);
-    if (cancelBtn) cancelBtn.addEventListener('click', closeAddModal);
-    if (addModal) addModal.addEventListener('click', function(e) { if (e.target === addModal) closeAddModal(); });
+    function abrirModalComDias(reservaId, tituloItem) {
+        const modal = document.getElementById('confirmReserveModal');
+        const inputInicio = document.getElementById('modalInputDataInicio');
+        const inputFim = document.getElementById('modalInputDataFim');
 
-    // ==========================================================
-    // LÓGICA DINÂMICA DE MÚLTIPLOS AUTORES SEM REPETIÇÃO
-    // ==========================================================
-    const containerAutores = document.getElementById('container-autores');
-    const btnAddAutor = document.getElementById('btn-add-autor-row');
+        document.getElementById('modalTargetReservaId').value = reservaId;
+        document.getElementById('modalTargetTitulo').innerText = 'Validar: ' + tituloItem;
 
-    // Função que percorre todos os selects e bloqueia autores duplicados
-    function atualizarAutoresDisponiveis() {
-        const todosSelects = document.querySelectorAll('.select-autor-dinamico');
-        const valoresSelecionados = Array.from(todosSelects)
-            .map(s => s.value)
-            .filter(val => val !== "");
+        inputInicio.min = DATA_HOJE_SISTEMA;
+        inputInicio.value = DATA_HOJE_SISTEMA;
 
-        todosSelects.forEach(selectAtual => {
-            const opcoes = selectAtual.querySelectorAll('option');
-            opcoes.forEach(opcao => {
-                if (opcao.value !== "") {
-                    // Se a opção já está escolhida noutro select, esconde/desativa
-                    if (valoresSelecionados.includes(opcao.value) && selectAtual.value !== opcao.value) {
-                        opcao.disabled = true;
-                        opcao.style.display = 'none';
-                    } else {
-                        opcao.disabled = false;
-                        opcao.style.display = 'block';
-                    }
-                }
-            });
-        });
+        const dataMaximaCalculada = somarDias(DATA_HOJE_SISTEMA, TETOS_DIAS_REGRA);
+        inputFim.min = DATA_HOJE_SISTEMA;
+        inputFim.max = dataMaximaCalculada;
+        inputFim.value = dataMaximaCalculada;
+
+        modal.style.setProperty('display', 'flex', 'important');
     }
 
-    // Monitorizar alterações no select inicial
-    containerAutores.addEventListener('change', function(e) {
-        if (e.target.classList.contains('select-autor-dinamico')) {
-            atualizarAutoresDisponiveis();
-        }
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('confirmReserveModal');
+        const closeBtn = document.getElementById('closeConfirmModalBtn');
+        const cancelBtn = document.getElementById('cancelConfirmModalBtn');
+        const inputInicio = document.getElementById('modalInputDataInicio');
+        const inputFim = document.getElementById('modalInputDataFim');
 
-    // Evento do botão + para injetar uma nova linha
-    if (btnAddAutor) {
-        btnAddAutor.addEventListener('click', function() {
-            const todosSelects = document.querySelectorAll('.select-autor-dinamico');
-            // Só deixa adicionar se o select anterior já tiver alguma coisa selecionada
-            if (todosSelects[todosSelects.length - 1].value === "") {
-                alert("Por favor, selecione o autor na linha anterior antes de adicionar um novo.");
-                return;
+        inputInicio.addEventListener('change', function() {
+            if (this.value < DATA_HOJE_SISTEMA) {
+                alert('A data de início não pode ser anterior ao dia de hoje!');
+                this.value = DATA_HOJE_SISTEMA;
             }
-
-            // Clonar a primeira linha de opções do select para manter os IDs corretos
-            const primeiroSelect = document.querySelector('.select-autor-dinamico');
-            const novaLinha = document.createElement('div');
-            novaLinha.style.display = 'flex';
-            novaLinha.style.gap = '6px';
-            novaLinha.style.alignItems = 'center';
-
-            const novoSelect = primeiroSelect.cloneNode(true);
-            novoSelect.value = ""; // Reseta a seleção do clone
-            novoSelect.required = true;
-
-            const btnRemover = document.createElement('button');
-            btnRemover.type = 'button';
-            btnRemover.style.height = '45px';
-            btnRemover.style.width = '45px';
-            btnRemover.style.background = '#ef4444';
-            btnRemover.style.border = 'none';
-            btnRemover.style.border-radius = '6px';
-            btnRemover.style.color = 'white';
-            btnRemover.style.fontSize = '1.2rem';
-            btnRemover.style.cursor = 'pointer';
-            btnRemover.innerText = '✕';
-
-            btnRemover.addEventListener('click', function() {
-                novaLinha.remove();
-                atualizarAutoresDisponiveis();
-            });
-
-            novaLinha.appendChild(novoSelect);
-            novaLinha.appendChild(btnRemover);
-            containerAutores.appendChild(novaLinha);
-
-            atualizarAutoresDisponiveis();
-        });
-    }
-
-    // CONTROLO DO MODAL DE DETALHES
-    const detailModal = document.getElementById('detailsCatalogModal');
-    const closeDetailBtn = document.getElementById('closeDetailModalBtn');
-    const cancelDetailBtn = document.getElementById('cancelDetailModalBtn');
-
-    document.querySelectorAll('.js-open-details').forEach(button => {
-        button.addEventListener('click', function() {
-            document.getElementById('txtDetailTitulo').innerText = this.dataset.titulo;
-            document.getElementById('txtDetailAutor').innerText = this.dataset.autor;
-            document.getElementById('txtDetailCdu').innerText = `[ ${this.dataset.cdu.toUpperCase()} ]`;
-            document.getElementById('txtDetailIsbn').innerText = this.dataset.isbn;
-            document.getElementById('txtDetailEditoraAno').innerText = `${this.dataset.editora} (${this.dataset.ano})`;
-            document.getElementById('txtDetailDescricao').innerText = this.dataset.descricao;
-            document.getElementById('imgDetailCapa').src = this.dataset.imagem;
-            document.getElementById('txtDetailCriador').innerText = this.dataset.criador;
-
-            const badgeEstado = document.getElementById('txtDetailEstado');
-            const estado = this.dataset.estado;
-            badgeEstado.innerText = estado;
             
-            if (estado.toLowerCase() === 'disponivel') {
-                badgeEstado.style.background = 'rgba(16, 185, 129, 0.1)';
-                badgeEstado.style.color = '#10b981';
-            } else if (estado.toLowerCase() === 'reservado') {
-                badgeEstado.style.background = 'rgba(234, 179, 8, 0.15)';
-                badgeEstado.style.color = '#eab308';
-            } else {
-                badgeEstado.style.background = 'rgba(239, 68, 68, 0.1)';
-                badgeEstado.style.color = '#ef4444';
-            }
+            inputFim.min = this.value;
+            const novoTetoMaximo = somarDias(this.value, TETOS_DIAS_REGRA);
+            inputFim.max = novoTetoMaximo;
 
-            detailModal.style.display = 'flex';
+            if (inputFim.value < this.value) {
+                inputFim.value = this.value;
+            } else if (inputFim.value > novoTetoMaximo) {
+                inputFim.value = novoTetoMaximo;
+            }
+        });
+
+        inputFim.addEventListener('change', function() {
+            const limiteMaximoCorrente = somarDias(inputInicio.value, TETOS_DIAS_REGRA);
+            if (this.value < inputInicio.value) {
+                alert('A data de fim de empréstimo não pode ser anterior à data de início!');
+                this.value = inputInicio.value;
+            } else if (this.value > limiteMaximoCorrente) {
+                alert(`O período máximo permitido para o empréstimo é de ${TETOS_DIAS_REGRA} dias!`);
+                this.value = limiteMaximoCorrente;
+            }
+        });
+
+        const fecharModal = () => { 
+            modal.style.setProperty('display', 'none', 'important'); 
+        };
+
+        if (closeBtn) closeBtn.addEventListener('click', fecharModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', fecharModal);
+        
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) fecharModal();
         });
     });
-
-    const closeDetailModal = () => { detailModal.style.display = 'none'; };
-    if (closeDetailBtn) closeDetailBtn.addEventListener('click', closeDetailModal);
-    if (cancelDetailBtn) cancelDetailBtn.addEventListener('click', closeDetailModal);
-    if (detailModal) detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeDetailModal(); });
-
-    // TOAST ALERT
-    const toast = document.getElementById('toastAlert');
-    if (toast) {
-        setTimeout(() => { toast.classList.add('show'); }, 200);
-        setTimeout(() => { toast.classList.remove('show'); }, 4000);
-    }
-});
-</script>
-
+    </script>
 </body>
 </html>
