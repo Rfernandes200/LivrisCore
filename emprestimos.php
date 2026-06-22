@@ -15,22 +15,22 @@ $limite_dias = 15; // Altera aqui se quiseres outro limite máximo de dias
 $max_fim_php = date('Y-m-d', strtotime("+$limite_dias days"));
 
 try {
-    // 1. Reservas Pendentes
-    $sql_pendentes = "SELECT reservas.*, itens.titulo as item_titulo, categorias.nome as cat_nome
+    // 1. Reservas Pendentes (Faz ligação à tabela 'livros' e traz a descrição da classe CDU se existir)
+    $sql_pendentes = "SELECT reservas.*, livros.titulo as item_titulo, cdu_classes.descricao as cat_nome
                       FROM reservas
-                      INNER JOIN itens ON reservas.item_id = itens.id
-                      LEFT JOIN categorias ON itens.categoria_id = categorias.id
+                      INNER JOIN livros ON reservas.livro_id = livros.id
+                      LEFT JOIN cdu_classes ON livros.cdu_codigo = cdu_classes.codigo
                       WHERE reservas.utilizador_id = :user_id AND reservas.status = 'pendente'
                       ORDER BY reservas.id DESC";
     $stmt_p = $pdo->prepare($sql_pendentes);
     $stmt_p->execute(['user_id' => $id_logado]);
     $reservas_pendentes = $stmt_p->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2. Empréstimos Ativos
-    $sql_ativos = "SELECT emprestimos.*, itens.titulo as item_titulo, categorias.nome as cat_nome
+    // 2. Empréstimos Ativos (Ligado corretamente por livro_id e cdu_codigo)
+    $sql_ativos = "SELECT emprestimos.*, livros.titulo as item_titulo, cdu_classes.descricao as cat_nome
                    FROM emprestimos 
-                   INNER JOIN itens ON emprestimos.item_id = itens.id 
-                   LEFT JOIN categorias ON itens.categoria_id = categorias.id
+                   INNER JOIN livros ON emprestimos.livro_id = livros.id 
+                   LEFT JOIN cdu_classes ON livros.cdu_codigo = cdu_classes.codigo
                    WHERE emprestimos.utilizador_id = :user_id AND emprestimos.data_devolucao_real IS NULL
                    ORDER BY emprestimos.data_prevista_devolucao ASC";
     $stmt_a = $pdo->prepare($sql_ativos);
@@ -38,10 +38,10 @@ try {
     $emprestimos_ativos = $stmt_a->fetchAll(PDO::FETCH_ASSOC);
 
     // 3. Histórico de Empréstimos
-    $sql_historico = "SELECT emprestimos.*, itens.titulo as item_titulo, categorias.nome as cat_nome
+    $sql_historico = "SELECT emprestimos.*, livros.titulo as item_titulo, cdu_classes.descricao as cat_nome
                       FROM emprestimos 
-                      INNER JOIN itens ON emprestimos.item_id = itens.id 
-                      LEFT JOIN categorias ON itens.categoria_id = categorias.id
+                      INNER JOIN livros ON emprestimos.livro_id = livros.id 
+                      LEFT JOIN cdu_classes ON livros.cdu_codigo = cdu_classes.codigo
                       WHERE emprestimos.utilizador_id = :user_id AND emprestimos.data_devolucao_real IS NOT NULL
                       ORDER BY emprestimos.data_devolucao_real DESC";
     $stmt_h = $pdo->prepare($sql_historico);
@@ -105,7 +105,7 @@ try {
                         <tr>
                             <th style="width: 80px;">ID</th>
                             <th>Artigo Reservado</th>
-                            <th>Formato</th>
+                            <th>Classificação (CDU)</th>
                             <th>Hora da Solicitação</th>
                             <th style="width: 240px; text-align: center;">Ações</th>
                         </tr>
@@ -120,7 +120,7 @@ try {
                                 <tr>
                                     <td class="td-id">#<?= $res['id']; ?></td>
                                     <td style="font-weight: 600; color: #f8fafc;"><?= htmlspecialchars($res['item_titulo']); ?></td>
-                                    <td style="color: #94a3b8;"><?= htmlspecialchars($res['cat_nome']); ?></td>
+                                    <td style="color: #94a3b8;"><?= $res['cat_nome'] ? htmlspecialchars($res['cat_nome']) : 'Sem classe'; ?></td>
                                     <td><?= date('d/m/Y H:i', strtotime($res['data_inicio'])); ?></td>
                                     <td style="text-align: center; display: flex; gap: 8px; justify-content: center; align-items: center; border:none;">
                                         
@@ -151,7 +151,7 @@ try {
                         <tr>
                             <th style="width: 80px;">ID</th>
                             <th>Artigo</th>
-                            <th>Formato</th>
+                            <th>Classificação (CDU)</th>
                             <th>Data de Saída</th>
                             <th>Data Limite</th>
                             <th style="width: 200px; text-align: center;">Ações</th>
@@ -171,7 +171,7 @@ try {
                                 <tr>
                                     <td class="td-id">#<?= $emp['id']; ?></td>
                                     <td style="font-weight: 500; color: #f8fafc;"><?= htmlspecialchars($emp['item_titulo']); ?></td>
-                                    <td style="color: #94a3b8;"><?= htmlspecialchars($emp['cat_nome']); ?></td>
+                                    <td style="color: #94a3b8;"><?= $emp['cat_nome'] ? htmlspecialchars($emp['cat_nome']) : 'Sem classe'; ?></td>
                                     <td><?= date('d/m/Y', strtotime($emp['data_saida'])); ?></td>
                                     <td class="<?= ($dias_restantes <= 2) ? 'data-aviso-urgente' : 'data-aviso-normal' ?>">
                                         <?= date('d/m/Y', strtotime($emp['data_prevista_devolucao'])); ?>

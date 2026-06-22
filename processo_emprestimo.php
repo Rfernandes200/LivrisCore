@@ -20,15 +20,15 @@ if ($acao === 'cancelar_reserva') {
     try {
         $pdo->beginTransaction();
         
-        // Verificar se a reserva pertence mesmo ao utilizador logado e está pendente
-        $stmt = $pdo->prepare("SELECT item_id FROM reservas WHERE id = :id AND utilizador_id = :user_id AND status = 'pendente'");
+        // CORREÇÃO: Alterado de item_id para livro_id
+        $stmt = $pdo->prepare("SELECT livro_id FROM reservas WHERE id = :id AND utilizador_id = :user_id AND status = 'pendente'");
         $stmt->execute(['id' => $reserva_id, 'user_id' => $id_logado]);
         $reserva = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($reserva) {
-            // 1. Devolve o estado do artigo para disponível no catálogo
-            $stmt_item = $pdo->prepare("UPDATE itens SET estado = 'disponivel' WHERE id = :item_id");
-            $stmt_item->execute(['item_id' => $reserva['item_id']]);
+            // CORREÇÃO: Alterado de itens para livros e item_id para livro_id
+            $stmt_item = $pdo->prepare("UPDATE livros SET estado = 'disponivel' WHERE id = :livro_id");
+            $stmt_item->execute(['livro_id' => $reserva['livro_id']]);
             
             // 2. Remove a reserva pendente
             $stmt_del = $pdo->prepare("DELETE FROM reservas WHERE id = :id");
@@ -73,25 +73,24 @@ if ($acao === 'oficializar_emprestimo') {
             }
 
             // 1. Atualizar o estado da reserva para concluído
-            // (Nota: Ajustado para 'concluida' para bater certo com o ENUM da sua tabela: 'pendente','concluida','cancelada')
             $stmt_up_res = $pdo->prepare("UPDATE reservas SET status = 'concluida' WHERE id = :id");
             $stmt_up_res->execute(['id' => $reserva_id]);
 
-            // 2. Criar o registo oficial na tabela de empréstimos com as datas do Pop-up
-            $sql_emp = "INSERT INTO emprestimos (utilizador_id, item_id, reserva_id, data_saida, data_prevista_devolucao) 
-                        VALUES (:user_id, :item_id, :reserva_id, :data_inicio, :data_fim)";
+            // 2. CORREÇÃO: Criar o registo oficial trocando item_id por livro_id
+            $sql_emp = "INSERT INTO emprestimos (utilizador_id, livro_id, reserva_id, data_saida, data_prevista_devolucao) 
+                        VALUES (:user_id, :livro_id, :reserva_id, :data_inicio, :data_fim)";
             $stmt_emp = $pdo->prepare($sql_emp);
             $stmt_emp->execute([
                 'user_id' => $id_logado,
-                'item_id' => $reserva['item_id'],
+                'livro_id' => $reserva['livro_id'],
                 'reserva_id' => $reserva_id,
                 'data_inicio' => $data_inicio,
                 'data_fim' => $data_fim
             ]);
 
-            // 3. Garantir que o artigo fica marcado como 'emprestado' (Ajustado com base no ENUM do seu banco de dados)
-            $stmt_item = $pdo->prepare("UPDATE itens SET estado = 'emprestado' WHERE id = :item_id");
-            $stmt_item->execute(['item_id' => $reserva['item_id']]);
+            // 3. CORREÇÃO: Ajustado para a tabela livros, livro_id e o estado correto ('indisponivel' de acordo com o teu enum do banco)
+            $stmt_item = $pdo->prepare("UPDATE livros SET estado = 'indisponivel' WHERE id = :livro_id");
+            $stmt_item->execute(['livro_id' => $reserva['livro_id']]);
 
             $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'Empréstimo confirmado com sucesso! Boa leitura. 🎉'];
         } else {
@@ -114,8 +113,8 @@ if ($acao === 'entregar_emprestimo') {
     try {
         $pdo->beginTransaction();
 
-        // Verificar se o empréstimo pertence mesmo ao utilizador ativo e ainda não foi devolvido
-        $stmt = $pdo->prepare("SELECT item_id FROM emprestimos WHERE id = :id AND utilizador_id = :user_id AND data_devolucao_real IS NULL");
+        // CORREÇÃO: Trocado item_id por livro_id
+        $stmt = $pdo->prepare("SELECT livro_id FROM emprestimos WHERE id = :id AND utilizador_id = :user_id AND data_devolucao_real IS NULL");
         $stmt->execute(['id' => $emprestimo_id, 'user_id' => $id_logado]);
         $emprestimo = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -124,9 +123,9 @@ if ($acao === 'entregar_emprestimo') {
             $stmt_devolucao = $pdo->prepare("UPDATE emprestimos SET data_devolucao_real = NOW() WHERE id = :id");
             $stmt_devolucao->execute(['id' => $emprestimo_id]);
 
-            // 2. Liberta o item voltando a colocá-lo como 'disponivel' para outros utilizadores no catálogo
-            $stmt_item = $pdo->prepare("UPDATE itens SET estado = 'disponivel' WHERE id = :item_id");
-            $stmt_item->execute(['item_id' => $emprestimo['item_id']]);
+            // 2. CORREÇÃO: Trocado itens por livros e item_id por livro_id
+            $stmt_item = $pdo->prepare("UPDATE livros SET estado = 'disponivel' WHERE id = :livro_id");
+            $stmt_item->execute(['livro_id' => $emprestimo['livro_id']]);
 
             $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'Artigo entregue e devolvido com sucesso! Obrigado. 👍'];
         } else {

@@ -40,8 +40,8 @@ try {
         exit();
     }
 
-    // 3. Gerar o código de levantamento aleatório de 6 caracteres (ex: A4F98D)
-    $codigo_reserva = strtoupper(substr(md5(uniqid(rand(), true)), 0, 6));
+    // 3. ALTERADO: Gerar o código de levantamento aleatório com EXATAMENTE 3 dígitos (ex: 042, 789)
+    $codigo_reserva = str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
 
     // Iniciar Transação SQL para garantir consistência (ou faz tudo ou não faz nada)
     $pdo->beginTransaction();

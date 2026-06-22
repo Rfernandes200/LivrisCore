@@ -43,7 +43,7 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
             
             <div style="display: flex; gap: 15px; align-items: center;">
                 <?php if (isset($user['tipo']) && ($user['tipo'] == 'admin' || (int)$user['tipo'] === 1)): ?>
-                    <a href="admin.php" style="color: #60a5fa; text-decoration: none; font-size: 0.9rem; font-weight: 600;">⚡ Voltar ao Painel</a>
+                    <a href="admin.php" style="color: #60a5fa; text-decoration: none; font-size: 0.9rem; font-weight: 600;">⚡Ir para o Painel</a>
                 <?php endif; ?>
                 
                 <a href="index.php" style="color: #60a5fa; text-decoration: none; font-size: 0.9rem; font-weight: 600;">Voltar ao Inicio</a> 
@@ -129,20 +129,7 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
         </div>
     </div>
 
-    <script>
-        document.querySelectorAll('.eye-icon').forEach(icon => {
-            icon.addEventListener('click', function() {
-                const input = this.previousElementSibling;
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    this.textContent = '🙈';
-                } else {
-                    input.type = 'password';
-                    this.textContent = '👁️';
-                }
-            });
-        });
-    </script>
+    
 
 </body>
 </html>

@@ -62,7 +62,7 @@ try {
         <h1>Gerir Artigos (Catálogo)</h1>
         <p class="admin-subtitle">Monitorize, filtre, edite e insira novos exemplares no acervo da biblioteca.</p>
     </div>
-    <button class="btn-edit-trigger" style="background: #10b981; height: 45px; padding: 0 20px;" onclick="abrirModalAdicionarArtigo()">➕ Adicionar Artigo</button>
+    <button class="btn-edit-trigger" style="background: #3b82f6; color: white; border: none; height: 45px; padding: 0 20px;" onclick="abrirModalAdicionarArtigo()">➕ Adicionar Artigo</button>
 </div>
 
 <div class="admin-toolbar" style="display: flex; gap: 15px; align-items: center; justify-content: space-between;">
