@@ -35,10 +35,10 @@ if ($está_logado) {
         <div class="logo"><strong>B</strong> BiblioBase</div>
         <div class="menu">
             <a href="index.php" class="<?= $pagina_atual === 'index.php' ? 'active' : ''; ?>">Catálogo</a>
+            <a href="sobre.php" class="<?= $pagina_atual === 'sobre.php' ? 'active' : ''; ?>">Sobre</a>
             
             <?php if ($está_logado): ?>
                 <a href="emprestimos.php" class="<?= $pagina_atual === 'emprestimos.php' ? 'active' : ''; ?>">Empréstimos</a>
-                <a href="meus_artigos.php" class="<?= $pagina_atual === 'meus_artigos.php' ? 'active' : ''; ?>">Os Meus Artigos</a>
                 
                 <?php if ((int)($_SESSION['utilizador_tipo'] ?? 0) === 1): ?>
                     <a href="admin.php" style="color: #60a5fa; font-weight: 600; margin-left: 15px;" class="<?= $pagina_atual === 'admin.php' ? 'active' : ''; ?>">⚡ Administração</a>

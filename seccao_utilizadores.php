@@ -25,7 +25,9 @@ try {
 
 <h1>Lista de Utilizadores</h1>
 <p class="admin-subtitle">Consulta de contas com acesso à biblioteca.</p>
-
+<button type="button" onclick="abrirModalAdicionarUtilizador()" style="background: #10b981; color: #ffffff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 20px; font-family: 'Inter', sans-serif;">
+    ➕ Novo Utilizador
+</button>
 <div class="admin-toolbar">
     <form action="admin.php" method="GET" class="search-container-admin">
         <input type="hidden" name="seccao" value="utilizadores">
@@ -87,15 +89,18 @@ try {
                         </td>
                         <td style="text-align: center;">
                             <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
-                                <button class="btn-edit-trigger" 
-                                        data-id="<?= $u['id']; ?>" 
-                                        data-nome="<?= htmlspecialchars($u['nome']); ?>" 
-                                        data-email="<?= htmlspecialchars($u['email']); ?>" 
-                                        data-telemovel="<?= htmlspecialchars($u['telemovel'] ?? ''); ?>" 
-                                        data-tipo="<?= $isAdmin ? 'admin' : 'user'; ?>" 
-                                        data-ativo="<?= $u['ativo']; ?>"
-                                        data-self="<?= $eProprioAdmin ? 'true' : 'false'; ?>"
-                                        onclick="abrirModalEditar(this)">✏️ Editar</button>
+                              <button type="button" 
+                                      class="btn-edit-trigger"
+                                      onclick="abrirModalEditar(this)" 
+                                      data-id="<?= $u['id']; ?>" 
+                                      data-nome="<?= htmlspecialchars($u['nome']); ?>" 
+                                      data-email="<?= htmlspecialchars($u['email']); ?>" 
+                                      data-telemovel="<?= htmlspecialchars($u['telemovel'] ?? ''); ?>" 
+                                      data-tipo="<?= $isAdmin ? 'admin' : 'user'; ?>" 
+                                      data-ativo="<?= $u['ativo']; ?>" 
+                                      data-self="<?= $eProprioAdmin ? 'true' : 'false'; ?>">
+                                  ✏️ Editar
+                              </button>
 
                                 <?php if (!$eProprioAdmin): ?>
                                     <form action="editar_utilizadores.php" method="POST" style="margin:0;" onsubmit="return confirm('Tem a certeza absoluta que deseja eliminar permanentemente a conta de: <?= htmlspecialchars($u['nome']); ?>?');">
