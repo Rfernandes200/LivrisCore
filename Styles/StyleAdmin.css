@@ -8,51 +8,6 @@
     font-family: 'Inter', sans-serif;
 }
 
-/* Sidebar Lateral Estilizada */
-.sidebar {
-    width: 260px;
-    background: #1e293b;
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 30px 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.sidebar-title {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #64748b;
-    padding-left: 12px;
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.sidebar-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    color: #94a3b8;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.sidebar-link:hover {
-    background: rgba(255, 255, 255, 0.03);
-    color: white;
-}
-
-.sidebar-link.active {
-    background: #3b82f6;
-    color: white;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
-}
 
 /* Conteúdo Principal */
 .admin-content {
@@ -914,4 +869,329 @@
     text-align: center;
     padding: 40px;
     color: #475569;
+}
+
+/* Isola a mudança de fundo APENAS na área do conteúdo principal */
+.admin-content {
+    background-color: #f8fafc !important;
+    /* Cinzento claro limpo */
+    color: #1e293b !important;
+    /* Texto escuro para contraste */
+    min-height: calc(100vh - 70px);
+    padding: 40px !important;
+}
+
+/* Ajusta os títulos dentro do painel claro */
+.admin-content h1 {
+    color: #0f172a !important;
+}
+
+.admin-subtitle {
+    color: #64748b !important;
+}
+
+/* Adapta as cores dos cartões mantendo exatamente os formatos originais */
+.admin-content .stat-card {
+    background: #ffffff !important;
+    /* Fundo do cartão passa a branco */
+    border: 1px solid #e2e8f0 !important;
+    /* Borda suave cinzenta */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+    /* Sombra leve */
+}
+
+/* Títulos dos cartões (Ex: UTILIZADORES) */
+.admin-content .stat-card h3 {
+    color: #475569 !important;
+    /* Cinzento escuro legível */
+}
+
+/* Números em destaque dentro dos cartões */
+.admin-content .stat-card p {
+    color: #2563eb !important;
+    /* Azul de destaque para os dados */
+}
+
+/* Configuração estrutural para permitir elementos colados ao fundo */
+.sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    height: calc(100vh - 70px) !important;
+    /* Desconta a altura da navbar */
+    position: fixed !important;
+    padding-bottom: 20px !important;
+}
+
+/* Empurrador dinâmico */
+.sidebar-spacer {
+    flex: 1 !important;
+}
+
+/* Área de Rodapé da Barra Lateral */
+.sidebar-footer {
+    padding: 15px 10px 5px 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Caixa de Perfil na Sidebar (Inspirada na Navbar original) */
+.sidebar-profile-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(30, 41, 59, 0.5);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+    max-width: 60%;
+}
+
+.user-avatar-sidebar {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #1e293b;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.user-name-sidebar {
+    font-weight: 500;
+    color: #f8fafc;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-nav-divider {
+    color: #334155;
+    font-size: 0.85rem;
+}
+
+.sidebar-logout-link {
+    font-size: 0.85rem;
+    color: #ef4444;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.sidebar-logout-link:hover {
+    text-decoration: underline;
+}
+
+/* Botão de Regresso ao Índice */
+.sidebar-back-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #f8fafc;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.sidebar-back-button:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+/* --- CONFIGURAÇÃO PARA ECRÃS GRANDES (DESKTOP) --- */
+.sidebar-responsiva {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100vh !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 260px !important;
+    padding: 20px 15px 25px 15px !important;
+    box-sizing: border-box !important;
+    z-index: 99 !important;
+    background-color: #1e293b;
+    /* Ajusta para a cor exata da tua sidebar */
+    transition: width 0.3s ease;
+}
+
+.admin-content-dinamico {
+    margin-left: 260px !important;
+    width: calc(100% - 260px) !important;
+    box-sizing: border-box !important;
+    padding: 40px !important;
+    min-height: 100vh !important;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.sidebar-menu-links {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.sidebar-title {
+    color: #64748b;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.sidebar-link.active {
+    background-color: #3b82f6 !important;
+    color: white !important;
+}
+
+/* Rodapé e Perfil */
+.custom-sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 15px;
+}
+
+.sidebar-profile-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #111827;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid #1e293b;
+}
+
+.sidebar-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.user-avatar-sidebar {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #1e293b;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.user-name-sidebar {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.sidebar-logout-link {
+    color: #ef4444;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.sidebar-back-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #f8fafc;
+    text-decoration: none;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* Ocultar o ícone de logout mobile em ecrãs grandes */
+.logo-out-mbi {
+    display: none;
+}
+
+/* --- QUEBRA DE RESPONSIVIDADE: ECRÃS PEQUENOS (TABLETS / LAPTOPS PEQUENOS) --- */
+@media (max-width: 1024px) {
+    .sidebar-responsiva {
+        width: 75px !important;
+        /* Encolhe drasticamente a barra */
+        padding: 20px 8px 25px 8px !important;
+        align-items: center !important;
+    }
+
+    /* Empurra menos o conteúdo para o lado */
+    .admin-content-dinamico {
+        margin-left: 75px !important;
+        width: calc(100% - 75px) !important;
+        padding: 20px !important;
+        /* Dá mais espaço para os botões e tabelas respirarem */
+    }
+
+    /* Esconder todos os textos descritivos */
+    .sb-text,
+    .sidebar-title,
+    .sidebar-nav-divider {
+        display: none !important;
+    }
+
+    /* Centralizar os ícones/emojis dentro dos botões compactos */
+    .sidebar-link,
+    .sidebar-back-button {
+        justify-content: center !important;
+        padding: 12px !important;
+        width: 45px;
+        height: 45px;
+        box-sizing: border-box;
+    }
+
+    .sidebar-profile-box {
+        background: none !important;
+        border: none !important;
+        padding: 0 !important;
+        flex-direction: column !important;
+        gap: 15px;
+    }
+
+    /* Mostrar o ícone de logout no modo compacto */
+    .logo-out-mbi {
+        display: inline-block !important;
+        font-size: 1.2rem;
+    }
 }

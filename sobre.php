@@ -10,7 +10,7 @@ require 'config.php';
     <title>Sobre o BiblioBase - Sistema de Biblioteca</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="Styles/StylesIndex.css">
-    <link rel="stylesheet" href="Styles/StylesIndex2.css">
+    
     <style>
         /* Define o fundo cinza claro suave em toda a página de forma fluida */
         body {

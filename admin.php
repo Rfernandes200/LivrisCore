@@ -10,6 +10,8 @@ if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !
 
 $id_admin_atual = $_SESSION['utilizador_id'] ?? null; 
 
+
+
 // Processamento de Cancelamento de Reserva
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_admin']) && $_POST['acao_admin'] === 'cancelar_reserva_admin') {
     $reserva_id = (int)$_POST['reserva_id'];
@@ -37,6 +39,7 @@ $seccao = $_GET['seccao'] ?? 'geral';
 $total_utilizadores = $pdo->query("SELECT COUNT(*) FROM utilizadores")->fetchColumn();
 $total_artigos = $pdo->query("SELECT COUNT(*) FROM livros")->fetchColumn();
 $total_reservas = $pdo->query("SELECT COUNT(*) FROM reservas WHERE status = 'pendente'")->fetchColumn();
+$total_emprestimos_ativos = $pdo->query("SELECT COUNT(*) FROM emprestimos WHERE data_devolucao_real IS NULL")->fetchColumn();
 
 $reservas = [];
 if ($seccao === 'reservas') {
@@ -63,22 +66,13 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
 </head>
 <body>
 
-    <?php require 'navbar.php'; ?>
 
-    <div class="admin-container" style="padding-top: 70px;">
-        <!-- MENU LATERAL DE NAVEGAÇÃO -->
-        <aside class="sidebar">
-            <div class="sidebar-title">Administração</div>
-            <a href="admin.php?seccao=geral" class="sidebar-link <?= $seccao === 'geral' ? 'active' : '' ?>">📊 Geral</a>
-            <a href="admin.php?seccao=utilizadores" class="sidebar-link <?= $seccao === 'utilizadores' ? 'active' : '' ?>">👥 Utilizadores</a>
-            <a href="admin.php?seccao=reservas" class="sidebar-link <?= $seccao === 'reservas' ? 'active' : '' ?>">📅 Reservas</a>
-            <a href="admin.php?seccao=emprestimos" class="sidebar-link <?= $seccao === 'emprestimos' ? 'active' : '' ?>">💼 Empréstimos</a>
-            <a href="admin.php?seccao=artigos" class="sidebar-link <?= $seccao === 'artigos' ? 'active' : '' ?>">📦 Artigos (Catálogo)</a>
-        </aside>
 
-        <!-- CONTEÚDO PRINCIPAL DINÂMICO -->
-        <main class="admin-content">
-            <!-- SESSÃO DE ALERTAS DO SISTEMA (SUCESSO / ERRO) -->
+    <div class="admin-container" style="padding-top: 0px;">
+
+    <?php require 'sidebar.php'; ?>
+
+    <main class="admin-content" style="margin-left: 260px !important; width: calc(100% - 260px) !important; box-sizing: border-box !important; padding: 40px !important; min-height: 100vh !important;">
             <?php if (isset($_SESSION['alerta'])): ?>
                 <div style="padding: 15px; margin-bottom: 20px; border-radius: 8px; font-size: 0.9rem; font-weight: 500; 
                     <?= $_SESSION['alerta']['tipo'] === 'sucesso' ? 'background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.2);' : 'background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.2);' ?>">
@@ -89,14 +83,18 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
 
             <!-- SECÇÃO: GERAL (DASHBOARD) -->
             <?php if ($seccao === 'geral'): ?>
-                <h1>Painel Geral</h1>
-                <p class="admin-subtitle">Visão unificada do estado do sistema de gestão.</p>
-                
-                <div class="dashboard-grid">
-                    <div class="stat-card"><h3>Utilizadores</h3><p><?= $total_utilizadores; ?></p></div>
-                    <div class="stat-card"><h3>Reservas Ativas</h3><p><?= $total_reservas; ?></p></div>
-                    <div class="stat-card"><h3>Artigos no Catálogo</h3><p><?= $total_artigos; ?></p></div>
-                </div>
+    <h1>Painel Geral</h1>
+    <p class="admin-subtitle">Visão unificada do estado do sistema de gestão.</p>
+    
+    <div class="dashboard-grid">
+        <div class="stat-card"><h3>Utilizadores</h3><p><?= $total_utilizadores; ?></p></div>
+        <div class="stat-card"><h3>Reservas Ativas</h3><p><?= $total_reservas; ?></p></div>
+        
+        <div class="stat-card"><h3>Empréstimos Ativos</h3><p><?= $total_emprestimos_ativos; ?></p></div>
+        
+        <div class="stat-card"><h3>Artigos no Catálogo</h3><p><?= $total_artigos; ?></p></div>
+    </div>
+
 
             <!-- SECÇÃO: UTILIZADORES -->
             <?php elseif ($seccao === 'utilizadores'): ?>
@@ -126,7 +124,7 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
     <div id="modalEditarUtilizador" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
-                <h2>✏️ Editar Perfil do Utilizador</h2>
+                <h2>Editar Perfil do Utilizador</h2>
                 <button class="btn-close-modal" onclick="fecharModalEditar()">✕</button>
             </div>
             <form id="formEditarUtilizador" action="editar_utilizadores.php" method="POST">

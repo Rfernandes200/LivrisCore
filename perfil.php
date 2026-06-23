@@ -85,9 +85,9 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
                 <p><?php echo htmlspecialchars($user['email'] ?? ''); ?></p>
                 <div class="badges">
                     <?php if (isset($user['tipo']) && ($user['tipo'] == 'admin' || (int)$user['tipo'] === 1)): ?>
-                        <span class="badge-role" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">⚡ Administrador</span>
+                        <span class="badge-role" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">Administrador</span>
                     <?php else: ?>
-                        <span class="badge-role">🔰 Utilizador</span>
+                        <span class="badge-role">Utilizador</span>
                     <?php endif; ?>
 
                     <span class="badge-date">Membro desde <?php echo date('d/m/Y', strtotime($user['data_registo'] ?? 'now')); ?></span>
