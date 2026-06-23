@@ -62,7 +62,7 @@ try {
         <h1>Gerir Artigos (Catálogo)</h1>
         <p class="admin-subtitle">Monitorize, filtre, edite e insira novos exemplares no acervo da biblioteca.</p>
     </div>
-    <button class="btn-edit-trigger" style="background: #3b82f6; color: white; border: none; height: 45px; padding: 0 20px;" onclick="abrirModalAdicionarArtigo()">➕ Adicionar Artigo</button>
+    <button class="btn-edit-trigger" style="background: #3b82f6; color: white; border: none; height: 45px; padding: 0 20px;" onclick="abrirModalAdicionarArtigo()">Adicionar Artigo</button>
 </div>
 
 <div class="admin-toolbar" style="display: flex; gap: 15px; align-items: center; justify-content: space-between;">
@@ -75,9 +75,9 @@ try {
         </div>
 
         <select name="estado" onchange="this.form.submit()" style="background: #0f172a; border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; padding: 0 15px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; outline: none; cursor: pointer; min-width: 180px; height: 45px;">
-            <option value="">⚙️ Todos os Estados</option>
-            <option value="disponivel" <?= $filtro_estado === 'disponivel' ? 'selected' : '' ?>>🟢 Disponível</option>
-            <option value="indisponivel" <?= $filtro_estado === 'indisponivel' ? 'selected' : '' ?>>🔴 Indisponível</option>
+            <option value="">Todos os Estados</option>
+            <option value="disponivel" <?= $filtro_estado === 'disponivel' ? 'selected' : '' ?>>Disponível</option>
+            <option value="indisponivel" <?= $filtro_estado === 'indisponivel' ? 'selected' : '' ?>>Indisponível</option>
         </select>
         
         <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 0 20px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; height: 45px; transition: background 0.2s;">Filtrar</button>
@@ -104,7 +104,7 @@ try {
         <tbody>
             <?php if (empty($artigos)): ?>
                 <tr>
-                    <td colspan="7" style="text-align: center; color: #64748b; padding: 40px;">❌ Nenhum artigo corresponde aos filtros aplicados.</td>
+                    <td colspan="7" style="text-align: center; color: #64748b; padding: 40px;">Nenhum artigo corresponde aos filtros aplicados.</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($artigos as $art): 
@@ -157,12 +157,12 @@ try {
                                         data-cdu="<?= htmlspecialchars($art['cdu_codigo'] ?? ''); ?>"
                                         data-estado="<?= $art['estado']; ?>"
                                         data-descricao="<?= htmlspecialchars($art['descricao'] ?? ''); ?>"
-                                        onclick="abrirModalEditarArtigo(this)">✏️</button>
+                                        onclick="abrirModalEditarArtigo(this)">Editar</button>
                                 
                                 <a href="eliminar_artigo.php?id=<?= $art['id']; ?>" 
                                    style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); padding: 4px 8px; border-radius: 6px; text-decoration: none;"
                                    title="Eliminar Artigo"
-                                   onclick="return confirm('Tem a certeza que deseja remover permanentemente o anúncio: <?= htmlspecialchars($art['titulo']); ?>?');">🗑️</a>
+                                   onclick="return confirm('Tem a certeza que deseja remover permanentemente o anúncio: <?= htmlspecialchars($art['titulo']); ?>?');">Eliminar</a>
                             </div>
                         </td>
                     </tr>

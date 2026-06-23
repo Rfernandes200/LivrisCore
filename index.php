@@ -98,115 +98,118 @@ try {
 </header>
 
 
-<main class="catalog-container" style="margin-top: 40px;">
+<main style="background: #f8fafc; width: 100%; min-height: 100vh; padding: 40px 0; margin: 0; box-sizing: border-box;">
     
-    <div style="margin-bottom: 20px; padding: 0 10px; width: 100%;">
-        <h2 class="section-title" style="margin: 0; font-family: 'Playfair Display', 'Georgia', serif; font-size: 2.2rem; color: black;">Catálogo de Livros</h2>
-    </div>
-
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 35px; padding: 0 10px; width: 100%; flex-wrap: wrap;">
+    <div class="catalog-container" style="max-width: 1280px; margin: 0 auto; padding: 0 20px; box-sizing: border-box;">
         
-        <form method="GET" action="index.php" style="display: flex; align-items: center; gap: 12px; margin: 0; flex: 1; max-width: 580px;">
-            
-            <div style="position: relative; width: 100%;">
-                <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 1.1rem;">🔍</span>
-                <input type="text" 
-                       name="pesquisa" 
-                       value="<?= htmlspecialchars($pesquisa) ?>" 
-                       placeholder="Pesquisar por título, autor ou ISBN..." 
-                       style="width: 100%; background: #0f172a; border: 1px solid #1e293b; color: white; padding: 13px 16px 13px 44px; border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.2s; box-sizing: border-box;"
-                       onfocus="this.style.borderColor='#3b82f6'" 
-                       onblur="this.style.borderColor='#1e293b'">
-            </div>
+        <div style="margin-bottom: 20px; width: 100%;">
+            <h2 class="section-title" style="margin: 0; font-family: 'Playfair Display', 'Georgia', serif; font-size: 2.2rem; color: black;">Catálogo de Livros</h2>
+        </div>
 
-            <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 13px 28px; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
-                Filtrar
-            </button>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 35px; width: 100%; flex-wrap: wrap;">
             
-            <?php if (!empty($pesquisa)): ?>
-                <a href="index.php" style="color: #64748b; font-size: 0.9rem; text-decoration: none; margin-left: 5px; white-space: nowrap;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#64748b'">Limpar</a>
+            <form method="GET" action="index.php" style="display: flex; align-items: center; gap: 12px; margin: 0; flex: 1; max-width: 580px;">
+                <div style="position: relative; width: 100%;">
+                    <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #3b82f6; font-size: 1.1rem; z-index: 2; pointer-events: none;">🔍</span>
+                    
+                    <input type="text" 
+                           name="pesquisa" 
+                           value="<?= htmlspecialchars($pesquisa) ?>" 
+                           placeholder="Pesquisar por título, autor ou ISBN..." 
+                           style="width: 100%; background: #1e293b; border: 2px solid #334155; color: #f8fafc; padding: 13px 16px 13px 48px; border-radius: 10px; font-size: 1rem; outline: none; font-weight: 500; transition: all 0.25s ease-in-out; box-sizing: border-box; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);"
+                           onfocus="this.style.borderColor='#3b82f6'; this.style.background='#0f172a'; this.style.boxShadow='0 0 0 4px rgba(59, 130, 246, 0.15), inset 0 2px 4px rgba(0,0,0,0.1)';" 
+                           onblur="this.style.borderColor='#334155'; this.style.background='#1e293b'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.2)';">
+                </div>
+
+                <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);" onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#3b82f6'; this.style.transform='none;'">
+                    Filtrar
+                </button>
+                
+                <?php if (!empty($pesquisa)): ?>
+                    <a href="index.php" style="color: #64748b; font-size: 0.9rem; text-decoration: none; margin-left: 5px; white-space: nowrap; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#64748b'">Limpar Filtro</a>
+                <?php endif; ?>
+            </form>
+
+            <?php if (isset($_SESSION['utilizador_tipo']) && ((int)$_SESSION['utilizador_tipo'] === 1 || $_SESSION['utilizador_tipo'] === 'admin')): ?>
+                <button type="button" class="btn-add-catalog" id="openAddCatalogBtn" style="background: #3b82f6; color: white; border: none; padding: 14px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 1rem; transition: all 0.2s; white-space: nowrap; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);" onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#3b82f6'; this.style.transform='none;'">
+                    <svg viewBox="0 0 24 24" fill="white" style="width: 18px; height: 18px;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    Adicionar Livro
+                </button>
             <?php endif; ?>
-        </form>
+        </div>
 
-        <?php if (isset($_SESSION['utilizador_tipo']) && ((int)$_SESSION['utilizador_tipo'] === 1 || $_SESSION['utilizador_tipo'] === 'admin')): ?>
-            <button type="button" class="btn-add-catalog" id="openAddCatalogBtn" style="background: #3b82f6; color: white; border: none; padding: 13px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 1rem; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
-                <svg viewBox="0 0 24 24" fill="white" style="width: 18px; height: 18px;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                Adicionar Livro
-            </button>
-        <?php endif; ?>
-    </div>
+        <div class="grid-itens">
+            <?php foreach($itens as $item): 
+                $itemImagem = !empty($item['imagem_url']) ? 'Uploads/'.$item['imagem_url'] : 'Images/default-cover.png';
+                $criadorTipo = 'Administrador'; 
+                $estadoLimpo = strtolower(trim($item['estado']));
+                $quemReservou = !empty($item['quem_reservou']) ? (int)$item['quem_reservou'] : null;
+            ?>
+            <div class="card">
+                <div class="card-header" style="position: relative; width: 100%; height: 220px; background: rgba(0, 0, 0, 0.02); display: flex; align-items: center; justify-content: center; overflow: hidden; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    
+                    <span class="status-badge <?= $item['estado'] ?>" style="position: absolute; top: 12px; right: 12px; z-index: 10; <?php 
+                        if($estadoLimpo === 'reservado') {
+                            echo 'background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3);';
+                        } ?>">
+                        <?= strtoupper($item['estado']) ?>
+                    </span>
+                    
+                    <img src="<?= $itemImagem ?>" alt="Capa de <?= htmlspecialchars($item['titulo']) ?>" style="width: 100%; height: 100%; object-fit: contain; padding: 15px; filter: drop-shadow(0px 8px 16px rgba(0, 0, 0, 0.15));">
+                </div>
 
-    <div class="grid-itens">
-        <?php foreach($itens as $item): 
-            $itemImagem = !empty($item['imagem_url']) ? 'Uploads/'.$item['imagem_url'] : 'Images/default-cover.png';
-            $criadorTipo = 'Administrador'; 
-            $estadoLimpo = strtolower(trim($item['estado']));
-            $quemReservou = !empty($item['quem_reservou']) ? (int)$item['quem_reservou'] : null;
-        ?>
-        <div class="card">
-            <div class="card-header" style="position: relative; width: 100%; height: 220px; background: rgba(255, 255, 255, 0.03); display: flex; align-items: center; justify-content: center; overflow: hidden; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                
-                <span class="status-badge <?= $item['estado'] ?>" style="position: absolute; top: 12px; right: 12px; z-index: 10; <?php 
-                    if($estadoLimpo === 'reservado') {
-                        echo 'background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3);';
-                    } ?>">
-                    <?= strtoupper($item['estado']) ?>
-                </span>
-                
-                <img src="<?= $itemImagem ?>" alt="Capa de <?= htmlspecialchars($item['titulo']) ?>" style="width: 100%; height: 100%; object-fit: contain; padding: 15px; filter: drop-shadow(0px 8px 16px rgba(0, 0, 0, 0.3));">
-            </div>
+                <div class="card-body">
+                    <small class="category-label">CDU <?= htmlspecialchars($item['cdu_codigo']) ?></small>
+                    <h3><?= htmlspecialchars($item['titulo']) ?></h3>
+                    <p class="author-text"><?= htmlspecialchars($item['autor_artista'] ?? 'Autor Não Associado') ?></p>
+                    
+                    <div class="card-footer">
+                        <button type="button" class="btn-details js-open-details" 
+                                data-titulo="<?= htmlspecialchars($item['titulo']) ?>"
+                                data-autor="<?= htmlspecialchars($item['autor_artista'] ?? 'Não Associado') ?>"
+                                data-cdu="CDU <?= htmlspecialchars($item['cdu_codigo']) ?> - <?= htmlspecialchars($item['cdu_nome']) ?>"
+                                data-isbn="<?= htmlspecialchars($item['isbn']) ?>"
+                                data-editora="<?= htmlspecialchars($item['editora']) ?>"
+                                data-ano="<?= htmlspecialchars($item['ano_edicao']) ?>"
+                                data-estado="<?= htmlspecialchars($item['estado']) ?>"
+                                data-descricao="<?= htmlspecialchars($item['descricao']) ?>"
+                                data-imagem="<?= $itemImagem ?>"
+                                data-criador="<?= $criadorTipo ?>">
+                            Detalhes
+                        </button>
 
-            <div class="card-body">
-                <small class="category-label">CDU <?= htmlspecialchars($item['cdu_codigo']) ?></small>
-                <h3><?= htmlspecialchars($item['titulo']) ?></h3>
-                <p class="author-text"><?= htmlspecialchars($item['autor_artista'] ?? 'Autor Não Associado') ?></p>
-                
-                <div class="card-footer">
-                    <button type="button" class="btn-details js-open-details" 
-                            data-titulo="<?= htmlspecialchars($item['titulo']) ?>"
-                            data-autor="<?= htmlspecialchars($item['autor_artista'] ?? 'Não Associado') ?>"
-                            data-cdu="CDU <?= htmlspecialchars($item['cdu_codigo']) ?> - <?= htmlspecialchars($item['cdu_nome']) ?>"
-                            data-isbn="<?= htmlspecialchars($item['isbn']) ?>"
-                            data-editora="<?= htmlspecialchars($item['editora']) ?>"
-                            data-ano="<?= htmlspecialchars($item['ano_edicao']) ?>"
-                            data-estado="<?= htmlspecialchars($item['estado']) ?>"
-                            data-descricao="<?= htmlspecialchars($item['descricao']) ?>"
-                            data-imagem="<?= $itemImagem ?>"
-                            data-criador="<?= $criadorTipo ?>">
-                        Detalhes
-                    </button>
-
-                    <?php if($estadoLimpo === 'disponivel'): ?>
-                        <?php if ($bloqueado_por_limite): ?>
-                            <button disabled class="btn-disabled" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); cursor: not-allowed; font-size: 0.8rem; padding: 8px 12px; border-radius: 6px;" title="Atingiu o limite de 2 reservas pendentes.">
-                                Limite Atingido
-                            </button>
-                        <?php else: ?>
-                            <button type="button" class="btn-action js-open-reserve" 
-                                    data-id="<?= $item['id'] ?>" 
-                                    data-titulo="<?= htmlspecialchars($item['titulo']) ?>"
-                                    style="border:none; cursor:pointer;">
-                                Reservar
-                            </button>
-                        <?php endif; ?>
-                    <?php elseif($estadoLimpo === 'reservado'): ?>
-                        <?php if($id_logado && $id_logado === $quemReservou): ?>
-                            <form action="cancela_reserva.php" method="POST" style="margin:0; display:inline;">
-                                <input type="hidden" name="livro_id" value="<?= $item['id'] ?>">
-                                <button type="submit" class="btn-action" style="background: #ef4444; color: white; border:none; cursor:pointer;">
-                                    Cancelar
+                        <?php if($estadoLimpo === 'disponivel'): ?>
+                            <?php if ($bloqueado_por_limite): ?>
+                                <button disabled class="btn-disabled" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); cursor: not-allowed; font-size: 0.8rem; padding: 8px 12px; border-radius: 6px;" title="Atingiu o limite de 2 reservas pendentes.">
+                                    Limite Atingido
                                 </button>
-                            </form>
+                            <?php else: ?>
+                                <button type="button" class="btn-action js-open-reserve" 
+                                        data-id="<?= $item['id'] ?>" 
+                                        data-titulo="<?= htmlspecialchars($item['titulo']) ?>"
+                                        style="border:none; cursor:pointer;">
+                                    Reservar
+                                </button>
+                            <?php endif; ?>
+                        <?php elseif($estadoLimpo === 'reservado'): ?>
+                            <?php if($id_logado && $id_logado === $quemReservou): ?>
+                                <form action="cancela_reserva.php" method="POST" style="margin:0; display:inline;">
+                                    <input type="hidden" name="livro_id" value="<?= $item['id'] ?>">
+                                    <button type="submit" class="btn-action" style="background: #ef4444; color: white; border:none; cursor:pointer;">
+                                        Cancelar
+                                    </button>
+                                </form>
+                            <?php else: ?>
+                                <button disabled class="btn-disabled" style="background: rgba(234, 179, 8, 0.1); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.2); cursor: not-allowed;">Reservado</button>
+                            <?php endif; ?>
                         <?php else: ?>
-                            <button disabled class="btn-disabled" style="background: rgba(234, 179, 8, 0.1); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.2); cursor: not-allowed;">Reservado</button>
+                            <button disabled class="btn-disabled">Indisponível</button>
                         <?php endif; ?>
-                    <?php else: ?>
-                        <button disabled class="btn-disabled">Indisponível</button>
-                    <?php endif; ?>
+                    </div>
                 </div>
             </div>
+            <?php endforeach; ?>
         </div>
-        <?php endforeach; ?>
     </div>
 </main>
 

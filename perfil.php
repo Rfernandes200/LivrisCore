@@ -9,13 +9,28 @@ if (!isset($_SESSION['utilizador_id'])) {
 
 $id = $_SESSION['utilizador_id'];
 
-// CORREÇÃO: Busca os dados certos incluindo o telemovel usando as colunas exatas da BD
+// 1. VERIFICAÇÃO DE EMPRÉSTIMOS ATIVOS
+$pode_eliminar = true;
+$total_pendente = 0;
+
+try {
+    $stmt_check = $pdo->prepare("SELECT COUNT(*) FROM emprestimos WHERE utilizador_id = :id AND data_devolucao_real IS NULL");
+    $stmt_check->execute(['id' => $id]);
+    $total_pendente = (int)$stmt_check->fetchColumn();
+    
+    if ($total_pendente > 0) {
+        $pode_eliminar = false;
+    }
+} catch (Exception $e) {
+    $pode_eliminar = false;
+}
+
+// Lógica de busca dos dados do utilizador
 try {
     $stmt = $pdo->prepare("SELECT nome, email, telemovel, tipo, data_registo FROM utilizadores WHERE id = :id");
     $stmt->execute(['id' => $id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
-    // Caso ocorra alguma falha, mantém um plano de contingência seguro
     $stmt = $pdo->prepare("SELECT nome, email, telemovel, tipo FROM utilizadores WHERE id = :id");
     $stmt->execute(['id' => $id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -34,23 +49,35 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
     <link rel="stylesheet" href="Styles/StylesIndex.css">
     <link rel="stylesheet" href="Styles/StylePerfil.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+        .btn-delete:disabled {
+            background: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body class="perfil-body">
 
-    <div class="perfil-header">
-        <nav class="navbar-perfil">
-            <a href="index.php" class="logo"><strong>B</strong> BiblioBase</a>
-            
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <?php if (isset($user['tipo']) && ($user['tipo'] == 'admin' || (int)$user['tipo'] === 1)): ?>
-                    <a href="admin.php" style="color: #60a5fa; text-decoration: none; font-size: 0.9rem; font-weight: 600;">⚡Ir para o Painel</a>
-                <?php endif; ?>
-                
-                <a href="index.php" style="color: #60a5fa; text-decoration: none; font-size: 0.9rem; font-weight: 600;">Voltar ao Inicio</a> 
-                <a href="logout.php" class="logout-btn">Sair</a>
-            </div>
-        </nav>
+    <?php require 'navbar.php'; ?>
 
+    <div class="perfil-header" style="margin-top: 70px;">
         <div class="perfil-banner-content">
             <div class="avatar-circle"><?php echo $inicial; ?></div>
             <div class="user-info-header">
@@ -124,12 +151,37 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
                     </div>
                 </div>
 
-                <button type="submit" class="btn-save">Guardar alterações</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; flex-wrap: wrap; gap: 15px;">
+                    
+                    <button type="submit" class="btn-save" style="margin-bottom: 0;">
+                        Guardar alterações
+                    </button>
+                    
+                    <?php if (!$pode_eliminar): ?>
+                        <button type="button" class="btn-delete" disabled title="Ação Bloqueada: Possui <?= $total_pendente; ?> empréstimo(s) ativo(s). Devolva os livros primeiro.">
+                            Eliminar a minha conta
+                        </button>
+                    <?php else: ?>
+                        <button type="button" class="btn-delete" onclick="dispararExclusao();">
+                            Eliminar a minha conta
+                        </button>
+                    <?php endif; ?>
+                    
+                </div>
             </form>
+
+            <form id="formDeletarConta" action="eliminar_conta.php" method="POST" style="display: none;"></form>
+
         </div>
     </div>
 
-    
+    <script>
+        function dispararExclusao() {
+            if (confirm("Tem a certeza absoluta de que deseja eliminar a sua conta? Esta ação NÃO pode ser desfeita e perderá o acesso ao sistema!")) {
+                document.getElementById('formDeletarConta').submit();
+            }
+        }
+    </script>
 
 </body>
 </html>
