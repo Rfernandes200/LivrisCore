@@ -53,7 +53,6 @@ if ($seccao === 'reservas') {
 $todos_autores = $pdo->query("SELECT id, nome FROM autores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
 $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER BY codigo ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -66,51 +65,50 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
 </head>
 
 <style>
-    <style>
-    * {
-        /* Se não for a sidebar, removemos qualquer fundo escuro herdado */
-        background-color: transparent;
-    }
-    
-    html, 
-    body, 
-    main, 
-    div, 
-    section, 
-    article,
-    .admin-container, 
-    .admin-content,
-    .admin-content-dinamico {
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-    }
-
-    /* Manter a sidebar escura intocável para não estragar o menu */
-    .sidebar, 
-    .sidebar-responsiva, 
-    .sidebar * {
-        background-color: #1e293b !important; /* Mantém a cor escura só na barra lateral */
-    }
-    
-    /* Remover paddings ou margens que forcem o miolo a descolar das bordas do browser */
+    /* Estilos globais limpos para evitar fugas de background */
     body {
         margin: 0 !important;
         padding: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
         overflow-x: hidden;
+        background-color: #ffffff !important;
+    }
+    
+    .admin-container {
+        display: flex;
+        min-height: 100vh;
+        background-color: #ffffff !important;
+    }
+
+    /* O miolo agora adapta-se de forma inteligente através do CSS externo */
+    .admin-content {
+        margin-left: 260px;
+        width: calc(100% - 260px);
+        box-sizing: border-box;
+        padding: 40px;
+        min-height: 100vh;
+        background-color: #ffffff !important;
+        transition: margin-left 0.3s ease, width 0.3s ease;
+    }
+
+    /* Se o ecrã for menor, o miolo expande-se dinamicamente */
+    @media (max-width: 1024px) {
+        .admin-content {
+            margin-left: 72px;
+            width: calc(100% - 72px);
+            padding: 20px;
+        }
     }
 </style>
-</style>
-<<body >>
 
+<body>
 
+    <div class="admin-container">
 
-    <div class="admin-container" <div class="admin-container" style="background-color: #ffffff !important; min-height: 100vh; padding-top: 0px;">">
+        <?php require 'sidebar.php'; ?>
 
-    <?php require 'sidebar.php'; ?>
-
-    <main class="admin-content" style="margin-left: 260px !important; width: calc(100% - 260px) !important; box-sizing: border-box !important; padding: 40px !important; min-height: 100vh !important;">
+        <main class="admin-content">
             <?php if (isset($_SESSION['alerta'])): ?>
                 <div style="padding: 15px; margin-bottom: 20px; border-radius: 8px; font-size: 0.9rem; font-weight: 500; 
                     <?= $_SESSION['alerta']['tipo'] === 'sucesso' ? 'background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.2);' : 'background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.2);' ?>">
@@ -120,24 +118,17 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
             <?php endif; ?>
 
             <?php if ($seccao === 'geral'): ?>
-    <?php include 'seccao_geral.php'; ?>
+                <?php include 'seccao_geral.php'; ?>
 
-
-
-            <!-- SECÇÃO: UTILIZADORES -->
             <?php elseif ($seccao === 'utilizadores'): ?>
                <?php include 'seccao_utilizadores.php'; ?>
 
-            <!-- SECÇÃO: RESERVAS -->
             <?php elseif ($seccao === 'reservas'): ?>
-                
                 <?php include 'seccao_reservas.php'; ?>
 
-            <!-- SECÇÃO: EMPRÉSTIMOS -->
             <?php elseif ($seccao === 'emprestimos'): ?>
                 <?php include 'seccao_emprestimos.php'; ?>
 
-            <!-- SECÇÃO: ARTIGOS -->
             <?php elseif ($seccao === 'artigos'): ?>
                 <?php include 'seccao_artigos.php'; ?>
             <?php endif; ?>

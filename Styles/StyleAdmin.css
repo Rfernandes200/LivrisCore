@@ -915,112 +915,17 @@
     /* Azul de destaque para os dados */
 }
 
-/* Configuração estrutural para permitir elementos colados ao fundo */
-.sidebar {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-start !important;
-    height: calc(100vh - 70px) !important;
-    /* Desconta a altura da navbar */
-    position: fixed !important;
-    padding-bottom: 20px !important;
-}
+/* ==========================================================================
+   ESTRUTURA DA SIDEBAR E CONTEÚDO (ADMIN) - CORRIGIDO
+   ========================================================================== */
 
-/* Empurrador dinâmico */
-.sidebar-spacer {
-    flex: 1 !important;
-}
+/* Configuração Estrutural da Sidebar (Desktop) */
+/* ==========================================================================
+   BARRA LATERAL E CONTEÚDO DINÂMICO - UNIFICAÇÃO MÁXIMA (CORRIGIDO)
+   ========================================================================== */
 
-/* Área de Rodapé da Barra Lateral */
-.sidebar-footer {
-    padding: 15px 10px 5px 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-/* Caixa de Perfil na Sidebar (Inspirada na Navbar original) */
-.sidebar-profile-box {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(30, 41, 59, 0.5);
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.sidebar-profile-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    color: inherit;
-    max-width: 60%;
-}
-
-.user-avatar-sidebar {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: #1e293b;
-    color: white;
-    font-weight: 600;
-    font-size: 0.85rem;
-    flex-shrink: 0;
-}
-
-.user-name-sidebar {
-    font-weight: 500;
-    color: #f8fafc;
-    font-size: 0.85rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.sidebar-nav-divider {
-    color: #334155;
-    font-size: 0.85rem;
-}
-
-.sidebar-logout-link {
-    font-size: 0.85rem;
-    color: #ef4444;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.sidebar-logout-link:hover {
-    text-decoration: underline;
-}
-
-/* Botão de Regresso ao Índice */
-.sidebar-back-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px;
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #f8fafc;
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 500;
-    border-radius: 8px;
-    transition: background 0.2s ease;
-}
-
-.sidebar-back-button:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-    color: #ffffff;
-}
-
-/* --- CONFIGURAÇÃO PARA ECRÃS GRANDES (DESKTOP) --- */
+/* Forçar comportamento correto quer uses a classe .sidebar ou .sidebar-responsiva */
+.sidebar,
 .sidebar-responsiva {
     display: flex !important;
     flex-direction: column !important;
@@ -1033,20 +938,22 @@
     padding: 20px 15px 25px 15px !important;
     box-sizing: border-box !important;
     z-index: 99 !important;
-    background-color: #1e293b;
-    /* Ajusta para a cor exata da tua sidebar */
-    transition: width 0.3s ease;
+    background-color: #1e293b !important;
+    transition: all 0.3s ease !important;
 }
 
+/* Forçar o conteúdo central a respeitar a largura em Desktop */
 .admin-content-dinamico {
     margin-left: 260px !important;
     width: calc(100% - 260px) !important;
     box-sizing: border-box !important;
     padding: 40px !important;
     min-height: 100vh !important;
-    transition: margin-left 0.3s ease, width 0.3s ease;
+    display: block !important;
+    transition: all 0.3s ease !important;
 }
 
+/* Links do Menu Lateral */
 .sidebar-menu-links {
     display: flex;
     flex-direction: column;
@@ -1079,15 +986,19 @@
     color: white !important;
 }
 
-/* Rodapé e Perfil */
+/* Área de Rodapé da Barra Lateral */
+.sidebar-footer,
 .custom-sidebar-footer {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-top: 15px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding-top: 15px !important;
+    margin-top: auto !important;
+    /* Empurra o rodapé para o fundo do ecrã */
 }
 
+/* Caixa de Perfil na Sidebar */
 .sidebar-profile-box {
     display: flex;
     align-items: center;
@@ -1103,6 +1014,7 @@
     align-items: center;
     gap: 8px;
     text-decoration: none;
+    max-width: 70%;
 }
 
 .user-avatar-sidebar {
@@ -1116,12 +1028,21 @@
     color: white;
     font-weight: 600;
     font-size: 0.85rem;
+    flex-shrink: 0;
 }
 
 .user-name-sidebar {
     color: white;
     font-size: 0.9rem;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-nav-divider {
+    color: #334155;
+    font-size: 0.85rem;
 }
 
 .sidebar-logout-link {
@@ -1131,6 +1052,11 @@
     font-weight: 500;
 }
 
+.sidebar-logout-link:hover {
+    text-decoration: underline;
+}
+
+/* Botão de Regresso ao Índice */
 .sidebar-back-button {
     display: flex;
     align-items: center;
@@ -1150,49 +1076,51 @@
     display: none;
 }
 
-/* --- QUEBRA DE RESPONSIVIDADE: ECRÃS PEQUENOS (TABLETS / LAPTOPS PEQUENOS) --- */
+/* --- RESPONSIVIDADE COMPACTA (TABLETS / LAPTOPS) --- */
 @media (max-width: 1024px) {
+
+    .sidebar,
     .sidebar-responsiva {
         width: 75px !important;
-        /* Encolhe drasticamente a barra */
         padding: 20px 8px 25px 8px !important;
         align-items: center !important;
     }
 
-    /* Empurra menos o conteúdo para o lado */
     .admin-content-dinamico {
         margin-left: 75px !important;
         width: calc(100% - 75px) !important;
         padding: 20px !important;
-        /* Dá mais espaço para os botões e tabelas respirarem */
     }
 
-    /* Esconder todos os textos descritivos */
+    /* Esconder textos quando colapsado */
     .sb-text,
     .sidebar-title,
-    .sidebar-nav-divider {
+    .sidebar-nav-divider,
+    .user-name-sidebar {
         display: none !important;
     }
 
-    /* Centralizar os ícones/emojis dentro dos botões compactos */
+    /* Ajustar links para o modo compacto */
     .sidebar-link,
     .sidebar-back-button {
         justify-content: center !important;
-        padding: 12px !important;
-        width: 45px;
-        height: 45px;
-        box-sizing: border-box;
+        padding: 0 !important;
+        width: 45px !important;
+        height: 45px !important;
+        border-radius: 8px !important;
     }
 
     .sidebar-profile-box {
         background: none !important;
         border: none !important;
         padding: 0 !important;
-        flex-direction: column !important;
-        gap: 15px;
+        justify-content: center !important;
     }
 
-    /* Mostrar o ícone de logout no modo compacto */
+    .sidebar-profile-link {
+        max-width: 100% !important;
+    }
+
     .logo-out-mbi {
         display: inline-block !important;
         font-size: 1.2rem;
