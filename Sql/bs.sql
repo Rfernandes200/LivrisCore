@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 21-Jun-2026 às 23:50
+-- Tempo de geração: 22-Jun-2026 às 22:52
 -- Versão do servidor: 10.4.32-MariaDB
 -- versão do PHP: 8.2.12
 
@@ -11,15 +11,16 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Banco de dados: `bibliobase`
+-- Criação e Seleção Segura da Base de Dados (CORREÇÃO AQUI)
 --
+CREATE DATABASE IF NOT EXISTS `bibliobase` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `bibliobase`;
 
 -- --------------------------------------------------------
 
@@ -37,7 +38,8 @@ CREATE TABLE `autores` (
 --
 
 INSERT INTO `autores` (`id`, `nome`) VALUES
-(1, 'José');
+(1, 'José'),
+(2, 'Miguel');
 
 -- --------------------------------------------------------
 
@@ -81,6 +83,15 @@ CREATE TABLE `emprestimos` (
   `data_devolucao_real` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Extraindo dados da tabela `emprestimos`
+--
+
+INSERT INTO `emprestimos` (`id`, `utilizador_id`, `livro_id`, `reserva_id`, `data_saida`, `data_prevista_devolucao`, `data_devolucao_real`) VALUES
+(1, 1, 1, 3, '2026-06-21 23:00:00', '2026-07-07', '2026-06-22 10:21:40'),
+(2, 1, 3, 5, '2026-06-21 23:00:00', '2026-07-07', '2026-06-22 13:27:46'),
+(4, 3, 1, 13, '2026-06-23 23:00:00', '2026-07-09', '2026-06-22 18:07:36');
+
 -- --------------------------------------------------------
 
 --
@@ -105,7 +116,10 @@ CREATE TABLE `livros` (
 --
 
 INSERT INTO `livros` (`id`, `titulo`, `isbn`, `editora`, `ano_edicao`, `cdu_codigo`, `descricao`, `imagem`, `imagem_url`, `estado`) VALUES
-(1, 'Livro', '98766667576', 'Porto editora', 2026, '6', 'afefewg', NULL, '0b1de6ae1f68d7506c98f8ca146605e7.png', 'disponivel');
+(1, 'Livro', '98766667576', 'Porto editora', 2026, '6', 'afefewg', NULL, '0b1de6ae1f68d7506c98f8ca146605e7.png', 'disponivel'),
+(3, 'Memorial do Convento', '978-972-0-04671-1', 'Porto editora', 2022, '2', 'pt9+90+', NULL, 'capa_6a390ae0804e77.59021355.png', 'reservado'),
+(5, 'Livroad', '978-972-0-04671-1', 'Porto editora', 2026, '1', 'o8ro', 'capa_6a390c687b5a13.21060649.png', 'capa_6a390c687b5a13.21060649.png', 'disponivel'),
+(8, 'Livro', '978-972-0-04671-1', 'Porto editora', 2023, '2', 'grsrg', 'capa_6a398c23b46b18.08041270.png', 'capa_6a398c23b46b18.08041270.png', 'disponivel');
 
 -- --------------------------------------------------------
 
@@ -123,7 +137,10 @@ CREATE TABLE `livro_autores` (
 --
 
 INSERT INTO `livro_autores` (`livro_id`, `autor_id`) VALUES
-(1, 1);
+(1, 1),
+(3, 1),
+(5, 1),
+(8, 1);
 
 -- --------------------------------------------------------
 
@@ -140,6 +157,22 @@ CREATE TABLE `reservas` (
   `status` enum('pendente','concluida','cancelada') NOT NULL DEFAULT 'pendente',
   `codigo_validacao` int(3) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Extraindo dados da tabela `reservas`
+--
+
+INSERT INTO `reservas` (`id`, `utilizador_id`, `livro_id`, `data_inicio`, `data_fim`, `status`, `codigo_validacao`) VALUES
+(1, 1, 1, '2026-06-21 21:59:06', '0000-00-00 00:00:00', 'cancelada', 0),
+(2, 1, 1, '2026-06-22 09:17:35', '0000-00-00 00:00:00', 'cancelada', 0),
+(3, 1, 1, '2026-06-22 09:19:47', '0000-00-00 00:00:00', 'concluida', 946),
+(4, 1, 1, '2026-06-22 09:21:45', '0000-00-00 00:00:00', 'cancelada', 296),
+(5, 1, 3, '2026-06-22 10:29:06', '0000-00-00 00:00:00', 'concluida', 60),
+(10, 1, 1, '2026-06-22 13:22:03', '0000-00-00 00:00:00', 'cancelada', 595),
+(11, 1, 3, '2026-06-22 13:22:06', '0000-00-00 00:00:00', 'cancelada', 14),
+(13, 3, 1, '2026-06-22 17:06:10', '0000-00-00 00:00:00', 'concluida', 596),
+(14, 1, 3, '2026-06-22 18:23:25', '0000-00-00 00:00:00', 'cancelada', 695),
+(15, 1, 3, '2026-06-22 18:50:39', '0000-00-00 00:00:00', 'pendente', 278);
 
 -- --------------------------------------------------------
 
@@ -163,7 +196,8 @@ CREATE TABLE `utilizadores` (
 --
 
 INSERT INTO `utilizadores` (`id`, `nome`, `email`, `telemovel`, `password_hash`, `tipo`, `ativo`, `data_registo`) VALUES
-(1, 'Rodrigo', 'a@a.a', '987747853', '$2y$10$LfnMfcU8mkYy4oEHzyHK8OViefTew.5I1vGdFa/Uy9xrPV8bxuQkq', 1, 1, '2026-06-21 18:43:17');
+(1, 'Rodrigo', 'a@a.a', '987747853', '$2y$10$TLD6xL8ms0VQyx1d8yl9xuwPRKLN9qd1HC160mkaNfK6B6/vcZtGi', 1, 1, '2026-06-21 18:43:17'),
+(3, 'João Baião', 'g@g.g', '987747853', '$2y$10$HHBWBTmv6PIX.pvqwI0AJOu8lVSA8ekTqtRDVyncyljj4zsyiDZXW', 0, 1, '2026-06-22 17:03:40');
 
 --
 -- Índices para tabelas despejadas
@@ -228,31 +262,31 @@ ALTER TABLE `utilizadores`
 -- AUTO_INCREMENT de tabela `autores`
 --
 ALTER TABLE `autores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `emprestimos`
 --
 ALTER TABLE `emprestimos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de tabela `livros`
 --
 ALTER TABLE `livros`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de tabela `reservas`
 --
 ALTER TABLE `reservas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de tabela `utilizadores`
 --
 ALTER TABLE `utilizadores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Restrições para despejos de tabelas

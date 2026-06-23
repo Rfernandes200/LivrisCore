@@ -65,42 +65,199 @@ try {
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
     <style>
+        body {
+            background-color: #0f172a;
+            color: #cbd5e1;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .main-wrapper {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            margin-bottom: 35px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding-bottom: 20px;
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.3rem;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .section-card {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 35px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        }
+
+        .table-section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .title-pendente { color: #f59e0b; }
+        .title-ativo { color: #3b82f6; }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .custom-table th {
+            background: rgba(15, 23, 42, 0.4);
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 14px 18px;
+            border-bottom: 2px solid rgba(255,255,255,0.05);
+        }
+
+        .custom-table td {
+            padding: 16px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.92rem;
+            vertical-align: middle;
+        }
+
+        .custom-table tr:hover td {
+            background: rgba(255,255,255,0.01);
+        }
+
+        /* Badges e Tags customizados */
+        .cdu-badge {
+            background: rgba(148, 163, 184, 0.1);
+            color: #94a3b8;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-status-ativo {
+            background: rgba(59, 130, 246, 0.15) !important;
+            color: #60a5fa !important;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Alertas de Tempo Dinâmicos */
+        .data-aviso-normal {
+            color: #cbd5e1;
+        }
+        .data-aviso-urgente {
+            color: #f87171;
+            font-weight: 600;
+            animation: pulse-warn 2s infinite;
+        }
+        .data-subtexto {
+            display: block;
+            font-size: 0.78rem;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .data-aviso-urgente .data-subtexto { color: #fca5a5; }
+
+        @keyframes pulse-warn {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        /* Botões Estilizados */
+        .btn-action-base {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-confirmar-modal-custom {
+            background: #10b981;
+            color: #0f172a;
+        }
+        .btn-confirmar-modal-custom:hover {
+            background: #34d399;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-cancelar-inline-custom {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        .btn-cancelar-inline-custom:hover {
+            background: #ef4444;
+            color: #fff;
+        }
+
         .btn-entregar-inline {
             background: #3b82f6;
             color: #fff;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
         }
         .btn-entregar-inline:hover {
             background: #2563eb;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
         }
+
+        .alert-container-box {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .alert-sucesso-custom { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #34d399; }
+        .alert-erro-custom { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; }
     </style>
 </head>
 <body>
 
     <?php require 'navbar.php'; ?>
 
-    <div class="admin-container admin-container-block">
-        <main class="admin-content admin-content-padded">
-            
-            <?php if (isset($_SESSION['alerta'])): ?>
-                <div class="alert-box <?= $_SESSION['alerta']['tipo'] === 'sucesso' ? 'alert-sucesso' : 'alert-erro' ?>">
-                    <?= $_SESSION['alerta']['mensagem']; ?>
-                </div>
-                <?php unset($_SESSION['alerta']); ?>
-            <?php endif; ?>
-
+    <div class="main-wrapper">
+        
+        <header class="page-header">
             <h1>Os Meus Empréstimos e Solicitações</h1>
-            <p class="admin-subtitle admin-subtitle-margin">Confirme as suas reservas ativas inserindo o código ou acompanhe os artigos em sua posse.</p>
+            <p>Confirme as suas reservas ativas inserindo o código ou acompanhe os artigos em sua posse de forma simples.</p>
+        </header>
 
+        <?php if (isset($_SESSION['alerta'])): ?>
+            <div class="alert-container-box <?= $_SESSION['alerta']['tipo'] === 'sucesso' ? 'alert-sucesso-custom' : 'alert-erro-custom' ?>">
+                <?= $_SESSION['alerta']['mensagem']; ?>
+            </div>
+            <?php unset($_SESSION['alerta']); ?>
+        <?php endif; ?>
+
+        <section class="section-card">
             <h2 class="table-section-title title-pendente">⏳ Reservas Efetuadas (Aguardar Validação)</h2>
-            <div class="table-responsive table-wrapper">
-                <table class="agent-table">
+            <div style="overflow-x: auto;">
+                <table class="custom-table">
                     <thead>
                         <tr>
                             <th style="width: 80px;">ID</th>
@@ -113,29 +270,28 @@ try {
                     <tbody>
                         <?php if (empty($reservas_pendentes)): ?>
                             <tr>
-                                <td colspan="5" style="text-align: center; color: #64748b; padding: 25px;">Não tem nenhuma reserva pendente de validação.</td>
+                                <td colspan="5" style="text-align: center; color: #64748b; padding: 35px;">Não tem nenhuma reserva pendente de validação de momento.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($reservas_pendentes as $res): ?>
                                 <tr>
-                                    <td class="td-id">#<?= $res['id']; ?></td>
+                                    <td style="color: #64748b; font-weight: 600;">#<?= $res['id']; ?></td>
                                     <td style="font-weight: 600; color: #f8fafc;"><?= htmlspecialchars($res['item_titulo']); ?></td>
-                                    <td style="color: #94a3b8;"><?= $res['cat_nome'] ? htmlspecialchars($res['cat_nome']) : 'Sem classe'; ?></td>
-                                    <td><?= date('d/m/Y H:i', strtotime($res['data_inicio'])); ?></td>
-                                    <td style="text-align: center; display: flex; gap: 8px; justify-content: center; align-items: center; border:none;">
-                                        
-                                        <button type="button" class="btn-confirmar-modal" 
-                                                style="cursor: pointer;"
-                                                onclick='abrirModalComDias(<?= (int)$res['id']; ?>, <?= json_encode($res['item_titulo'], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>
-                                            Confirmar
-                                        </button>
+                                    <td><span class="cdu-badge"><?= $res['cat_nome'] ? htmlspecialchars($res['cat_nome']) : 'Sem classe'; ?></span></td>
+                                    <td style="color: #94a3b8;"><?= date('d/m/Y H:i', strtotime($res['data_inicio'])); ?></td>
+                                    <td style="text-align: center;">
+                                        <div style="display: flex; gap: 10px; justify-content: center;">
+                                            <button type="button" class="btn-action-base btn-confirmar-modal-custom" 
+                                                    onclick='abrirModalComDias(<?= (int)$res['id']; ?>, <?= json_encode($res['item_titulo'], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>
+                                                Confirmar
+                                            </button>
 
-                                        <form action="processo_emprestimo.php" method="POST" style="margin:0;" onsubmit="return confirm('Tem a certeza que deseja cancelar esta reserva?');">
-                                            <input type="hidden" name="acao" value="cancelar_reserva">
-                                            <input type="hidden" name="reserva_id" value="<?= $res['id']; ?>">
-                                            <button type="submit" class="btn-cancelar-inline">Cancelar</button>
-                                        </form>
-
+                                            <form action="processo_emprestimo.php" method="POST" style="margin:0;" onsubmit="return confirm('Tem a certeza que deseja cancelar esta reserva?');">
+                                                <input type="hidden" name="acao" value="cancelar_reserva">
+                                                <input type="hidden" name="reserva_id" value="<?= $res['id']; ?>">
+                                                <button type="submit" class="btn-action-base btn-cancelar-inline-custom">Cancelar</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -143,10 +299,12 @@ try {
                     </tbody>
                 </table>
             </div>
+        </section>
 
+        <section class="section-card">
             <h2 class="table-section-title title-ativo">📖 Artigos Contigo (Em Curso)</h2>
-            <div class="table-responsive table-wrapper">
-                <table class="agent-table">
+            <div style="overflow-x: auto;">
+                <table class="custom-table">
                     <thead>
                         <tr>
                             <th style="width: 80px;">ID</th>
@@ -160,31 +318,35 @@ try {
                     <tbody>
                         <?php if (empty($emprestimos_ativos)): ?>
                             <tr>
-                                <td colspan="6" style="text-align: center; color: #64748b; padding: 25px;">Não tens nenhum artigo emprestado em tua posse de momento.</td>
+                                <td colspan="6" style="text-align: center; color: #64748b; padding: 35px;">Não tens nenhum artigo emprestado em tua posse de momento.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($emprestimos_ativos as $emp): 
                                 $hoje = strtotime(date('Y-m-d'));
                                 $data_limite = strtotime($emp['data_prevista_devolucao']);
-                                $dias_restantes = round(($data_limite - $hoje) / (60 * 60 * 24));
+                                $dias_restantes = (int)round(($data_limite - $hoje) / (60 * 60 * 24));
                             ?>
                                 <tr>
-                                    <td class="td-id">#<?= $emp['id']; ?></td>
-                                    <td style="font-weight: 500; color: #f8fafc;"><?= htmlspecialchars($emp['item_titulo']); ?></td>
-                                    <td style="color: #94a3b8;"><?= $emp['cat_nome'] ? htmlspecialchars($emp['cat_nome']) : 'Sem classe'; ?></td>
-                                    <td><?= date('d/m/Y', strtotime($emp['data_saida'])); ?></td>
+                                    <td style="color: #64748b; font-weight: 600;">#<?= $emp['id']; ?></td>
+                                    <td style="font-weight: 600; color: #f8fafc;"><?= htmlspecialchars($emp['item_titulo']); ?></td>
+                                    <td><span class="cdu-badge"><?= $emp['cat_nome'] ? htmlspecialchars($emp['cat_nome']) : 'Sem classe'; ?></span></td>
+                                    <td style="color: #94a3b8;"><?= date('d/m/Y', strtotime($emp['data_saida'])); ?></td>
                                     <td class="<?= ($dias_restantes <= 2) ? 'data-aviso-urgente' : 'data-aviso-normal' ?>">
                                         <?= date('d/m/Y', strtotime($emp['data_prevista_devolucao'])); ?>
-                                        <small class="data-subtexto">(Faltam <?= $dias_restantes; ?> dias)</small>
+                                        <small class="data-subtexto">
+                                            <?= $dias_restantes < 0 ? "Atrasado por " . abs($dias_restantes) . " dias!" : "Faltam $dias_restantes dias"; ?>
+                                        </small>
                                     </td>
-                                    <td style="text-align: center; display: flex; gap: 8px; justify-content: center; align-items: center; border: none;">
-                                        <span class="badge-status-ativo">Ativo</span>
-                                        
-                                        <form action="processo_emprestimo.php" method="POST" style="margin:0;" onsubmit="return confirm('Confirmas que queres proceder à entrega deste artigo?');">
-                                            <input type="hidden" name="acao" value="entregar_emprestimo">
-                                            <input type="hidden" name="emprestimo_id" value="<?= $emp['id']; ?>">
-                                            <button type="submit" class="btn-entregar-inline">Entregar</button>
-                                        </form>
+                                    <td style="text-align: center;">
+                                        <div style="display: flex; gap: 12px; justify-content: center; align-items: center;">
+                                            <span class="badge-status-ativo">Ativo</span>
+                                            
+                                            <form action="processo_emprestimo.php" method="POST" style="margin:0;" onsubmit="return confirm('Confirmas que queres proceder à entrega deste artigo?');">
+                                                <input type="hidden" name="acao" value="entregar_emprestimo">
+                                                <input type="hidden" name="emprestimo_id" value="<?= $emp['id']; ?>">
+                                                <button type="submit" class="btn-action-base btn-entregar-inline">Entregar</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -192,7 +354,8 @@ try {
                     </tbody>
                 </table>
             </div>
-        </main>
+        </section>
+
     </div>
 
     <div id="confirmReserveModal" style="display: none; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(10, 15, 30, 0.92) !important; justify-content: center; align-items: center; z-index: 999999999999 !important;">
