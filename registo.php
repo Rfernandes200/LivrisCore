@@ -5,10 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criar Conta - BiblioBase</title>
     <link rel="stylesheet" href="Styles/StyleRegistro.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        
+    </style>
 </head>
 <body>
     <div class="login-screen">
+        
         <div class="login-sidebar">
             <div class="sidebar-brand">
                 <span class="brand-box">B</span> BiblioBase
@@ -22,6 +28,13 @@
 
         <div class="login-main">
             <div class="login-content-wrapper">
+                
+                <div class="top-navigation">
+                    <p class="nav-serif-text">
+                        Deseja navegar? <a href="index.php">Voltar ao início</a>
+                    </p>
+                </div>
+
                 <h1>Criar conta</h1>
                 <p class="subtitle">Junte-se à BiblioBase e comece a explorar o catálogo.</p>
                 
@@ -64,8 +77,10 @@
                     <button type="submit" class="btn-submit">Criar conta</button>
                 </form>
 
-                <div class="footer-link">
-                    Já tem conta? <a href="login.php">Iniciar sessão</a>
+                <div class="bottom-navigation">
+                    <p class="nav-serif-text">
+                        Já tem conta? <a href="login.php">Iniciar sessão</a>
+                    </p>
                 </div>
             </div>
         </div>
