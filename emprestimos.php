@@ -60,180 +60,97 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Os Meus Empréstimos - BiblioBase</title>
     <link rel="stylesheet" href="Styles/StylesIndex.css">
-    <link rel="stylesheet" href="Styles/StyleAdmin.css">
-    <link rel="stylesheet" href="Styles/Styleempres.css">
+    <link rel="stylesheet" href="Styles/Styleempres.css">   
+    
+    
+    
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
+    <!-- Para não permitir conflitos entre os estilos globais e os estilos da página emprestimos -->
     <style>
-        body {
-            background-color: #0f172a;
-            color: #cbd5e1;
-            font-family: 'Inter', sans-serif;
+    html, body {
+            background-color: #f1f5f9 !important; 
+            background: #f1f5f9 !important;
+            color: #334155 !important;
+            font-family: 'Inter', sans-serif !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Garante que a estrutura da página limpa o fundo escuro do cabeçalho */
+        .main-wrapper header,
+        .page-header {
+            background: transparent !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            border-bottom: 1px solid #cbd5e1 !important;
+            margin-bottom: 35px;
+            padding: 10px 0 20px 0 !important;
         }
 
         .main-wrapper {
             max-width: 1200px;
             margin: 40px auto;
             padding: 0 20px;
-        }
-
-        .page-header {
-            margin-bottom: 35px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            padding-bottom: 20px;
+            box-sizing: border-box;
         }
 
         .page-header h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.3rem;
-            color: #ffffff;
-            margin-bottom: 8px;
+            font-family: 'Playfair Display', serif !important;
+            font-size: 2.3rem !important;
+            color: #0f172a !important; 
+            margin-bottom: 8px !important;
         }
 
         .page-header p {
-            color: #64748b;
-            font-size: 1rem;
+            color: #64748b !important;
+            font-size: 1rem !important;
         }
 
+        /* Força os cartões a ficarem brancos e destacados no fundo cinzento */
         .section-card {
-            background: #1e293b;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 35px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            background: #ffffff !important; 
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 12px !important;
+            padding: 24px !important;
+            margin-bottom: 35px !important;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05) !important;
         }
 
-        .table-section-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .title-pendente { color: #f59e0b; }
-        .title-ativo { color: #3b82f6; }
-
+        /* Tabelas limpas */
         .custom-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
+            width: 100% !important;
+            border-collapse: collapse !important;
         }
 
         .custom-table th {
-            background: rgba(15, 23, 42, 0.4);
-            color: #94a3b8;
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 14px 18px;
-            border-bottom: 2px solid rgba(255,255,255,0.05);
+            background: #f8fafc !important;
+            color: #64748b !important;
+            padding: 14px 18px !important;
+            border-bottom: 2px solid #e2e8f0 !important;
+            font-size: 0.85rem !important;
+            text-transform: uppercase !important;
         }
 
         .custom-table td {
-            padding: 16px 18px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            font-size: 0.92rem;
-            vertical-align: middle;
+            padding: 16px 18px !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            color: #334155 !important;
+            background: transparent !important;
         }
 
         .custom-table tr:hover td {
-            background: rgba(255,255,255,0.01);
+            background: #f8fafc !important;
         }
 
-        /* Badges e Tags customizados */
         .cdu-badge {
-            background: rgba(148, 163, 184, 0.1);
-            color: #94a3b8;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .badge-status-ativo {
-            background: rgba(59, 130, 246, 0.15) !important;
-            color: #60a5fa !important;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        /* Alertas de Tempo Dinâmicos */
-        .data-aviso-normal {
-            color: #cbd5e1;
-        }
-        .data-aviso-urgente {
-            color: #f87171;
-            font-weight: 600;
-            animation: pulse-warn 2s infinite;
-        }
-        .data-subtexto {
-            display: block;
-            font-size: 0.78rem;
-            color: #64748b;
-            margin-top: 2px;
-        }
-        .data-aviso-urgente .data-subtexto { color: #fca5a5; }
-
-        @keyframes pulse-warn {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-
-        /* Botões Estilizados */
-        .btn-action-base {
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-        }
-
-        .btn-confirmar-modal-custom {
-            background: #10b981;
-            color: #0f172a;
-        }
-        .btn-confirmar-modal-custom:hover {
-            background: #34d399;
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
-        }
-
-        .btn-cancelar-inline-custom {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-        .btn-cancelar-inline-custom:hover {
-            background: #ef4444;
-            color: #fff;
-        }
-
-        .btn-entregar-inline {
-            background: #3b82f6;
-            color: #fff;
-        }
-        .btn-entregar-inline:hover {
-            background: #2563eb;
-            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
-        }
-
-        .alert-container-box {
-            padding: 14px 18px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-        .alert-sucesso-custom { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #34d399; }
-        .alert-erro-custom { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; }
+            background: #f1f5f9 !important;
+            color: #475569 !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 4px 8px !important;
+            border-radius: 4px !important;
+        }    
     </style>
 </head>
 <body>
@@ -254,6 +171,7 @@ try {
             <?php unset($_SESSION['alerta']); ?>
         <?php endif; ?>
 
+        <!-- SECCÃO 1: RESERVAS PENDENTES -->
         <section class="section-card">
             <h2 class="table-section-title title-pendente">⏳ Reservas Efetuadas (Aguardar Validação)</h2>
             <div style="overflow-x: auto;">
@@ -276,9 +194,9 @@ try {
                             <?php foreach ($reservas_pendentes as $res): ?>
                                 <tr>
                                     <td style="color: #64748b; font-weight: 600;">#<?= $res['id']; ?></td>
-                                    <td style="font-weight: 600; color: #f8fafc;"><?= htmlspecialchars($res['item_titulo']); ?></td>
+                                    <td style="font-weight: 600; color: #1e293b;"><?= htmlspecialchars($res['item_titulo']); ?></td>
                                     <td><span class="cdu-badge"><?= $res['cat_nome'] ? htmlspecialchars($res['cat_nome']) : 'Sem classe'; ?></span></td>
-                                    <td style="color: #94a3b8;"><?= date('d/m/Y H:i', strtotime($res['data_inicio'])); ?></td>
+                                    <td style="color: #475569;"><?= date('d/m/Y H:i', strtotime($res['data_inicio'])); ?></td>
                                     <td style="text-align: center;">
                                         <div style="display: flex; gap: 10px; justify-content: center;">
                                             <button type="button" class="btn-action-base btn-confirmar-modal-custom" 
@@ -301,6 +219,7 @@ try {
             </div>
         </section>
 
+        <!-- SECÇÃO 2: EMPRÉSTIMOS ATIVOS -->
         <section class="section-card">
             <h2 class="table-section-title title-ativo">📖 Artigos Contigo (Em Curso)</h2>
             <div style="overflow-x: auto;">
@@ -328,9 +247,9 @@ try {
                             ?>
                                 <tr>
                                     <td style="color: #64748b; font-weight: 600;">#<?= $emp['id']; ?></td>
-                                    <td style="font-weight: 600; color: #f8fafc;"><?= htmlspecialchars($emp['item_titulo']); ?></td>
+                                    <td style="font-weight: 600; color: #1e293b;"><?= htmlspecialchars($emp['item_titulo']); ?></td>
                                     <td><span class="cdu-badge"><?= $emp['cat_nome'] ? htmlspecialchars($emp['cat_nome']) : 'Sem classe'; ?></span></td>
-                                    <td style="color: #94a3b8;"><?= date('d/m/Y', strtotime($emp['data_saida'])); ?></td>
+                                    <td style="color: #475569;"><?= date('d/m/Y', strtotime($emp['data_saida'])); ?></td>
                                     <td class="<?= ($dias_restantes <= 2) ? 'data-aviso-urgente' : 'data-aviso-normal' ?>">
                                         <?= date('d/m/Y', strtotime($emp['data_prevista_devolucao'])); ?>
                                         <small class="data-subtexto">
@@ -358,13 +277,14 @@ try {
 
     </div>
 
-    <div id="confirmReserveModal" style="display: none; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(10, 15, 30, 0.92) !important; justify-content: center; align-items: center; z-index: 999999999999 !important;">
-        <div style="background: #1e293b; padding: 30px; border-radius: 12px; max-width: 480px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); border: 1px solid #475569; font-family: 'Inter', sans-serif;">
+    <!-- MODAL DE CONFIRMAÇÃO -->
+    <div id="confirmReserveModal" style="display: none; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15, 23, 42, 0.6) !important; justify-content: center; align-items: center; z-index: 999999999999 !important;">
+        <div style="background: #ffffff; padding: 30px; border-radius: 12px; max-width: 480px; width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif;">
             
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
                 <div>
-                    <small style="color: #34d399; font-weight: bold; font-size: 0.75rem; letter-spacing: 1px; display:block; margin-bottom:4px;">VALIDAR RESERVA</small>
-                    <h2 id="modalTargetTitulo" style="color: #f8fafc; margin: 0; font-size: 1.25rem; font-weight: 600;">Oficializar Empréstimo</h2>
+                    <small style="color: #059669; font-weight: bold; font-size: 0.75rem; letter-spacing: 1px; display:block; margin-bottom:4px;">VALIDAR RESERVA</small>
+                    <h2 id="modalTargetTitulo" style="color: #0f172a; margin: 0; font-size: 1.25rem; font-weight: 600;">Oficializar Empréstimo</h2>
                 </div>
                 <button type="button" id="closeConfirmModalBtn" style="background: none; border: none; color: #94a3b8; font-size: 2.2rem; cursor: pointer; line-height: 0.8;">&times;</button>
             </div>
@@ -375,30 +295,30 @@ try {
 
                 <div style="display: flex; gap: 15px; margin-bottom: 25px;">
                     <div style="flex: 1; position: relative;">
-                        <label style="color: #94a3b8; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE INÍCIO</label>
+                        <label style="color: #475569; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE INÍCIO</label>
                         <input type="date" name="data_inicio" id="modalInputDataInicio" required 
                                onkeydown="return false" 
                                onclick="if(typeof this.showPicker === 'function') this.showPicker();"
-                               style="width: 100%; padding: 11px; padding-right: 30px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 6px; font-size:0.9rem; cursor: pointer;">
+                               style="width: 100%; padding: 11px; padding-right: 30px; background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-size:0.9rem; cursor: pointer;">
                     </div>
                     
                     <div style="flex: 1; position: relative;">
-                        <label style="color: #94a3b8; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE FIM (MÁX. <?=$limite_dias?> DIAS)</label>
+                        <label style="color: #475569; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE FIM (MÁX. <?=$limite_dias?> DIAS)</label>
                         <input type="date" name="data_fim" id="modalInputDataFim" required 
                                onkeydown="return false" 
                                onclick="if(typeof this.showPicker === 'function') this.showPicker();"
-                               style="width: 100%; padding: 11px; padding-right: 30px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 6px; font-size:0.9rem; cursor: pointer;">
+                               style="width: 100%; padding: 11px; padding-right: 30px; background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-size:0.9rem; cursor: pointer;">
                     </div>
                 </div>
 
-                <div style="margin-bottom: 25px; border-top: 1px solid #334155; padding-top: 15px;">
-                    <label style="color: #94a3b8; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 8px;">CÓDIGO DE SEGURANÇA (3 DÍGITOS) *</label>
-                    <input type="text" name="codigo_validacao" required maxlength="3" pattern="\d{3}" placeholder="000" style="width: 100%; padding: 12px; background: #0f172a; color: #34d399; font-size: 1.6rem; text-align: center; font-weight: bold; border: 1px solid #334155; border-radius: 6px; letter-spacing: 6px;">
+                <div style="margin-bottom: 25px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                    <label style="color: #475569; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 8px;">CÓDIGO DE SEGURANÇA (3 DÍGITOS) *</label>
+                    <input type="text" name="codigo_validacao" required maxlength="3" pattern="\d{3}" placeholder="000" style="width: 100%; padding: 12px; background: #f8fafc; color: #059669; font-size: 1.6rem; text-align: center; font-weight: bold; border: 1px solid #cbd5e1; border-radius: 6px; letter-spacing: 6px;">
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #334155; padding-top: 15px;">
-                    <button type="button" id="cancelConfirmModalBtn" style="padding: 10px 18px; background: transparent; color: #94a3b8; border: 1px solid #334155; border-radius: 6px; cursor: pointer; font-weight:500;">Voltar</button>
-                    <button type="submit" style="padding: 10px 18px; background: #34d399; color: #0f172a; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Confirmar</button>
+                <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                    <button type="button" id="cancelConfirmModalBtn" style="padding: 10px 18px; background: transparent; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-weight:500;">Voltar</button>
+                    <button type="submit" style="padding: 10px 18px; background: #10b981; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Confirmar</button>
                 </div>
             </form>
         </div>

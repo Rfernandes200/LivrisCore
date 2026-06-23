@@ -1,9 +1,3 @@
-/* --- Este estilo apesar do nome admin.css está aser usado tambem nos ficheiro de
-emprestimos por ter alguns atributos utilizados no emprestimo
-e tambem podem existir classes não utilizadas em nenhuma parte do projeto por causa
-das alterações ao longo do tempo
---- */
-
 .admin-container {
     display: flex;
     min-height: 100vh;

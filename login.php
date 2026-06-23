@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entrar - BiblioBase</title>
-    <link rel="stylesheet" href="Styles/StylesIndex.css">
+    <link rel="stylesheet" href="Styles/StylesIndex.css">   
 </head>
 <body class="auth-body">
 
@@ -21,7 +21,7 @@
             </div>
             <div class="quote-author">— Anónimo</div>
             <div class="sidebar-icons">
-                <span>📖</span> <span>💿</span> <span>🎬</span>
+                
             </div>
         </div>
     </div>
