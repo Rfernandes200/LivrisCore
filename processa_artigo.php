@@ -11,7 +11,7 @@ if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $titulo         = trim($_POST['titulo'] ?? '');
     
-    // Recebe o array de autores vindo do Select2 múltiplo
+    // CORREÇÃO: O name correto que vem do formulário HTML é 'autor_id' (enviado via array pelo JS/HTML)
     $autores_ids    = $_POST['autor_id'] ?? []; 
     
     $cdu_codigo     = trim($_POST['cdu_codigo'] ?? ''); 
@@ -21,6 +21,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $editora        = trim($_POST['editora'] ?? '');
     $ano_edicao     = (int)($_POST['ano_edicao'] ?? 0);
     
+    $origem = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+
+    // [NOVA VALIDAÇÃO: ISBN DUPLICADO]
+    if (!empty($isbn)) {
+        $stmt_check = $pdo->prepare("SELECT COUNT(*) FROM livros WHERE isbn = :isbn");
+        $stmt_check->execute(['isbn' => $isbn]);
+        
+        if ((int)$stmt_check->fetchColumn() > 0) {
+            $_SESSION['alerta'] = [
+                'tipo' => 'erro',
+                'mensagem' => '❌ Erro: Já existe um livro registado com este código ISBN!'
+            ];
+            header("Location: " . $origem);
+            exit; // Para o script imediatamente para não fazer upload nem INSERT
+        }
+    }
+
     $nome_imagem_bd = null;
     
     // Configuração do Upload da Imagem
@@ -41,8 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
-
-    $origem = $_SERVER['HTTP_REFERER'] ?? 'index.php';
 
     // TRATAMENTO DOS AUTORES: Garantir formato numérico, remover vazios e duplicados
     if (is_array($autores_ids)) {

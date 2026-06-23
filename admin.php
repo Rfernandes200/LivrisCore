@@ -10,8 +10,26 @@ if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !
 
 $id_admin_atual = $_SESSION['utilizador_id'] ?? null; 
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Sanatizar o ISBN recebido
+    $isbn = isset($_POST['isbn']) ? trim($_POST['isbn']) : '';
+    $titulo = isset($_POST['titulo']) ? trim($_POST['titulo']) : '';
 
-
+    // [VALIDAÇÃO DO ISBN DUPLICADO]
+    if (!empty($isbn)) {
+        $stmt_check = $pdo->prepare("SELECT COUNT(*) FROM livros WHERE isbn = :isbn");
+        $stmt_check->execute(['isbn' => $isbn]);
+        
+        if ((int)$stmt_check->fetchColumn() > 0) {
+            // Se já existir, interrompe e avisa o utilizador
+            echo "<script>
+                    alert('Erro: Já existe um livro registado com este código ISBN!');
+                    window.history.back();
+                  </script>";
+            exit;
+        }
+    }
+}
 // Processamento de Cancelamento de Reserva
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_admin']) && $_POST['acao_admin'] === 'cancelar_reserva_admin') {
     $reserva_id = (int)$_POST['reserva_id'];
@@ -51,8 +69,11 @@ if ($seccao === 'reservas') {
 }
 
 $todos_autores = $pdo->query("SELECT id, nome FROM autores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
-$todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER BY codigo ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+// CORREÇÃO AQUI: Forçamos a ordenação limpa por código na variável que o teu modal do admin usa!
+$todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER BY codigo + 0 ASC, codigo ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -226,156 +247,113 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
     </div>
 
     <!-- 3. MODAL: ADICIONAR ARTIGO -->
-    <div id="modalAdicionarArtigo" class="modal-overlay">
-        <div class="modal-box" style="max-width: 600px;">
-            <div class="modal-header">
-                <h2> Adicionar Novo Artigo ao Catálogo</h2>
-                <button class="btn-close-modal" onclick="fecharModalAdicionarArtigo()">✕</button>
+<div id="modalEditarArtigo" class="modal-overlay">
+    <div class="modal-box" style="max-width: 600px; display: flex; flex-direction: column; overflow: hidden;">
+        
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 0.7rem; color: #eab308; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ MODIFICAR ARTIGO ]</span>
+                <h2>Editar Detalhes do Livro</h2>
             </div>
-            <form action="inserir_artigo.php" method="POST" enctype="multipart/form-data">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group-modal">
-                        <label>Título do Livro/Artigo</label>
-                        <input type="text" name="titulo" placeholder="Ex: O Principezinho" required>
-                    </div>
-                    <div class="form-group-modal">
-                        <label>ISBN</label>
-                        <input type="text" name="isbn" placeholder="Ex: 9789722524223">
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
-                    <div class="form-group-modal">
-                        <label>Editora</label>
-                        <input type="text" name="editora" placeholder="Ex: Porto Editora">
-                    </div>
-                    <div class="form-group-modal">
-                        <label>Ano de Edição</label>
-                        <input type="number" name="ano_edicao" min="1000" max="2026" placeholder="Ex: 2020">
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
-                    <div class="form-group-modal">
-                        <label>Autor Principal</label>
-                        <select name="autor_id" required style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
-                            <option value="">Selecione o Autor...</option>
-                            <?php foreach ($todos_autores as $autor): ?>
-                                <option value="<?= $autor['id']; ?>"><?= htmlspecialchars($autor['nome']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group-modal">
-                        <label>Categoria (CDU)</label>
-                        <select name="cdu_codigo" required style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
-                            <option value="">Selecione a Classe...</option>
-                            <?php foreach ($todas_categorias as $cat): ?>
-                                <option value="<?= htmlspecialchars($cat['codigo']); ?>"><?= htmlspecialchars($cat['codigo'] . ' - ' . $cat['descricao']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
-                    <div class="form-group-modal">
-                        <label>Estado Inicial</label>
-                        <select name="estado" style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
-                            <option value="disponivel"> Disponível</option>
-                            <option value="indisponivel">Indisponível</option>
-                        </select>
-                    </div>
-                    <div class="form-group-modal">
-                        <label>Imagem da Capa</label>
-                        <input type="file" name="imagem_capa" accept="image/*" style="padding: 5px 0;">
-                    </div>
-                </div>
-                <div class="form-group-modal" style="margin-top: 10px;">
-                    <label>Descrição / Resumo</label>
-                    <textarea name="descricao" rows="3" placeholder="Insira a sinopse ou notas do exemplar..." style="width: 100%; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 10px; font-family: inherit; resize: vertical;"></textarea>
-                </div>
-                <div class="modal-footer" style="margin-top: 20px;">
-                    <button type="button" class="btn-modal btn-modal-cancel" onclick="fecharModalAdicionarArtigo()">Cancelar</button>
-                    <button type="submit" class="btn-modal btn-modal-save" style="background: #10b981;">Adicionar Artigo</button>
-                </div>
-            </form>
+            <button type="button" class="btn-close-modal" onclick="fecharModalEditarArtigo()">✕</button>
         </div>
-    </div>
 
-    <!-- 4. MODAL: EDITAR ARTIGO EXISTENTE -->
-    <div id="modalEditarArtigo" class="modal-overlay">
-        <div class="modal-box" style="max-width: 600px;">
-            <div class="modal-header">
-                <h2> Editar Detalhes do Artigo</h2>
-                <button class="btn-close-modal" onclick="fecharModalEditarArtigo()">✕</button>
-            </div>
-            <form action="editar_artigo.php" method="POST" enctype="multipart/form-data">
-                <input type="hidden" id="edit_artigo_id" name="artigo_id">
+        <form action="editar_artigo.php" method="POST" enctype="multipart/form-data" style="margin: 0; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
+            
+            <input type="hidden" id="edit_artigo_id" name="artigo_id">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">TÍTULO DO LIVRO *</label>
+                    <input type="text" id="edit_titulo" name="titulo" required style="width: 100%; height: 45px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
+                </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group-modal">
-                        <label>Título do Livro/Artigo</label>
-                        <input type="text" id="edit_titulo" name="titulo" required>
-                    </div>
-                    <div class="form-group-modal">
-                        <label>ISBN</label>
-                        <input type="text" id="edit_isbn" name="isbn">
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
-                    <div class="form-group-modal">
-                        <label>Editora</label>
-                        <input type="text" id="edit_editora" name="editora">
-                    </div>
-                    <div class="form-group-modal">
-                        <label>Ano de Edição</label>
-                        <input type="number" id="edit_ano" name="ano_edicao" min="1000" max="2026">
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
-                    <div class="form-group-modal">
-                        <label>Autor Principal</label>
-                        <select id="edit_autor_id" name="autor_id" required style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
-                            <?php foreach ($todos_autores as $autor): ?>
-                                <option value="<?= $autor['id']; ?>"><?= htmlspecialchars($autor['nome']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group-modal">
-                        <label>Categoria (CDU)</label>
-                        <select id="edit_cdu_codigo" name="cdu_codigo" required style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
-                            <?php foreach ($todas_categorias as $cat): ?>
-                                <option value="<?= htmlspecialchars($cat['codigo']); ?>"><?= htmlspecialchars($cat['codigo'] . ' - ' . $cat['descricao']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
-                    <div class="form-group-modal">
-                        <label>Estado</label>
-                        <select id="edit_estado" name="estado" style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
-                            <option value="disponivel">Disponível</option>
-                            <option value="indisponivel">Indisponível</option>
-                        </select>
-                    </div>
-                    <div class="form-group-modal">
-                        <label>Substituir Capa (Opcional)</label>
-                        <input type="file" name="imagem_capa" accept="image/*" style="padding: 5px 0;">
-                    </div>
-                </div>
-                <div class="form-group-modal" style="margin-top: 10px;">
-                    <label>Descrição / Resumo</label>
-                    <textarea id="edit_descricao" name="descricao" rows="3" style="width: 100%; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 10px; font-family: inherit; resize: vertical;"></textarea>
-                </div>
-                <div class="modal-footer" style="margin-top: 20px;">
-                    <button type="button" class="btn-modal btn-modal-cancel" onclick="fecharModalEditarArtigo()">Cancelar</button>
-                    <button type="submit" class="btn-modal btn-modal-save" style="background: #3b82f6;">Atualizar Artigo</button>
-                </div>
-            </form>
-        </div>
-    </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">AUTOR(ES) DO LIVRO *</label>
+                    <div id="container-autores-edit" style="display: flex; flex-direction: column; gap: 8px;">
+                        
+                        <div class="linha-autor-edit" style="display: flex; gap: 6px; align-items: center;">
+                            <select name="autor_id[]" class="select-autor-dinamico-edit" required style="height: 45px; flex-grow: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
+                                <option value="" disabled selected>Selecione um Autor...</option>
+                                <?php foreach($todos_autores as $autor): ?>
+                                    <option value="<?= $autor['id']; ?>"><?= htmlspecialchars($autor['nome']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="button" id="btn-add-autor-row-edit" style="height: 45px; width: 45px; min-width: 45px; border: none; border-radius: 6px; background: #10b981; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 600;">+</button>
+                        </div>
 
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">CÓDIGO ISBN *</label>
+                    <input type="text" id="edit_isbn" name="isbn" required style="width: 100%; height: 45px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">CLASSIFICAÇÃO CDU *</label>
+                    <select id="edit_cdu_codigo" name="cdu_codigo" required style="height: 45px; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
+                        <option value="" disabled selected>Selecione a Classe CDU...</option>
+                        <?php foreach ($todas_categorias as $cat): ?>
+                            <option value="<?= htmlspecialchars($cat['codigo']); ?>" style="background:#0b0f19; color:white;"><?= htmlspecialchars($cat['codigo'] . ' - ' . $cat['descricao']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">EDITORA *</label>
+                    <input type="text" id="edit_editora" name="editora" required style="width: 100%; height: 45px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">ANO DE EDIÇÃO *</label>
+                    <input type="number" id="edit_ano" name="ano_edicao" min="1000" max="2026" required style="width: 100%; height: 45px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">ESTADO ACTUAL *</label>
+                    <select id="edit_estado" name="estado" required style="height: 45px; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
+                        <option value="disponivel" style="background:#0b0f19;">Disponível</option>
+                        <option value="reservado" style="background:#0b0f19;">Reservado</option>
+                        <option value="indisponivel" style="background:#0b0f19;">Indisponível</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">SINOPSE / RESUMO *</label>
+                <textarea id="edit_descricao" name="descricao" rows="4" required style="resize: vertical; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 12px 14px; box-sizing: border-box; font-family: inherit;"></textarea>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">SUBSTITUIR CAPA (OPCIONAL)</label>
+                <input type="file" name="imagem" accept="image/*" style="width: 100%; height: 45px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: #64748b; padding: 10px 14px; box-sizing: border-box; font-family: inherit;">
+                <small style="color: #64748b; font-size: 0.75rem; margin-top: 4px; display:block;">Deixe vazio para manter a imagem atual.</small>
+            </div>
+            
+            <div class="modal-footer" style="margin-top: 10px; padding-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn-modal btn-modal-cancel" onclick="fecharModalEditarArtigo()">Cancelar Edição</button>
+                <button type="submit" class="btn-modal btn-modal-save" style="background: #eab308; color: #0b0f19; font-weight: 700;">Atualizar Artigo</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<select id="template-select-autor" style="display: none;">
+    <option value="" disabled selected>Selecione um Autor...</option>
+    <?php foreach($todos_autores as $autor): ?>
+        <option value="<?= $autor['id']; ?>"><?= htmlspecialchars($autor['nome']); ?></option>
+    <?php endforeach; ?>
+</select>
     <!-- ==================================================================
          SCRIPTS JAVASCRIPT GERAIS DO PAINEL
          ================================================================== -->
-
-    <script>
+<script>
+/**
+ * BIBLIOBASE - GESTÃO DE MODAIS
+ * Versão otimizada para CSS com suporte a transições (.show)
+ */
 /**
  * BIBLIOBASE - GESTÃO DE MODAIS
  * Versão otimizada para CSS com suporte a transições (.show)
@@ -456,6 +434,109 @@ window.addEventListener('click', function(event) {
             alternarModal(id, false);
         }
     });
+});
+
+// 5. ADICIONAR LINHA DE AUTOR (Com validações de preenchimento, limite máximo e duplicados)
+document.addEventListener('click', function(event) {
+    if (event.target && event.target.id === 'btn-add-autor-row') {
+        const container = document.getElementById('container-autores');
+        if (!container) return;
+        
+        const selectsAtuais = container.querySelectorAll('.select-autor-dinamico');
+        const ultimoSelect = selectsAtuais[selectsAtuais.length - 1];
+
+        // VALIDAÇÃO 1: Obriga a preencher o campo atual antes de criar um novo espaço
+        if (ultimoSelect && ultimoSelect.value === "") {
+            alert("Por favor, selecione um autor no campo atual antes de adicionar outro.");
+            ultimoSelect.focus();
+            return;
+        }
+
+        // VALIDAÇÃO 2: Evita duplicados (Verifica se o autor do último campo já existe nos campos anteriores)
+        let valoresSelecionados = [];
+        let temDuplicado = false;
+        
+        selectsAtuais.forEach(select => {
+            if (select.value !== "") {
+                if (valoresSelecionados.includes(select.value)) {
+                    temDuplicado = true;
+                }
+                valoresSelecionados.push(select.value);
+            }
+        });
+
+        if (temDuplicado) {
+            alert("Este autor já foi selecionado num campo anterior. Por favor, altere para um autor diferente.");
+            ultimoSelect.selectedIndex = 0; // Limpa o campo com erro
+            ultimoSelect.focus();
+            return;
+        }
+
+        // VALIDAÇÃO 3: Bloqueia a criação de mais caixas do que os autores registados na BD
+        const totalAutoresDisponiveis = ultimoSelect.options.length - 1;
+        if (selectsAtuais.length >= totalAutoresDisponiveis) {
+            alert("Não existem mais autores disponíveis para associar a este artigo.");
+            return;
+        }
+        
+        // Se passou em tudo, cria a nova linha estruturada
+        const newRow = document.createElement('div');
+        newRow.style.display = 'flex';
+        newRow.style.gap = '6px';
+        newRow.style.alignItems = 'center';
+        
+        // Clona o elemento select e redefine para o estado vazio inicial
+        const newSelect = ultimoSelect.cloneNode(true);
+        newSelect.selectedIndex = 0; 
+        
+        // Cria o botão de remoção rápida (-)
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.style.height = '45px';
+        removeBtn.style.width = '45px';
+        removeBtn.style.minWidth = '45px';
+        removeBtn.style.background = '#ef4444';
+        removeBtn.style.border = 'none';
+        removeBtn.style.borderRadius = '6px';
+        removeBtn.style.color = 'white';
+        removeBtn.style.fontSize = '1.5rem';
+        removeBtn.style.cursor = 'pointer';
+        removeBtn.style.display = 'flex';
+        removeBtn.style.alignItems = 'center';
+        removeBtn.style.justifyContent = 'center';
+        
+        removeBtn.addEventListener('click', function() {
+            newRow.remove();
+        });
+        
+        newRow.appendChild(newSelect);
+        newRow.appendChild(removeBtn);
+        container.appendChild(newRow);
+    }
+});
+
+// Extra: Adiciona verificação em tempo real caso o utilizador mude um select antigo para um valor duplicado
+document.addEventListener('change', function(event) {
+    if (event.target && event.target.classList.contains('select-autor-dinamico')) {
+        const container = document.getElementById('container-autores');
+        if (!container) return;
+
+        const selectsAtuais = container.querySelectorAll('.select-autor-dinamico');
+        let valores = [];
+        
+        selectsAtuais.forEach(select => {
+            if (select.value !== "") {
+                if (valores.includes(select.value)) {
+                    alert("Erro: Não pode selecionar o mesmo autor mais do que uma vez!");
+                    event.target.selectedIndex = 0; // Faz reset ao select alterado
+                    event.target.focus();
+                    return;
+                }
+                valores.push(select.value);
+            }
+        });
+    }
 });
 </script>
 </body>
