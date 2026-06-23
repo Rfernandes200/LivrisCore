@@ -286,8 +286,8 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
                     <div class="form-group-modal">
                         <label>Estado Inicial</label>
                         <select name="estado" style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
-                            <option value="disponivel">🟢 Disponível</option>
-                            <option value="indisponivel">🔴 Indisponível</option>
+                            <option value="disponivel"> Disponível</option>
+                            <option value="indisponivel">Indisponível</option>
                         </select>
                     </div>
                     <div class="form-group-modal">
@@ -311,7 +311,7 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
     <div id="modalEditarArtigo" class="modal-overlay">
         <div class="modal-box" style="max-width: 600px;">
             <div class="modal-header">
-                <h2>✏️ Editar Detalhes do Artigo</h2>
+                <h2> Editar Detalhes do Artigo</h2>
                 <button class="btn-close-modal" onclick="fecharModalEditarArtigo()">✕</button>
             </div>
             <form action="editar_artigo.php" method="POST" enctype="multipart/form-data">
@@ -359,8 +359,8 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
                     <div class="form-group-modal">
                         <label>Estado</label>
                         <select id="edit_estado" name="estado" style="width: 100%; height: 40px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 6px; padding: 0 10px;">
-                            <option value="disponivel">🟢 Disponível</option>
-                            <option value="indisponivel">🔴 Indisponível</option>
+                            <option value="disponivel">Disponível</option>
+                            <option value="indisponivel">Indisponível</option>
                         </select>
                     </div>
                     <div class="form-group-modal">
