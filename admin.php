@@ -64,11 +64,49 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
     <link rel="stylesheet" href="Styles/StyleAdmin.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
-<body>
+
+<style>
+    <style>
+    * {
+        /* Se não for a sidebar, removemos qualquer fundo escuro herdado */
+        background-color: transparent;
+    }
+    
+    html, 
+    body, 
+    main, 
+    div, 
+    section, 
+    article,
+    .admin-container, 
+    .admin-content,
+    .admin-content-dinamico {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+    }
+
+    /* Manter a sidebar escura intocável para não estragar o menu */
+    .sidebar, 
+    .sidebar-responsiva, 
+    .sidebar * {
+        background-color: #1e293b !important; /* Mantém a cor escura só na barra lateral */
+    }
+    
+    /* Remover paddings ou margens que forcem o miolo a descolar das bordas do browser */
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        overflow-x: hidden;
+    }
+</style>
+</style>
+<<body >>
 
 
 
-    <div class="admin-container" style="padding-top: 0px;">
+    <div class="admin-container" <div class="admin-container" style="background-color: #ffffff !important; min-height: 100vh; padding-top: 0px;">">
 
     <?php require 'sidebar.php'; ?>
 
@@ -81,19 +119,9 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
                 <?php unset($_SESSION['alerta']); ?>
             <?php endif; ?>
 
-            <!-- SECÇÃO: GERAL (DASHBOARD) -->
             <?php if ($seccao === 'geral'): ?>
-    <h1>Painel Geral</h1>
-    <p class="admin-subtitle">Visão unificada do estado do sistema de gestão.</p>
-    
-    <div class="dashboard-grid">
-        <div class="stat-card"><h3>Utilizadores</h3><p><?= $total_utilizadores; ?></p></div>
-        <div class="stat-card"><h3>Reservas Ativas</h3><p><?= $total_reservas; ?></p></div>
-        
-        <div class="stat-card"><h3>Empréstimos Ativos</h3><p><?= $total_emprestimos_ativos; ?></p></div>
-        
-        <div class="stat-card"><h3>Artigos no Catálogo</h3><p><?= $total_artigos; ?></p></div>
-    </div>
+    <?php include 'seccao_geral.php'; ?>
+
 
 
             <!-- SECÇÃO: UTILIZADORES -->
@@ -152,12 +180,12 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
                 <div class="form-group-modal">
                     <label for="modal_ativo">Estado da Conta</label>
                     <select id="modal_ativo" name="ativo">
-                        <option value="1">🟢 Ativo</option>
-                        <option value="0">🔴 Inativo</option>
+                        <option value="1"> Ativo</option>
+                        <option value="0"> Inativo</option>
                     </select>
                 </div>
                 <p id="aviso_self_edit" style="color: #eab308; font-size: 0.75rem; display: none; margin-top: 10px; background: rgba(234,179,8,0.1); padding: 8px; border-radius: 4px;">
-                    ⚠️ Nota: Por segurança, não pode alterar o seu próprio cargo nem desativar a sua conta atual.
+                    Nota: Por segurança, não pode alterar o seu próprio cargo nem desativar a sua conta atual.
                 </p>
                 <div class="modal-footer">
                     <button type="button" class="btn-modal btn-modal-cancel" onclick="fecharModalEditar()">Cancelar</button>
@@ -171,7 +199,7 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
     <div id="modalAdicionarUtilizador" class="modal-overlay">
         <div class="modal-box" style="max-width: 500px;">
             <div class="modal-header">
-                <h2>➕ Criar Novo Utilizador</h2>
+                <h2> Criar Novo Utilizador</h2>
                 <button class="btn-close-modal" onclick="fecharModalAdicionarUtilizador()">✕</button>
             </div>
             <form action="inserir_utilizador.php" method="POST">
@@ -210,7 +238,7 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
     <div id="modalAdicionarArtigo" class="modal-overlay">
         <div class="modal-box" style="max-width: 600px;">
             <div class="modal-header">
-                <h2>➕ Adicionar Novo Artigo ao Catálogo</h2>
+                <h2> Adicionar Novo Artigo ao Catálogo</h2>
                 <button class="btn-close-modal" onclick="fecharModalAdicionarArtigo()">✕</button>
             </div>
             <form action="inserir_artigo.php" method="POST" enctype="multipart/form-data">

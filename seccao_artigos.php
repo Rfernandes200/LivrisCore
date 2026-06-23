@@ -57,56 +57,205 @@ try {
 }
 ?>
 
-<div class="seccao-artigos-container" style="background-color: #f8fafc !important; color: #1e293b !important; min-height: 100vh; padding: 20px; font-family: 'Inter', sans-serif;">
+<style>
+    .seccao-artigos-container {
+        background-color: #ffffff !important; 
+        color: #1e293b !important; 
+        min-height: 100vh; 
+        padding: 20px; 
+        font-family: 'Inter', sans-serif;
+    }
+    .topo-header-artigos {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: flex-start; 
+        margin-bottom: 25px; 
+        width: 100%;
+        gap: 15px;
+    }
+    .admin-toolbar-artigos {
+        display: flex; 
+        gap: 15px; 
+        align-items: center; 
+        justify-content: space-between; 
+        margin-bottom: 25px; 
+        background: #ffffff !important; 
+        padding: 15px; 
+        border-radius: 12px; 
+        border: 1px solid #e2e8f0 !important;
+    }
+    .filtro-form-artigos {
+        display: flex; 
+        gap: 12px; 
+        align-items: center;
+        width: 100%; 
+        max-width: 700px;
+    }
+    .search-container-admin-artigos {
+        flex-grow: 2; 
+        margin: 0; 
+        position: relative; 
+        min-width: 250px;
+    }
+    .input-busca-artigos {
+        width: 100%; 
+        height: 42px; 
+        background: #f1f5f9 !important; 
+        border: 1px solid #cbd5e1 !important; 
+        color: #0f172a !important; 
+        padding: 0 15px; 
+        border-radius: 8px; 
+        font-size: 0.88rem; 
+        box-sizing: border-box;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .input-busca-artigos:focus {
+        border-color: #3b82f6 !important;
+    }
+    .select-estado-artigos {
+        background: #ffffff !important; 
+        border: 1px solid #cbd5e1 !important; 
+        color: #334155 !important; 
+        padding: 0 15px; 
+        border-radius: 8px; 
+        font-size: 0.88rem; 
+        outline: none; 
+        cursor: pointer; 
+        min-width: 160px; 
+        height: 42px; 
+        box-sizing: border-box;
+    }
+    .btn-filtrar-artigos {
+        background: #3b82f6 !important; 
+        color: white !important; 
+        border: none; 
+        padding: 0 22px; 
+        border-radius: 8px; 
+        font-weight: 600; 
+        font-size: 0.88rem; 
+        cursor: pointer; 
+        height: 42px; 
+        transition: background 0.2s;
+    }
+    .btn-adicionar-artigo {
+        background: #3b82f6 !important; 
+        color: white !important; 
+        border: none; 
+        height: 42px; 
+        padding: 0 20px; 
+        border-radius: 8px; 
+        font-weight: 600; 
+        font-size: 0.88rem; 
+        cursor: pointer; 
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.2s;
+        white-space: nowrap;
+    }
+    .contador-badge-artigos {
+        white-space: nowrap; 
+        font-size: 0.88rem; 
+        font-weight: 500; 
+        color: #64748b; 
+        background: #f8fafc; 
+        padding: 8px 14px; 
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+    }
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+    /* Media Queries para Responsividade (Mobile e Tablet) */
+    @media (max-width: 768px) {
+        .topo-header-artigos {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .topo-header-artigos h1 {
+            font-size: 1.8rem !important;
+        }
+        .btn-adicionar-artigo {
+            width: 100%;
+            justify-content: center;
+        }
+        .admin-toolbar-artigos {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 12px;
+        }
+        .filtro-form-artigos {
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+        }
+        .search-container-admin-artigos {
+            min-width: 100%;
+        }
+        .select-estado-artigos {
+            width: 100%;
+        }
+        .btn-filtrar-artigos {
+            width: 100%;
+        }
+        .contador-badge-artigos {
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    }
+</style>
+
+<div class="seccao-artigos-container">
+
+    <div class="topo-header-artigos">
         <div>
-            <h1 style="color: #0f172a !important; font-size: 1.75rem; font-weight: 700; margin: 0;">Gerir Artigos (Catálogo)</h1>
-            <p style="color: #64748b !important; margin: 4px 0 0 0; font-size: 0.9rem;">Monitorize, filtre, edite e insira novos exemplares no acervo da biblioteca.</p>
+            <h1 style="font-family: 'Playfair Display', serif; color: #0f172a !important; font-size: 2.2rem; font-weight: bold; margin: 0 0 5px 0;">Gerir Artigos (Catálogo)</h1>
+            <p style="color: #64748b !important; margin: 0; font-size: 0.95rem;">Monitorize, filtre, edite e insira novos exemplares no acervo da biblioteca.</p>
         </div>
-        <button class="btn-edit-trigger" style="background: #2563eb !important; color: white !important; border: none; height: 42px; padding: 0 18px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.2s;" onclick="abrirModalAdicionarArtigo()">➕ Adicionar Artigo</button>
+        <button class="btn-adicionar-artigo" onclick="abrirModalAdicionarArtigo()" onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
+            <span style="font-size: 1.1rem; font-weight: bold;">+</span> Adicionar Artigo
+        </button>
     </div>
 
-    <div class="admin-toolbar" style="display: flex; gap: 15px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 20px; background: #ffffff !important; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0 !important;">
-        <form action="admin.php" method="GET" style="display: flex; gap: 12px; width: 100%; max-width: 700px; flex-wrap: wrap;">
+    <div class="admin-toolbar-artigos">
+        <form action="admin.php" method="GET" class="filtro-form-artigos">
             <input type="hidden" name="seccao" value="artigos">
             
-            <div class="search-container-admin" style="flex-grow: 2; margin: 0; position: relative; min-width: 250px;">
-                <input type="text" name="q_artigo" style="width: 100%; height: 42px; background: #f1f5f9 !important; border: 1px solid #cbd5e1 !important; color: #0f172a !important; padding: 0 15px 0 35px; border-radius: 8px; font-size: 0.85rem; box-sizing: border-box;" placeholder="Pesquisar por título, ISBN ou editora..." value="<?= htmlspecialchars($pesquisa_artigo) ?>">
-                <span style="position: absolute; left: 12px; top: 12px; color: #64748b;">🔍</span>
+            <div class="search-container-admin-artigos">
+                <input type="text" name="q_artigo" class="input-busca-artigos" placeholder="Pesquisar por título, ISBN ou editora..." value="<?= htmlspecialchars($pesquisa_artigo) ?>">
             </div>
 
-            <select name="estado" onchange="this.form.submit()" style="background: #ffffff !important; border: 1px solid #cbd5e1 !important; color: #334155 !important; padding: 0 15px; border-radius: 8px; font-size: 0.85rem; outline: none; cursor: pointer; min-width: 160px; height: 42px; box-sizing: border-box;">
+            <select name="estado" class="select-estado-artigos" onchange="this.form.submit()">
                 <option value="">Todos os Estados</option>
                 <option value="disponivel" <?= $filtro_estado === 'disponivel' ? 'selected' : '' ?>>Disponível</option>
                 <option value="indisponivel" <?= $filtro_estado === 'indisponivel' ? 'selected' : '' ?>>Indisponível</option>
             </select>
             
-            <button type="submit" style="background: #334155 !important; color: white !important; border: none; padding: 0 20px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; height: 42px; transition: background 0.2s;">Filtrar</button>
+            <button type="submit" class="btn-filtrar-artigos" onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">Filtrar</button>
         </form>
 
-        <div style="white-space: nowrap; font-size: 0.85rem; font-weight: 600; color: #475569; background: #f1f5f9; padding: 8px 14px; border-radius: 20px;">
-            <span>📊 <?= count($artigos); ?> artigo(s) listado(s)</span>
+        <div class="contador-badge-artigos">
+            <span><?= count($artigos); ?> artigo(s) listado(s)</span>
         </div>
     </div>
 
-    <div style="width: 100% !important; overflow-x: auto !important; background: #ffffff !important; border-radius: 12px; border: 1px solid #e2e8f0 !important;">
-        <table style="width: 100% !important; min-width: 850px; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+    <div style="width: 100% !important; overflow-x: auto !important; background: #ffffff !important; border-radius: 12px; border: 1px solid #e2e8f0 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.02); -webkit-overflow-scrolling: touch;">
+        <table style="width: 100% !important; min-width: 900px; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
             <thead>
-                <tr style="background-color: #f1f5f9 !important; border-bottom: 2px solid #e2e8f0 !important;">
-                    <th style="padding: 14px; width: 60px; color: #475569; font-weight: 600;">ID</th>
-                    <th style="padding: 14px; width: 70px; color: #475569; font-weight: 600;">Capa</th>
-                    <th style="padding: 14px; color: #475569; font-weight: 600;">Título / Detalhes</th>
-                    <th style="padding: 14px; color: #475569; font-weight: 600;">Autor / Artista</th>
-                    <th style="padding: 14px; width: 150px; color: #475569; font-weight: 600;">Categoria (CDU)</th>
-                    <th style="padding: 14px; width: 130px; color: #475569; font-weight: 600;">Estado</th>
-                    <th style="padding: 14px; width: 160px; text-align: center; color: #475569; font-weight: 600;">Ações</th>
+                <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                    <th style="padding: 16px 20px; width: 60px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">ID</th>
+                    <th style="padding: 16px 20px; width: 70px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Capa</th>
+                    <th style="padding: 16px 20px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Título / Detalhes</th>
+                    <th style="padding: 16px 20px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Autor / Artista</th>
+                    <th style="padding: 16px 20px; width: 150px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Categoria (CDU)</th>
+                    <th style="padding: 16px 20px; width: 130px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Estado</th>
+                    <th style="padding: 16px 20px; width: 180px; text-align: center; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Ações</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($artigos)): ?>
                     <tr>
-                        <td colspan="7" style="text-align: center; color: #64748b; padding: 40px; background: #ffffff;">Nenhum artigo corresponde aos filtros aplicados.</td>
+                        <td colspan="7" style="text-align: center; color: #64748b; padding: 50px; font-weight: 500; background: #ffffff;">Nenhum artigo corresponde aos filtros aplicados.</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($artigos as $art): 
@@ -121,52 +270,47 @@ try {
                             $corEstado = 'color: #dc2626; border: 1px solid #fecaca; background: #fef2f2;';
                         }
                     ?>
-                        <tr style="border-bottom: 1px solid #e2e8f0 !important; background: #ffffff; transition: background 0.15s;">
-                            <td style="padding: 14px; font-weight: 600; color: #64748b;">#<?= $art['id']; ?></td>
-                            <td style="padding: 14px;">
+                        <tr style="border-bottom: 1px solid #f1f5f9; background: #ffffff; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
+                            <td style="padding: 14px 20px; font-weight: 600; color: #64748b;">#<?= $art['id']; ?></td>
+                            <td style="padding: 14px 20px;">
                                 <img src="<?= $capaPath; ?>" alt="Capa" style="width: 40px; height: 52px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1;">
                             </td>
-                            <td style="padding: 14px;">
+                            <td style="padding: 14px 20px;">
                                 <div style="display: flex; flex-direction: column; gap: 3px;">
-                                    <span style="font-weight: 600; color: #0f172a; font-size: 0.95rem;"><?= htmlspecialchars($art['titulo']); ?></span>
-                                    <small style="color: #64748b; font-size: 0.75rem; font-weight: 500;">
+                                    <span style="font-weight: 600; color: #1e293b; font-size: 0.95rem;"><?= htmlspecialchars($art['titulo']); ?></span>
+                                    <small style="color: #64748b; font-size: 0.78rem; font-weight: 500;">
                                         ISBN: <?= !empty($art['isbn']) ? htmlspecialchars($art['isbn']) : 'N/A'; ?> | 
                                         Editora: <?= !empty($art['editora']) ? htmlspecialchars($art['editora']) : 'N/A'; ?> 
                                         (<?= !empty($art['ano_edicao']) ? $art['ano_edicao'] : 'N/A'; ?>)
                                     </small>
                                 </div>
                             </td>
-                            <td style="padding: 14px; color: #334155; font-weight: 500;"><?= htmlspecialchars($art['autor_artista'] ?? 'Desconhecido'); ?></td>
-                            <td style="padding: 14px;">
+                            <td style="padding: 14px 20px; color: #334155; font-weight: 500;"><?= htmlspecialchars($art['autor_artista'] ?? 'Desconhecido'); ?></td>
+                            <td style="padding: 14px 20px;">
                                 <span style="font-size: 0.75rem; font-weight: 600; background: #f1f5f9; padding: 5px 9px; border-radius: 6px; color: #475569; border: 1px solid #e2e8f0;" title="<?= htmlspecialchars($art['cat_nome'] ?? '') ?>">
                                     <?= !empty($art['cdu_codigo']) ? htmlspecialchars($art['cdu_codigo']) : 'Sem CDU'; ?>
                                 </span>
                             </td>
-                            <td style="padding: 14px;">
-                                <span style="display: inline-flex; align-items: center; justify-content: center; padding: 5px 10px; min-width: 95px; border-radius: 6px; text-transform: uppercase; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.03em; <?= $corEstado ?>">
+                            <td style="padding: 14px 20px;">
+                                <span style="display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; min-width: 90px; border-radius: 6px; text-transform: uppercase; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; <?= $corEstado ?>">
                                     <?= $textoExibido; ?>
                                 </span>
                             </td>
-                            <td style="padding: 14px; text-align: center;">
+                            <td style="padding: 14px 20px; text-align: center;">
                                 <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
-                                    
-                                    <button style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; background: #2563eb !important; color: white !important; border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s;"
-                                            data-id="<?= $art['id']; ?>"
-                                            data-titulo="<?= htmlspecialchars($art['titulo']); ?>"
-                                            data-isbn="<?= htmlspecialchars($art['isbn'] ?? ''); ?>"
-                                            data-editora="<?= htmlspecialchars($art['editora'] ?? ''); ?>"
-                                            data-ano="<?= $art['ano_edicao'] ?? ''; ?>"
-                                            data-autor="<?= $art['autor_id'] ?? ''; ?>"
-                                            data-cdu="<?= htmlspecialchars($art['cdu_codigo'] ?? ''); ?>"
-                                            data-estado="<?= $art['estado']; ?>"
-                                            data-descricao="<?= htmlspecialchars($art['descricao'] ?? ''); ?>"
-                                            onclick="abrirModalEditarArtigo(this)">Editar</button>
-                                    
-                                    <a href="eliminar_artigo.php?id=<?= $art['id']; ?>" 
-                                       style="background: #fee2e2 !important; color: #dc2626 !important; border: 1px solid #fecaca !important; padding: 5px 11px; font-size: 0.8rem; font-weight: 600; border-radius: 6px; text-decoration: none; display: inline-block; transition: background 0.2s;"
-                                       title="Eliminar Artigo"
-                                       onclick="return confirm('Tem a certeza que deseja remover permanentemente o anúncio: <?= htmlspecialchars($art['titulo']); ?>?');">Eliminar</a>
-                                </div>
+    
+    <button type="button"
+            style="background: #2563eb !important; color: white !important; border: none; padding: 8px 0; min-width: 90px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s; font-family: 'Inter', sans-serif;"
+            onclick="abrirModalEditarArtigo(this)"
+            onmouseover="this.style.backgroundColor='#1d4ed8'"
+            onmouseout="this.style.backgroundColor='#2563eb'">Editar</button>
+    
+    <a href="eliminar_artigo.php?id=<?= $art['id']; ?>" 
+       style="background: #ffe4e6 !important; color: #e11d48 !important; border: 1px solid #fecdd3 !important; padding: 8px 0; min-width: 90px; font-size: 0.85rem; font-weight: 600; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s; font-family: 'Inter', sans-serif;"
+       onmouseover="this.style.background='#fecdd3'; this.style.color='#be123c';" 
+       onmouseout="this.style.background='#ffe4e6'; this.style.color='#e11d48';"
+       onclick="return confirm('Tem a certeza que deseja remover este artigo?');">Eliminar</a>
+</div>
                             </td>
                         </tr>
                     <?php endforeach; ?>

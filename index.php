@@ -76,6 +76,67 @@ try {
 </head>
 <body>
 
+<style>
+    .grid-itens {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+        gap: 25px !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin-top: 30px !important;
+    }
+
+    .card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        border: 1px solid #e2e8f0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important; /* Força a largura do item a preencher a célula */
+        box-sizing: border-box !important;
+
+
+    }/* Container que agrupa os botões (deve ser flex) */
+.card-footer {
+    display: flex;
+    gap: 10px; /* Espaço entre os botões */
+    margin-top: 15px;
+}
+
+/* Estilo comum para ambos os botões */
+.btn-action, .btn-details {
+    flex: 1; /* Faz com que ambos ocupem o mesmo espaço */
+    padding: 10px 0;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+    transition: background 0.2s;
+}
+
+/* Estilo específico do botão Detalhes */
+.btn-details {
+    background: #e2e8f0 !important; /* Cor de fundo cinza claro para destaque */
+    color: #475569 !important;      /* Cor de texto legível */
+}
+
+.btn-details:hover {
+    background: #cbd5e1 !important;
+}
+
+/* Estilo específico do botão Reservar */
+.btn-action {
+    background: #3b82f6 !important;
+    color: white !important;
+}
+
+.btn-action:hover {
+    background: #2563eb !important;
+}
+    
+</style>
 <?php if (isset($_SESSION['alerta'])): ?>
     <div id="toastAlert" class="alert-toast <?= $_SESSION['alerta']['tipo'] ?>">
         <span><?= $_SESSION['alerta']['mensagem'] ?></span>
@@ -160,7 +221,9 @@ try {
 
                 <div class="card-body">
                     <small class="category-label">CDU <?= htmlspecialchars($item['cdu_codigo']) ?></small>
-                    <h3><?= htmlspecialchars($item['titulo']) ?></h3>
+                   <h3 style="color: #1e293b !important; font-size: 1.1rem; margin: 8px 0;">
+    <?= htmlspecialchars($item['titulo']) ?>
+</h3>
                     <p class="author-text"><?= htmlspecialchars($item['autor_artista'] ?? 'Autor Não Associado') ?></p>
                     
                     <div class="card-footer">

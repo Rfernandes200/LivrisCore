@@ -1,19 +1,22 @@
+/* --- ATUALIZA ESTA REGRA NO TEU CSS --- */
 .admin-container {
     display: flex;
     min-height: 100vh;
-    padding-top: 70px;
-    /* Espaço para a navbar fixa */
-    background-color: #0f172a;
-    color: white;
+    padding-top: 0px !important;
+    /* Removemos os 70px que criavam o topo preto */
+    background-color: #ffffff !important;
+    /* Mudado para branco puro */
+    color: #1e293b;
+    /* Texto escuro para contraste */
     font-family: 'Inter', sans-serif;
 }
 
-
-/* Conteúdo Principal */
+/* --- ATUALIZA ESTA REGRA NO TEU CSS --- */
 .admin-content {
     flex: 1;
     padding: 40px;
-    background: #0f172a;
+    background: #ffffff !important;
+    /* Mudado para branco puro */
 }
 
 .admin-content h1 {
