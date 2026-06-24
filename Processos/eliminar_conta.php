@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config.php';
+require '../config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['utilizador_id'])) {
     $id = $_SESSION['utilizador_id'];
@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['utilizador_id'])) 
         $total_pendente = (int)$stmt_check->fetchColumn();
 
         if ($total_pendente > 0) {
-            header("Location: perfil.php?erro=Não pode eliminar a sua conta porque ainda tem empréstimos ativos.");
+            header("Location: ../perfil.php?erro=Não pode eliminar a sua conta porque ainda tem empréstimos ativos.");
             exit();
         }
 
@@ -24,14 +24,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['utilizador_id'])) 
         session_unset();
         session_destroy();
 
-        header("Location: login.php?sucesso=A sua conta foi eliminada permanentemente.");
+        header("Location: ../login.php?sucesso=A sua conta foi eliminada permanentemente.");
         exit();
 
     } catch (Exception $e) {
-        header("Location: perfil.php?erro=Erro ao processar a eliminação na base de dados.");
+        header("Location: ../perfil.php?erro=Erro ao processar a eliminação na base de dados.");
         exit();
     }
 } else {
-    header("Location: perfil.php");
+    header("Location: ../perfil.php");
     exit();
 }

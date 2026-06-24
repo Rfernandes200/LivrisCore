@@ -306,7 +306,7 @@ try {
             onmouseover="this.style.backgroundColor='#1d4ed8'"
             onmouseout="this.style.backgroundColor='#2563eb'">Editar</button>
     
-    <a href="eliminar_artigo.php?id=<?= $art['id']; ?>" 
+    <a href="Processos/eliminar_artigo.php?id=<?= $art['id']; ?>" 
        style="background: #ffe4e6 !important; color: #e11d48 !important; border: 1px solid #fecdd3 !important; padding: 8px 0; min-width: 90px; font-size: 0.85rem; font-weight: 600; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s; font-family: 'Inter', sans-serif;"
        onmouseover="this.style.background='#fecdd3'; this.style.color='#be123c';" 
        onmouseout="this.style.background='#ffe4e6'; this.style.color='#e11d48';"

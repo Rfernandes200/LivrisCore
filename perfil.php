@@ -170,7 +170,7 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
                 </div>
             </form>
 
-            <form id="formDeletarConta" action="eliminar_conta.php" method="POST" style="display: none;"></form>
+            <form id="formDeletarConta" action="Processos/eliminar_conta.php" method="POST" style="display: none;"></form>
 
         </div>
     </div>

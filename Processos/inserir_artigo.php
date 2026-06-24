@@ -1,10 +1,10 @@
 <?php
 session_start();
-require 'config.php';
+require '../config.php';
 
 // Bloqueio de Segurança
 if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !== 1 && $_SESSION['utilizador_tipo'] !== 'admin')) {
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit();
 }
 
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $newFileName = md5(time() . $fileName) . '.' . $fileExtension;
             
             // Certifica-te de que a pasta 'Uploads' existe
-            $uploadFileDir = 'Uploads/';
+            $uploadFileDir = '../Uploads/';
             if (!is_dir($uploadFileDir)) {
                 mkdir($uploadFileDir, 0755, true);
             }
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $_SESSION['alerta'] = [
             'tipo' => 'sucesso',
-            'mensagem' => 'Artigo "' . htmlspecialchars($titulo) . '" adicionado com sucesso ao acervo!'
+            'mensagem' => 'Artigo "' . htmlspecialchars($titulo) . '" adicionado com sucesso !'
         ];
 
     } catch (PDOException $e) {
@@ -98,10 +98,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Redireciona de volta para a secção de artigos
-    header("Location: admin.php?seccao=artigos");
+    header("Location: ../admin.php?seccao=artigos");
     exit();
 } else {
     // Se tentarem aceder diretamente sem POST, manda para o painel
-    header("Location: admin.php?seccao=artigos");
+    header("Location: ../admin.php?seccao=artigos");
     exit();
 }
