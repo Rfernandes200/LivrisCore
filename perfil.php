@@ -51,29 +51,7 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
     <link rel="stylesheet" href="Styles/StylePerfil.css">
      <link rel="stylesheet" href="Styles/StyleNav.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        .btn-delete {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-delete:hover {
-            background: #dc2626;
-        }
-
-        .btn-delete:disabled {
-            background: #cbd5e1;
-            color: #94a3b8;
-            cursor: not-allowed;
-        }
-    </style>
+    
 </head>
 <body class="perfil-body">
 
@@ -153,23 +131,25 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; flex-wrap: wrap; gap: 15px;">
-                    
-                    <button type="submit" class="btn-save" style="margin-bottom: 0;">
-                        Guardar alterações
-                    </button>
-                    
-                    <?php if (!$pode_eliminar): ?>
-                        <button type="button" class="btn-delete" disabled title="Ação Bloqueada: Possui <?= $total_pendente; ?> empréstimo(s) ativo(s). Devolva os livros primeiro.">
-                            Eliminar a minha conta
-                        </button>
-                    <?php else: ?>
-                        <button type="button" class="btn-delete" onclick="dispararExclusao();">
-                            Eliminar a minha conta
-                        </button>
-                    <?php endif; ?>
-                    
-                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; flex-wrap: wrap; gap: 15px; width: 100%;">
+    
+    <button type="submit" class="btn-save" style="background: #0f172a; color: white; padding: 14px 30px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;">
+        Guardar alterações
+    </button>
+    
+    <?php if (!$pode_eliminar): ?>
+        <button type="button" class="btn-delete" disabled title="Ação Bloqueada: Possui <?= $total_pendente; ?> empréstimo(s) ativo(s). Devolva os livros primeiro." 
+                style="background: #cbd5e1; color: #94a3b8; border: none; padding: 12px 24px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: not-allowed; transition: all 0.2s;">
+            Eliminar a minha conta
+        </button>
+    <?php else: ?>
+        <button type="button" class="btn-delete" onclick="dispararExclusao();" 
+                style="background: #ef4444; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+            Eliminar a minha conta
+        </button>
+    <?php endif; ?>
+    
+</div>
             </form>
 
             <form id="formDeletarConta" action="Processos/eliminar_conta.php" method="POST" style="display: none;"></form>
