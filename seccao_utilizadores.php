@@ -235,7 +235,7 @@ try {
                                     </button>
 
                                     <?php if (!$eProprioAdmin): ?>
-                                        <form action="editar_utilizadores.php" method="POST" style="margin:0;" onsubmit="return confirm('Tem a certeza absoluta que deseja eliminar permanentemente a conta de: <?= htmlspecialchars($u['nome']); ?>?');">
+                                        <form action="Processos/editar_utilizadores.php" method="POST" style="margin:0;" onsubmit="return confirm('Tem a certeza absoluta que deseja eliminar permanentemente a conta de: <?= htmlspecialchars($u['nome']); ?>?');">
                                             <input type="hidden" name="acao" value="eliminar_utilizador">
                                             <input type="hidden" name="utilizador_id" value="<?= $u['id']; ?>">
                                             <button type="submit" 

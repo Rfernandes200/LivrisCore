@@ -1,10 +1,10 @@
 <?php
 session_start();
-require 'config.php';
+require '../config.php';
 
 // Bloqueio de Segurança: Se não for admin, cancela a operação imediatamente
 if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !== 1 && $_SESSION['utilizador_tipo'] !== 'admin')) {
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit();
 }
 
@@ -14,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_admin_atual = (int)($_SESSION['utilizador_id'] ?? 0);
 
     if ($id_alvo <= 0) {
-        $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => '❌ Utilizador inválido ou não especificado.'];
-        header("Location: admin.php?seccao=utilizadores");
+        $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Utilizador inválido ou não especificado.'];
+        header("Location: ../admin.php?seccao=utilizadores");
         exit();
     }
 
@@ -29,16 +29,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $telemovel = trim($_POST['telemovel'] ?? '');
 
             if (empty($nome) || empty($email)) {
-                $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => '❌ Os campos Nome e Email são obrigatórios.'];
-                header("Location: admin.php?seccao=utilizadores");
+                $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Os campos Nome e Email são obrigatórios.'];
+                header("Location: ../admin.php?seccao=utilizadores");
                 exit();
             }
 
             // NOVA VALIDAÇÃO: Se o telemóvel não estiver vazio, valida se tem apenas números e exatamente 9 dígitos
             if (!empty($telemovel)) {
                 if (!preg_match('/^[0-9]{9}$/', $telemovel)) {
-                    $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => '❌ O número de telemóvel deve conter apenas números e ter exatamente 9 dígitos.'];
-                    header("Location: admin.php?seccao=utilizadores");
+                    $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'O número de telemóvel deve conter apenas números e ter exatamente 9 dígitos.'];
+                    header("Location: ../admin.php?seccao=utilizadores");
                     exit();
                 }
             } else {
@@ -102,19 +102,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ==========================================
         elseif ($acao === 'eliminar_utilizador') {
             if ($id_alvo === $id_admin_atual) {
-                $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => '❌ Operação Cancelada: Não podes eliminar o teu próprio perfil de administrador.'];
+                $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Operação Cancelada: Não podes eliminar o teu próprio perfil de administrador.'];
             } else {
                 $stmt = $pdo->prepare("DELETE FROM utilizadores WHERE id = :id");
                 $stmt->execute(['id' => $id_alvo]);
-                $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => '🗑️ A conta do utilizador foi eliminada permanentemente.'];
+                $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'A conta do utilizador foi eliminada permanentemente.'];
             }
         }
 
     } catch (PDOException $e) {
-        $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => '❌ Erro de Base de Dados: ' . $e->getMessage()];
+        $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Erro de Base de Dados: ' . $e->getMessage()];
     }
 }
 
 // Redireciona de volta mantendo o Administrador focado na aba correta
-header("Location: admin.php?seccao=utilizadores");
+header("Location: ../admin.php?seccao=utilizadores");
 exit();

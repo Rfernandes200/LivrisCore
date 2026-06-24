@@ -1,6 +1,6 @@
 <?php
 // 1. Incluir a ligação à base de dados
-require 'config.php'; 
+require '../config.php'; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
@@ -17,25 +17,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // 1. Proteção para Nome em branco ou só com espaços
     if (empty($nome)) {
-        header("Location: registo.php?erro=O nome é obrigatório.");
+        header("Location: ../registo.php?erro=O nome é obrigatório.");
         exit();
     }
 
     // 2. Verificar se o email é válido
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        header("Location: registo.php?erro=O email não é válido e precisa de conter \"@\" e depois \".\"");
+        header("Location: ../registo.php?erro=O email não é válido e precisa de conter \"@\" e depois \".\"");
         exit();
     }
 
     // 3. Verificar se a password está totalmente vazia
     if ($password_bruta === '' || empty($password_limpa)) {
-        header("Location: registo.php?erro=A password não pode estar vazia");
+        header("Location: ../registo.php?erro=A password não pode estar vazia");
         exit();
     }
 
     // 4. Verificar o tamanho mínimo seguro da password
     if (strlen($password_bruta) < 8) {
-        header("Location: registo.php?erro=A password é inválida e precisa de ter 8 caracteres ou mais");
+        header("Location: ../registo.php?erro=A password é inválida e precisa de ter 8 caracteres ou mais");
         exit();
     }
 
@@ -57,23 +57,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         if ($stmt->execute()) {
             // Conta criada com sucesso! Redireciona para o login
-            header("Location: login.php?sucesso=Conta criada com sucesso! Faça login.");
+            header("Location: ../login.php?sucesso=Conta criada com sucesso! Faça login.");
             exit();
         } else {
-            header("Location: registo.php?erro=Erro ao criar conta.");
+            header("Location: ../registo.php?erro=Erro ao criar conta.");
             exit();
         }
 
     } catch (PDOException $e) {
         // Verificar violação de chave única (Email já registado)
         if ($e->getCode() == 23000) {
-            header("Location: registo.php?erro=Este email já está registado.");
+            header("Location: ../registo.php?erro=Este email já está registado.");
         } else {
-            header("Location: registo.php?erro=Erro técnico na base de dados.");
+            header("Location: ../registo.php?erro=Erro técnico na base de dados.");
         }
         exit();
     }
 } else {
-    header("Location: registo.php");
+    header("Location: ../registo.php");
     exit();
 }

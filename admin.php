@@ -193,7 +193,7 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
                 <h2>Editar Perfil do Utilizador</h2>
                 <button class="btn-close-modal" onclick="fecharModalEditar()">✕</button>
             </div>
-            <form id="formEditarUtilizador" action="editar_utilizadores.php" method="POST">
+            <form id="formEditarUtilizador" action="Processos/editar_utilizadores.php" method="POST">
                 <input type="hidden" name="acao" value="actualizar_completo">
                 <input type="hidden" id="modal_id" name="utilizador_id">
                 <div class="form-group-modal">
@@ -384,7 +384,7 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
             <button type="button" onclick="fecharModalEditarArtigo()" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
 
-        <form action="editar_artigo.php" method="POST" enctype="multipart/form-data" style="margin: 0; padding: 28px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
+        <form action="Processos/editar_artigo.php" method="POST" enctype="multipart/form-data" style="margin: 0; padding: 28px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
             
             <input type="hidden" id="edit_artigo_id" name="artigo_id">
             
@@ -516,7 +516,7 @@ function fecharModalAdicionarArtigo() { alternarModal('modalAdicionarArtigo', fa
 function abrirModalEditarArtigo(btn) {
     const id = btn.getAttribute('data-id');
     
-    fetch(`editar_artigo.php?id=${id}`)
+    fetch(`Processos/editar_artigo.php?id=${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.erro) {

@@ -1,10 +1,10 @@
 <?php
 session_start();
-require 'config.php';
+require '../config.php';
 
 // Bloqueio de Segurança
 if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !== 1 && $_SESSION['utilizador_tipo'] !== 'admin')) {
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit();
 }
 
@@ -50,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $descricao  = trim($_POST['descricao'] ?? '');
 
     if ($artigo_id <= 0 || empty($titulo)) {
-        $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => '❌ Erro: Dados obrigatórios do artigo em falta.'];
-        header("Location: admin.php?seccao=artigos");
+        $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Erro: Dados obrigatórios do artigo em falta.'];
+        header("Location: ../admin.php?seccao=artigos");
         exit();
     }
 
@@ -63,9 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ((int)$stmt_check->fetchColumn() > 0) {
             $_SESSION['alerta'] = [
                 'tipo' => 'erro',
-                'mensagem' => '❌ Erro: Já existe OUTRO livro registado com este código ISBN!'
+                'mensagem' => 'Erro: Já existe OUTRO livro registado com este código ISBN!'
             ];
-            header("Location: admin.php?seccao=artigos");
+            header("Location: ../admin.php?seccao=artigos");
             exit;
         }
     }
@@ -116,13 +116,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $pdo->commit();
-        $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => '🎉 Artigo atualizado com sucesso!'];
+        $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => ' Artigo atualizado com sucesso!'];
 
     } catch (Exception $e) {
         $pdo->rollBack();
-        $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => '❌ Erro ao atualizar: ' . $e->getMessage()];
+        $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Erro ao atualizar: ' . $e->getMessage()];
     }
 }
 
-header("Location: admin.php?seccao=artigos");
+header("Location: ../admin.php?seccao=artigos");
 exit();

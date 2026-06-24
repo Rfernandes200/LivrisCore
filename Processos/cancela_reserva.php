@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config.php';
+require '../config.php';
 
 // 1. Bloqueio de Segurança: Garante que o utilizador está logado
 if (!isset($_SESSION['utilizador_id'])) {
@@ -8,7 +8,7 @@ if (!isset($_SESSION['utilizador_id'])) {
         'tipo' => 'erro',
         'mensagem' => '⚠️ A sua sessão expirou. Por favor, faça login novamente.'
     ];
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit();
 }
 
@@ -18,9 +18,9 @@ $id_livro = isset($_POST['livro_id']) ? (int)$_POST['livro_id'] : 0;
 if ($id_livro <= 0) {
     $_SESSION['alerta'] = [
         'tipo' => 'erro',
-        'mensagem' => '❌ Erro: Livro inválido.'
+        'mensagem' => ' Erro: Livro inválido.'
     ];
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit();
 }
 
@@ -53,7 +53,7 @@ try {
 
     $_SESSION['alerta'] = [
         'tipo' => 'sucesso',
-        'mensagem' => '🗑️ Reserva cancelada com sucesso. O livro voltou a ficar disponível!'
+        'mensagem' => ' Reserva cancelada com sucesso. O livro voltou a ficar disponível!'
     ];
 
 } catch (Exception $e) {
@@ -62,10 +62,10 @@ try {
     }
     $_SESSION['alerta'] = [
         'tipo' => 'erro',
-        'mensagem' => '❌ Erro ao cancelar reserva: ' . $e->getMessage()
+        'mensagem' => 'Erro ao cancelar reserva: ' . $e->getMessage()
     ];
 }
 
 // Redireciona de volta para a página principal
-header("Location: index.php");
+header("Location: ../index.php");
 exit();

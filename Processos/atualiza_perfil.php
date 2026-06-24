@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config.php';
+require '../config.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['utilizador_id'])) {
     $id = $_SESSION['utilizador_id'];
@@ -12,13 +12,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['utilizador_id'])) {
 
     // 1. Validações Básicas
     if (empty($nome) || empty($email)) {
-        header("Location: perfil.php?erro=Nome e Email são obrigatórios.");
+        header("Location: ../perfil.php?erro=Nome e Email são obrigatórios.");
         exit();
     }
 
     // Validação de segurança em PHP (garante que se houver telemóvel, tem exatamente 9 números)
     if (!empty($telemovel) && !preg_match('/^[0-9]{9}$/', $telemovel)) {
-        header("Location: perfil.php?erro=O número de telemóvel tem de conter exatamente 9 números.");
+        header("Location: ../perfil.php?erro=O número de telemóvel tem de conter exatamente 9 números.");
         exit();
     }
 
@@ -34,11 +34,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['utilizador_id'])) {
         // 3. Validação e Atualização da Password (apenas se for preenchida)
         if (!empty($nova_pw)) {
             if (strlen($nova_pw) < 8) {
-                header("Location: perfil.php?erro=A password deve ter pelo menos 8 caracteres.");
+                header("Location: ../perfil.php?erro=A password deve ter pelo menos 8 caracteres.");
                 exit();
             }
             if ($nova_pw !== $confirma_pw) {
-                header("Location: perfil.php?erro=As passwords não coincidem.");
+                header("Location: ../perfil.php?erro=As passwords não coincidem.");
                 exit();
             }
             
@@ -48,11 +48,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['utilizador_id'])) {
             $stmt->execute([$hash, $id]);
         }
 
-        header("Location: perfil.php?sucesso=Perfil atualizado com sucesso!");
+        header("Location: ../perfil.php?sucesso=Perfil atualizado com sucesso!");
         exit();
 
     } catch (PDOException $e) {
-        header("Location: perfil.php?erro=Erro ao atualizar: " . $e->getMessage());
+        header("Location: ../perfil.php?erro=Erro ao atualizar: " . $e->getMessage());
         exit();
     }
 }

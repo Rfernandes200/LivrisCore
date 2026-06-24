@@ -110,7 +110,7 @@ $inicial = strtoupper(substr($user['nome'] ?? 'U', 0, 1));
             
             <p class="subtitle">Atualize as suas informações pessoais</p>
 
-            <form action="atualiza_perfil.php" method="POST">
+            <form action="Processos/atualiza_perfil.php" method="POST">
                 <div class="input-group">
                     <label>Nome completo</label>
                     <input type="text" name="nome" value="<?php echo htmlspecialchars($user['nome'] ?? ''); ?>" required>

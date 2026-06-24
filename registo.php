@@ -44,7 +44,7 @@
                     </div>
                 <?php endif; ?>
 
-                <form action="criacao_utilizador.php" method="POST">
+                <form action="Processos/criacao_utilizador.php" method="POST">
                     <div class="form-group">
                         <label>Nome completo</label>
                         <input type="text" name="nome" class="input-control" placeholder="João Silva" required>
