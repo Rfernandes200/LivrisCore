@@ -6,7 +6,7 @@ require '../config.php';
 if (!isset($_SESSION['utilizador_id'])) {
     $_SESSION['alerta'] = [
         'tipo' => 'erro',
-        'mensagem' => '⚠️ A sua sessão expirou. Por favor, faça login novamente.'
+        'mensagem' => ' A sua sessão expirou. Por favor, faça login novamente.'
     ];
     header("Location: ../index.php");
     exit();
@@ -18,7 +18,7 @@ $id_livro = isset($_POST['livro_id']) ? (int)$_POST['livro_id'] : 0;
 if ($id_livro <= 0) {
     $_SESSION['alerta'] = [
         'tipo' => 'erro',
-        'mensagem' => ' Erro: Livro inválido.'
+        'mensagem' => 'Erro: Livro inválido.'
     ];
     header("Location: ../index.php");
     exit();
@@ -40,11 +40,12 @@ try {
         throw new Exception("Não foi encontrada nenhuma reserva ativa sua para este livro.");
     }
 
-    // 3. Atualiza o estado da reserva para 'cancelada' (ou podes fazer DELETE se preferires apagar)
+    // 3. Atualiza o estado da reserva para 'cancelada'
     $stmt_del = $pdo->prepare("UPDATE reservas SET status = 'cancelada' WHERE id = :reserva_id");
     $stmt_del->execute(['reserva_id' => $reserva['id']]);
 
-    // 4. Liberta o livro colocando-o novamente como 'disponivel' na tabela correta
+    // 4. Liberta o livro colocando-o novamente como 'disponivel'
+    // NOTA: Confirma se o nome da coluna na tua BD é 'estado' ou 'estado_calculado'
     $stmt_livro = $pdo->prepare("UPDATE livros SET estado = 'disponivel' WHERE id = :livro_id");
     $stmt_livro->execute(['livro_id' => $id_livro]);
 
@@ -53,7 +54,7 @@ try {
 
     $_SESSION['alerta'] = [
         'tipo' => 'sucesso',
-        'mensagem' => ' Reserva cancelada com sucesso. O livro voltou a ficar disponível!'
+        'mensagem' => 'Reserva cancelada com sucesso. O livro voltou a ficar disponível!'
     ];
 
 } catch (Exception $e) {
@@ -66,6 +67,6 @@ try {
     ];
 }
 
-// Redireciona de volta para a página principal
+// Redireciona com toda a segurança de volta para a raiz
 header("Location: ../index.php");
 exit();

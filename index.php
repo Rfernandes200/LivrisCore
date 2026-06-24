@@ -256,7 +256,7 @@ try {
                             <?php endif; ?>
                         <?php elseif($estadoLimpo === 'reservado'): ?>
                             <?php if($id_logado && $id_logado === $quemReservou): ?>
-                                <form action="cancela_reserva.php" method="POST" style="margin:0; display:inline;">
+                                <form action="Processos/cancela_reserva.php" method="POST" style="margin:0; display:inline;">
                                     <input type="hidden" name="livro_id" value="<?= $item['id'] ?>">
                                     <button type="submit" class="btn-action" style="background: #ef4444; color: white; border:none; cursor:pointer;">
                                         Cancelar
