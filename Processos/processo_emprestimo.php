@@ -1,10 +1,10 @@
 <?php
 session_start();
-require 'config.php';
+require '../config.php';
 
 // Proteção: Se não estiver logado ou não houver ação, bloqueia o acesso direto
 if (!isset($_SESSION['utilizador_id']) || !isset($_POST['acao'])) {
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -68,7 +68,7 @@ if ($acao === 'oficializar_emprestimo') {
             if ((int)$reserva['codigo_validacao'] !== (int)$codigo_inserido) {
                 $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'O código de 3 dígitos inserido está incorreto!'];
                 $pdo->rollBack();
-                header("Location: emprestimos.php");
+                header("Location: ../emprestimos.php");
                 exit();
             }
 
@@ -140,5 +140,5 @@ if ($acao === 'entregar_emprestimo') {
 }
 
 // Redireciona sempre de volta para a página visual limpa dos empréstimos
-header("Location: emprestimos.php");
+header("Location: ../emprestimos.php");
 exit();

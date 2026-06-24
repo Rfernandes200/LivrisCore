@@ -138,7 +138,7 @@ if ($está_logado) {
                 <a href="emprestimos.php" class="<?= $pagina_atual === 'emprestimos.php' ? 'active' : ''; ?>">Empréstimos</a>
                 
                 <?php if ((int)($_SESSION['utilizador_tipo'] ?? 0) === 1): ?>
-                    <a href="admin.php" style="color: #60a5fa; font-weight: 600; margin-left: 10px;" class="<?= $pagina_atual === 'admin.php' ? 'active' : ''; ?>">⚡ Administração</a>
+                    <a href="admin.php" style="color: #60a5fa; font-weight: 600; margin-left: 10px;" class="<?= $pagina_atual === 'admin.php' ? 'active' : ''; ?>"> Administração</a>
                 <?php endif; ?>
             <?php endif; ?>
         </div>

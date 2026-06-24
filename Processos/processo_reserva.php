@@ -1,14 +1,14 @@
 <?php
 session_start();
-require 'config.php';
+require '../config.php';
 
 // 1. Bloqueio de Segurança: Garante que o utilizador está logado
 if (!isset($_SESSION['utilizador_id'])) {
     $_SESSION['alerta'] = [
         'tipo' => 'erro',
-        'mensagem' => '⚠️ A sua sessão expirou ou não efetuou o login. Por favor, entre na sua conta para reservar.'
+        'mensagem' => 'A sua sessão expirou ou não efetuou o login. Por favor, entre na sua conta para reservar.'
     ];
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit();
 }
 
@@ -24,7 +24,7 @@ if ($total_reservas >= 2) {
         'tipo' => 'erro', 
         'mensagem' => 'Atingiu o limite máximo de 2 reservas pendentes em simultâneo!'
     ];
-    header("Location: index.php"); // Ou a página do teu catálogo
+    header("Location: ../index.php"); // Ou a página do teu catálogo
     exit();
 }
 
@@ -32,9 +32,9 @@ if ($total_reservas >= 2) {
 if ($id_livro <= 0) {
     $_SESSION['alerta'] = [
         'tipo' => 'erro',
-        'mensagem' => '❌ Erro: Artigo inválido para reserva.'
+        'mensagem' => 'Erro: Artigo inválido para reserva.'
     ];
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit();
 }
 
@@ -47,9 +47,9 @@ try {
     if (!$livro || strtolower(trim($livro['estado'])) !== 'disponivel') {
         $_SESSION['alerta'] = [
             'tipo' => 'erro',
-            'mensagem' => '❌ Este livro já não se encontra disponível para reserva.'
+            'mensagem' => 'Este livro já não se encontra disponível para reserva.'
         ];
-        header("Location: index.php");
+        header("Location: ../index.php");
         exit();
     }
 
@@ -82,7 +82,7 @@ try {
     
     $_SESSION['alerta'] = [
         'tipo' => 'sucesso',
-        'mensagem' => '🎉 Livro "' . htmlspecialchars($livro['titulo']) . '" reservado com sucesso!'
+        'mensagem' => ' Livro "' . htmlspecialchars($livro['titulo']) . '" reservado com sucesso!'
     ];
 
 } catch (Exception $e) {
@@ -93,10 +93,10 @@ try {
     
     $_SESSION['alerta'] = [
         'tipo' => 'erro',
-        'mensagem' => '❌ Erro ao processar reserva: ' . $e->getMessage()
+        'mensagem' => 'Erro ao processar reserva: ' . $e->getMessage()
     ];
 }
 
 // Redireciona sempre de volta para a página inicial
-header("Location: index.php");
+header("Location: ../index.php");
 exit();

@@ -37,7 +37,7 @@
             <button type="button" id="closeReserveModalBtn" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
 
-        <form action="processo_reserva.php" method="POST" style="padding: 24px; margin: 0; box-sizing: border-box; text-align: left;">
+        <form action="Processos/processo_reserva.php" method="POST" style="padding: 24px; margin: 0; box-sizing: border-box; text-align: left;">
             <input type="hidden" name="livro_id" id="formReserveItemId">
 
             <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin: 0; margin-bottom: 15px;">

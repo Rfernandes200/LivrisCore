@@ -3,7 +3,7 @@
 session_start();
 
 // Importa a ligação à base de dados
-require 'config.php';
+require '../config.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Verificar se os campos não estão vazios
     if (empty($email) || empty($password)) {
-        header("Location: login.php?erro=Preencha todos os campos.");
+        header("Location: ../login.php?erro=Preencha todos os campos.");
         exit();
     }
 
@@ -41,23 +41,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['utilizador_tipo'] = (int)$user['tipo'];
 
             // Redirecionar para a página principal
-            header("Location: index.php");
+            header("Location: ../index.php");
             exit();
 
         } else {
             // --- LOGIN FALHOU ---
-            header("Location: login.php?erro=Email ou palavra-passe incorretos.");
+            header("Location: ../login.php?erro=Email ou palavra-passe incorretos.");
             exit();
         }
 
     } catch (PDOException $e) {
         // Erro técnico de base de dados
-        header("Location: login.php?erro=Ocorreu um erro. Tente novamente mais tarde.");
+        header("Location: ../login.php?erro=Ocorreu um erro. Tente novamente mais tarde.");
         exit();
     }
 
 } else {
     // Se tentarem aceder ao ficheiro diretamente sem POST
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit();
 }

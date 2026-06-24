@@ -204,7 +204,7 @@ try {
                                                 Confirmar
                                             </button>
 
-                                            <form action="processo_emprestimo.php" method="POST" style="margin:0;" onsubmit="return confirm('Tem a certeza que deseja cancelar esta reserva?');">
+                                            <form action="Processos/processo_emprestimo.php" method="POST" style="margin:0;" onsubmit="return confirm('Tem a certeza que deseja cancelar esta reserva?');">
                                                 <input type="hidden" name="acao" value="cancelar_reserva">
                                                 <input type="hidden" name="reserva_id" value="<?= $res['id']; ?>">
                                                 <button type="submit" class="btn-action-base btn-cancelar-inline-custom">Cancelar</button>
@@ -260,7 +260,7 @@ try {
                                         <div style="display: flex; gap: 12px; justify-content: center; align-items: center;">
                                             <span class="badge-status-ativo">Ativo</span>
                                             
-                                            <form action="processo_emprestimo.php" method="POST" style="margin:0;" onsubmit="return confirm('Confirmas que queres proceder à entrega deste artigo?');">
+                                            <form action="Processos/processo_emprestimo.php" method="POST" style="margin:0;" onsubmit="return confirm('Confirmas que queres proceder à entrega deste artigo?');">
                                                 <input type="hidden" name="acao" value="entregar_emprestimo">
                                                 <input type="hidden" name="emprestimo_id" value="<?= $emp['id']; ?>">
                                                 <button type="submit" class="btn-action-base btn-entregar-inline">Entregar</button>
@@ -289,7 +289,7 @@ try {
                 <button type="button" id="closeConfirmModalBtn" style="background: none; border: none; color: #94a3b8; font-size: 2.2rem; cursor: pointer; line-height: 0.8;">&times;</button>
             </div>
 
-            <form action="processo_emprestimo.php" method="POST" id="modalFormEmprestimo">
+            <form action="Processos/processo_emprestimo.php" method="POST" id="modalFormEmprestimo">
                 <input type="hidden" name="acao" value="oficializar_emprestimo">
                 <input type="hidden" name="reserva_id" id="modalTargetReservaId">
 
