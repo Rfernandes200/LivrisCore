@@ -300,6 +300,7 @@ try {
                                 <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
     
     <button type="button"
+            data-id="<?= $art['id']; ?>"
             style="background: #2563eb !important; color: white !important; border: none; padding: 8px 0; min-width: 90px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s; font-family: 'Inter', sans-serif;"
             onclick="abrirModalEditarArtigo(this)"
             onmouseover="this.style.backgroundColor='#1d4ed8'"

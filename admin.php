@@ -370,18 +370,21 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
 
     <!-- 4. MODAL: EDITAR ARTIGO -->
 
-<div id="modalEditarArtigo" class="modal-overlay">
-    <div class="modal-box" style="max-width: 600px; display: flex; flex-direction: column; overflow: hidden;">
+    <!-- 4. MODAL: EDITAR ARTIGO -->
+
+<div id="modalEditarArtigo" class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+    
+    <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 600px; max-height: 90vh; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); display: flex; flex-direction: column; overflow: hidden; font-family: 'Inter', sans-serif;">
         
-        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="padding: 20px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2); flex-shrink: 0;">
             <div>
-                <span style="font-size: 0.7rem; color: #eab308; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ MODIFICAR ARTIGO ]</span>
-                <h2>Editar Detalhes do Livro</h2>
+                <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ MODIFICAR ARTIGO ]</span>
+                <h2 style="font-size: 1.3rem; color: white; font-weight: 600; margin: 0; text-align: left;">Editar Detalhes do Livro</h2>
             </div>
-            <button type="button" class="btn-close-modal" onclick="fecharModalEditarArtigo()">✕</button>
+            <button type="button" onclick="fecharModalEditarArtigo()" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
 
-        <form action="editar_artigo.php" method="POST" enctype="multipart/form-data" style="margin: 0; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
+        <form action="editar_artigo.php" method="POST" enctype="multipart/form-data" style="margin: 0; padding: 28px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
             
             <input type="hidden" id="edit_artigo_id" name="artigo_id">
             
@@ -405,7 +408,7 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">CLASSIFICAÇÃO CDU *</label>
                     <select id="edit_cdu_codigo" name="cdu_codigo" required style="height: 45px; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
-                        <option value="" disabled selected>Selecione a Classe CDU...</option>
+                        <option value="" disabled selected style="background:#0b0f19;">Selecione a Classe CDU...</option>
                         <?php foreach ($todas_categorias as $cat): ?>
                             <option value="<?= htmlspecialchars($cat['codigo']); ?>" style="background:#0b0f19; color:white;"><?= htmlspecialchars($cat['codigo'] . ' - ' . $cat['descricao']); ?></option>
                         <?php endforeach; ?>
@@ -443,9 +446,9 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
                 <small style="color: #64748b; font-size: 0.75rem; margin-top: 4px; display:block;">Deixe vazio para manter a imagem atual.</small>
             </div>
             
-            <div class="modal-footer" style="margin-top: 10px; padding-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
-                <button type="button" class="btn-modal btn-modal-cancel" onclick="fecharModalEditarArtigo()">Cancelar Edição</button>
-                <button type="submit" class="btn-modal btn-modal-save" style="background: #eab308; color: #0b0f19; font-weight: 700;">Atualizar Artigo</button>
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; flex-shrink: 0;">
+                <button type="button" onclick="fecharModalEditarArtigo()" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Cancelar Edição</button>
+                <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600;">Atualizar Artigo</button>
             </div>
         </form>
     </div>
@@ -483,6 +486,22 @@ function abrirModalEditarUtilizador(btn) {
     document.getElementById('modal_telemovel').value = btn.getAttribute('data-telemovel');
     document.getElementById('modal_tipo').value      = btn.getAttribute('data-tipo');
     document.getElementById('modal_ativo').value     = btn.getAttribute('data-ativo');
+    
+    // check if editing own admin account
+    const isSelf = btn.getAttribute('data-self') === 'true';
+    const avisoSelf = document.getElementById('aviso_self_edit');
+    const selectTipo = document.getElementById('modal_tipo');
+    const selectAtivo = document.getElementById('modal_ativo');
+    if (isSelf) {
+        if (avisoSelf) avisoSelf.style.display = 'block';
+        if (selectTipo) selectTipo.disabled = true;
+        if (selectAtivo) selectAtivo.disabled = true;
+    } else {
+        if (avisoSelf) avisoSelf.style.display = 'none';
+        if (selectTipo) selectTipo.disabled = false;
+        if (selectAtivo) selectAtivo.disabled = false;
+    }
+
     alternarModal('modalEditarUtilizador', true);
 }
 
@@ -491,28 +510,49 @@ function abrirModalAdicionarUtilizador() { alternarModal('modalAdicionarUtilizad
 function fecharModalAdicionarUtilizador() { alternarModal('modalAdicionarUtilizador', false); }
 
 // 3. FUNÇÕES DE ARTIGOS
+function abrirModalAdicionarArtigo() { alternarModal('modalAdicionarArtigo', true); }
+function fecharModalAdicionarArtigo() { alternarModal('modalAdicionarArtigo', false); }
+
 function abrirModalEditarArtigo(btn) {
-    document.getElementById('edit_artigo_id').value    = btn.getAttribute('data-id');
-    document.getElementById('edit_titulo').value       = btn.getAttribute('data-titulo');
-    document.getElementById('edit_isbn').value         = btn.getAttribute('data-isbn');
-    document.getElementById('edit_editora').value      = btn.getAttribute('data-editora');
-    document.getElementById('edit_ano').value          = btn.getAttribute('data-ano');
-    document.getElementById('edit_cdu_codigo').value   = btn.getAttribute('data-cdu');
-    document.getElementById('edit_estado').value       = btn.getAttribute('data-estado');
-    document.getElementById('edit_descricao').value    = btn.getAttribute('data-descricao');
-
-    const autoresAttr = btn.getAttribute('data-autores') || "";
-    const autoresIds = autoresAttr ? autoresAttr.split(',') : [];
+    const id = btn.getAttribute('data-id');
     
-    const container = document.getElementById('container-autores-edit');
-    const template = document.getElementById('template-select-autor');
-    
-    container.innerHTML = ''; 
-    autoresIds.forEach((id, index) => {
-        criarLinhaAutorGenerica(container, template, id, index === 0, 'select-autor-dinamico-edit', 'btn-add-autor-row-edit');
-    });
+    fetch(`editar_artigo.php?id=${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.erro) {
+                alert('Erro ao carregar dados: ' + data.erro);
+                return;
+            }
+            // Preencher os campos do formulário
+            document.getElementById('edit_artigo_id').value = data.id;
+            document.getElementById('edit_titulo').value = data.titulo;
+            document.getElementById('edit_isbn').value = data.isbn;
+            document.getElementById('edit_editora').value = data.editora;
+            document.getElementById('edit_ano').value = data.ano_edicao;
+            document.getElementById('edit_cdu_codigo').value = data.cdu_codigo;
+            document.getElementById('edit_estado').value = data.estado;
+            document.getElementById('edit_descricao').value = data.descricao;
 
-    alternarModal('modalEditarArtigo', true);
+            // Preencher autores
+            const container = document.getElementById('container-autores-edit');
+            const template = document.getElementById('template-select-autor');
+            container.innerHTML = '';
+            
+            const autoresIds = data.autores || [];
+            if (autoresIds.length === 0) {
+                criarLinhaAutorGenerica(container, template, '', true, 'select-autor-dinamico-edit', 'btn-add-autor-row-edit');
+            } else {
+                autoresIds.forEach((autorId, index) => {
+                    criarLinhaAutorGenerica(container, template, autorId, index === 0, 'select-autor-dinamico-edit', 'btn-add-autor-row-edit');
+                });
+            }
+
+            alternarModal('modalEditarArtigo', true);
+        })
+        .catch(err => {
+            console.error('Erro ao buscar dados do livro:', err);
+            alert('Erro ao carregar os dados do livro da base de dados.');
+        });
 }
 
 function fecharModalEditarArtigo() { alternarModal('modalEditarArtigo', false); }
@@ -527,11 +567,21 @@ function criarLinhaAutorGenerica(container, template, valorId, ePrimeiraLinha, c
     select.style.flexGrow = '1';
     select.name = 'autor_id[]';
     select.classList.add(classeSelect);
+    select.required = true;
+    select.style.height = "45px";
+    select.style.background = "rgba(255,255,255,0.03)";
+    select.style.border = "1px solid rgba(255,255,255,0.08)";
+    select.style.borderRadius = "6px";
+    select.style.color = "white";
+    select.style.padding = "0 14px";
+    select.style.boxSizing = "border-box";
+    select.style.fontFamily = "inherit";
+
     if (valorId) select.value = valorId;
 
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.style.cssText = "height: 45px; width: 45px; border: none; border-radius: 6px; cursor: pointer;";
+    btn.style.cssText = "height: 45px; width: 45px; min-width: 45px; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.3rem; font-weight: 600;";
     btn.innerHTML = ePrimeiraLinha ? '+' : '&times;';
     btn.style.background = ePrimeiraLinha ? '#10b981' : '#ef4444';
     if (!ePrimeiraLinha) btn.onclick = () => newRow.remove();
@@ -548,6 +598,10 @@ document.addEventListener('click', (e) => {
         const container = document.getElementById('container-autores-edit');
         const template = document.getElementById('template-select-autor');
         criarLinhaAutorGenerica(container, template, '', false, 'select-autor-dinamico-edit', '');
+    } else if (e.target.id === 'btn-add-autor-row') {
+        const container = document.getElementById('container-autores');
+        const template = document.getElementById('template-select-autor');
+        criarLinhaAutorGenerica(container, template, '', false, 'select-autor-dinamico', '');
     }
 });
 </script>

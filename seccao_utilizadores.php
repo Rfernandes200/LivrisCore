@@ -220,7 +220,7 @@ try {
                                 <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
                                     
                                     <button type="button" 
-                                            onclick="abrirModalEditar(this)" 
+                                            onclick="abrirModalEditarUtilizador(this)" 
                                             data-id="<?= $u['id']; ?>" 
                                             data-nome="<?= htmlspecialchars($u['nome']); ?>" 
                                             data-email="<?= htmlspecialchars($u['email']); ?>" 
