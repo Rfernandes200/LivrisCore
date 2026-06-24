@@ -12,19 +12,19 @@ if ($footer_logado) {
     <div class="sidebar-menu-links">
         <div class="sidebar-title">Administração</div>
         <a href="admin.php?seccao=geral" class="sidebar-link <?= ($seccao ?? 'geral') === 'geral' ? 'active' : '' ?>">
-            <span class="sb-icon">📊</span> <span class="sb-text">Geral</span>
+            <span class="sb-icon">G</span> <span class="sb-text">Geral</span>
         </a>
         <a href="admin.php?seccao=utilizadores" class="sidebar-link <?= ($seccao ?? '') === 'utilizadores' ? 'active' : '' ?>">
-            <span class="sb-icon">👥</span> <span class="sb-text">Utilizadores</span>
+            <span class="sb-icon">U</span> <span class="sb-text">Utilizadores</span>
         </a>
         <a href="admin.php?seccao=reservas" class="sidebar-link <?= ($seccao ?? '') === 'reservas' ? 'active' : '' ?>">
-            <span class="sb-icon">📅</span> <span class="sb-text">Reservas</span>
+            <span class="sb-icon">R</span> <span class="sb-text">Reservas</span>
         </a>
         <a href="admin.php?seccao=emprestimos" class="sidebar-link <?= ($seccao ?? '') === 'emprestimos' ? 'active' : '' ?>">
-            <span class="sb-icon">💼</span> <span class="sb-text">Empréstimos</span>
+            <span class="sb-icon">E</span> <span class="sb-text">Empréstimos</span>
         </a>
         <a href="admin.php?seccao=artigos" class="sidebar-link <?= ($seccao ?? '') === 'artigos' ? 'active' : '' ?>">
-            <span class="sb-icon">📦</span> <span class="sb-text">Artigos (Catálogo)</span>
+            <span class="sb-icon">L</span> <span class="sb-text">Livros</span>
         </a>
     </div>
 
@@ -43,7 +43,7 @@ if ($footer_logado) {
         <?php endif; ?>
         
         <a href="index.php" class="sidebar-back-button">
-            <span class="sb-text">Voltar ao início</span> <span class="sb-icon-mbi">🏠</span>
+            <span class="sb-text">Voltar ao início</span> <span class="sb-icon-mbi">VI</span>
         </a>
     </div>
 </aside>

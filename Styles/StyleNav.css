@@ -1,0 +1,240 @@
+/* ==========================================================================
+   BIBLIOBASE - ESTILOS E RESPONSIVIDADE DA NAVBAR
+   ========================================================================== */
+
+:root {
+    --nav-bg: rgba(15, 23, 42, 0.95);
+    --nav-border: rgba(255, 255, 255, 0.08);
+    --text-muted: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-hover: #2563eb;
+}
+
+/* --- BARRA PRINCIPAL --- */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8%;
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    height: 70px;
+    z-index: 1000;
+    border-bottom: 1px solid var(--nav-border);
+    box-sizing: border-box;
+}
+
+.nav-left,
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+/* --- LOGÓTIPO --- */
+.logo {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    margin-right: 25px;
+    display: flex;
+    align-items: center;
+}
+
+.logo strong {
+    background: var(--accent-blue);
+    padding: 4px 10px;
+    border-radius: 8px;
+    margin-right: 8px;
+    color: white;
+}
+
+/* --- MENU DESKTOP --- */
+.menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.menu a {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.menu a:hover,
+.menu a.active {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Link de Administração Especial */
+.menu a.nav-admin {
+    color: #60a5fa;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.menu a.nav-admin:hover {
+    background: rgba(96, 165, 250, 0.1);
+}
+
+/* --- BOTÃO ENTRAR --- */
+.btn-entrar-nav {
+    background: var(--accent-blue);
+    color: white !important;
+    padding: 10px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    display: inline-block;
+    border: none;
+}
+
+.btn-entrar-nav:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* --- BOX DE PERFIL (LOGADO) --- */
+.profile-box {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.profile-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.user-avatar {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #1e293b;
+    color: white;
+    font-weight: 600;
+}
+
+.user-name {
+    font-weight: 500;
+    color: #f8fafc;
+}
+
+.nav-divider {
+    color: #334155;
+}
+
+.logout-link {
+    font-size: 0.9rem;
+    color: #ef4444;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 4px 8px;
+    transition: opacity 0.2s;
+}
+
+.logout-link:hover {
+    opacity: 0.8;
+}
+
+/* --- BOTÃO HAMBÚRGUER --- */
+.hamburger-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    z-index: 1001;
+    margin-right: 12px;
+}
+
+.hamburger-toggle span {
+    display: block;
+    width: 26px;
+    height: 3px;
+    background-color: #f8fafc;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+/* Animação do X */
+.hamburger-toggle.open span:nth-child(1) {
+    transform: rotate(45deg) translate(6deg, 6deg);
+}
+
+.hamburger-toggle.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-toggle.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(6deg, -6deg);
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE (Ecrãs Mobile e Tablet)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0 24px;
+    }
+
+    .hamburger-toggle {
+        display: flex;
+    }
+
+    /* Transforma o menu numa barra lateral */
+    .menu {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 280px;
+        height: 100vh;
+        background: #0f172a;
+        border-right: 1px solid var(--nav-border);
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 90px 24px 30px 24px;
+        gap: 16px;
+        transition: left 0.3s ease-in-out;
+        z-index: 1000;
+        box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Revela o menu quando ganha a classe .open do JS */
+    .menu.open {
+        left: 0;
+    }
+
+    .menu a {
+        font-size: 1.1rem;
+        width: 100%;
+        padding: 12px 16px;
+        box-sizing: border-box;
+        display: block;
+    }
+
+    .menu a.nav-admin {
+        margin-left: 0;
+    }
+}

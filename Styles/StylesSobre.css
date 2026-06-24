@@ -1,11 +1,21 @@
-/* Define o fundo cinza claro suave em toda a página de forma fluida */
-body {
+/* ==========================================================================
+   STYLES SOBRE - VERSÃO CORRIGIDA SEM CONFLITO COM A NAVBAR
+   ========================================================================== */
+
+/* Aplica o fundo e a fonte apenas aos elementos da página sobre, 
+   respeitando a Navbar */
+body.about-page-body {
     background: #f8fafc !important;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    padding-top: 70px;
+    /* Empurra o conteúdo exatamente para baixo da Navbar */
+    font-family: 'Inter', sans-serif !important;
+    /* Garante a fonte moderna na página */
 }
 
+/* Garante que o cabeçalho da página fica alinhado e não interfere com o topo */
 .about-page-header {
     width: 100%;
     padding: 40px 20px 20px 20px;
@@ -17,10 +27,11 @@ body {
     overflow: visible !important;
 }
 
+/* Alvo específico para o h1 do Sobre */
 .about-page-header h1 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Playfair Display', serif !important;
+    /* Aplica a fonte elegante só aqui */
     color: #0f172a;
-    /* Texto escuro para contrastar com o fundo claro */
     font-size: 2.8rem;
     margin: 0 0 15px 0;
     line-height: 1.2 !important;
@@ -32,13 +43,13 @@ body {
     color: #3b82f6;
 }
 
+/* --- RECONSTRUÇÃO DOS CARTÕES (Garante isolamento) --- */
 .about-wrapper {
     max-width: 900px;
     margin: 20px auto 60px auto;
     padding: 0 20px;
     font-family: 'Inter', sans-serif;
     color: #334155;
-    /* Texto geral escuro */
     text-align: left;
     box-sizing: border-box;
 }
@@ -86,7 +97,6 @@ body {
 
 .rule-box h3 {
     color: #2563eb;
-    /* Azul com melhor contraste no fundo claro */
     margin-top: 0;
     font-size: 1.05rem;
     margin-bottom: 8px;
