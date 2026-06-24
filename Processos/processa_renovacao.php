@@ -1,10 +1,11 @@
 <?php
 session_start();
-require 'config.php';
+require '../config.php';
 
 // Bloqueio de Segurança para o Admin
 if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !== 1 && $_SESSION['utilizador_tipo'] !== 'admin')) {
-    exit('Acesso negado');
+    header("Location: ../admin.php?seccao=emprestimos&status=error_acesso");
+    exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['emprestimo_id'])) {
@@ -17,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['emprestimo_id'])) {
         $emprestimo = $stmt_busca->fetch(PDO::FETCH_ASSOC);
 
         if ($emprestimo) {
-            // Calcula a nova data com base no prazo atual
+            // Calcula a nova data com base no prazo atual (+ 14 dias)
             $data_atual_limite = $emprestimo['data_prevista_devolucao'];
             $nova_data_fim = date('Y-m-d', strtotime($data_atual_limite . ' + 14 days'));
 
@@ -28,16 +29,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['emprestimo_id'])) {
                 'id' => $emprestimo_id
             ]);
 
-            header("Location: admin.php?seccao=emprestimos&status=success_renovacao");
+            header("Location: ../admin.php?seccao=emprestimos&status=success_renovacao");
             exit();
         } else {
-            exit('Registo de empréstimo não encontrado ou já se encontra devolvido.');
+            // Se não encontrar o empréstimo ativo, volta com erro em vez de quebrar a página
+            header("Location: ../admin.php?seccao=emprestimos&status=error_not_found");
+            exit();
         }
 
     } catch (PDOException $e) {
-        exit("Erro ao processar renovação: " . $e->getMessage());
+        header("Location: ../admin.php?seccao=emprestimos&status=error_db");
+        exit();
     }
 } else {
-    header("Location: admin.php?seccao=emprestimos");
+    header("Location: ../admin.php?seccao=emprestimos");
     exit();
 }

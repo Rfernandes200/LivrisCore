@@ -1,10 +1,10 @@
 <?php
 session_start();
-require 'config.php';
+require '../config.php';
 
 // 1. Bloqueio de Segurança
 if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !== 1 && $_SESSION['utilizador_tipo'] !== 'admin')) {
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit();
 }
 
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $editora        = trim($_POST['editora'] ?? '');
     $ano_edicao     = (int)($_POST['ano_edicao'] ?? 0);
     
-    $origem = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+    $origem = $_SERVER['HTTP_REFERER'] ?? '../index.php';
 
     // [NOVA VALIDAÇÃO: ISBN DUPLICADO]
     if (!empty($isbn)) {
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ((int)$stmt_check->fetchColumn() > 0) {
             $_SESSION['alerta'] = [
                 'tipo' => 'erro',
-                'mensagem' => '❌ Erro: Já existe um livro registado com este código ISBN!'
+                'mensagem' => ' Erro: Já existe um livro registado com este código ISBN!'
             ];
             header("Location: " . $origem);
             exit; // Para o script imediatamente para não fazer upload nem INSERT
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             $imagem_nome = uniqid('capa_', true) . '.' . $extensao;
-            $destino = 'Uploads/' . $imagem_nome;
+            $destino = '../Uploads/' . $imagem_nome;
             
             if (move_uploaded_file($_FILES['imagem']['tmp_name'], $destino)) {
                 $nome_imagem_bd = $imagem_nome; 
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($titulo) || empty($autores_ids) || empty($cdu_codigo) || empty($isbn) || empty($editora) || $ano_edicao === 0 || empty($descricao) || !$nome_imagem_bd) {
         $_SESSION['alerta'] = [
             'tipo' => 'erro',
-            'mensagem' => '❌ Erro: Seleção de pelo menos um Autor e todos os outros campos são obrigatórios!'
+            'mensagem' => ' Erro: Seleção de pelo menos um Autor e todos os outros campos são obrigatórios!'
         ];
         header("Location: " . $origem);
         exit;
@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $_SESSION['alerta'] = [
             'tipo' => 'sucesso',
-            'mensagem' => '🎉 Livro adicionado e vinculado aos autores com sucesso!'
+            'mensagem' => ' Livro adicionado e vinculado aos autores com sucesso!'
         ];
 
     } catch (PDOException $e) {
@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $_SESSION['alerta'] = [
             'tipo' => 'erro',
-            'mensagem' => '❌ Erro ao guardar na Base de Dados: ' . $e->getMessage()
+            'mensagem' => ' Erro ao guardar na Base de Dados: ' . $e->getMessage()
         ];
     }
 

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'config.php';
+require '../config.php';
 
 // Bloqueio de Segurança para o Admin
 if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !== 1 && $_SESSION['utilizador_tipo'] !== 'admin')) {
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['emprestimo_id'])) {
             $stmt_item->execute(['livro_id' => $emprestimo['livro_id']]);
 
             $pdo->commit();
-            header("Location: admin.php?seccao=emprestimos&status=success_devolucao");
+            header("Location: ../admin.php?seccao=emprestimos&status=success_devolucao");
             exit();
         } else {
             $pdo->rollBack();
@@ -40,6 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['emprestimo_id'])) {
         exit('Erro ao processar a devolução: ' . $e->getMessage());
     }
 } else {
-    header("Location: admin.php?seccao=emprestimos");
+    header("Location: ../admin.php?seccao=emprestimos");
     exit();
 }

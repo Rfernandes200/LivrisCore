@@ -274,12 +274,12 @@ try {
                             <td style="padding: 14px 20px; text-align: center;">
                                 <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
                                     <?php if ($emp['estado_calculado'] !== 'devolvido'): ?>
-                                        <form action="processa_devolucao.php" method="POST" style="margin: 0; display: inline;">
+                                        <form action="Processos/processa_devolucao.php" method="POST" style="margin: 0; display: inline;">
                                             <input type="hidden" name="emprestimo_id" value="<?= $emp['id']; ?>">
                                             <button type="submit" style="padding: 8px 16px; font-size: 0.85rem; background: #2563eb; border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.15s;" onmouseover="this.style.backgroundColor='#1d4ed8'" onmouseout="this.style.backgroundColor='#2563eb'" title="Registar Devolução">Devolver</button>
                                         </form>
 
-                                        <form action="processa_renovacao.php" method="POST" style="margin: 0; display: inline;">
+                                        <form action="Processos/processa_renovacao.php" method="POST" style="margin: 0; display: inline;">
                                             <input type="hidden" name="emprestimo_id" value="<?= $emp['id']; ?>">
                                             <button type="submit" style="background: #ffffff; border: 1px solid #cbd5e1; color: #d97706; padding: 7px 16px; font-size: 0.85rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.15s;" onmouseover="this.style.background='#fffbeb'; this.style.borderColor='#fef3c7';" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#cbd5e1';" title="Renovar Prazo">Renovar</button>
                                         </form>

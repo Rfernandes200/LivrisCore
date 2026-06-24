@@ -240,7 +240,7 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
                 <h2> Criar Novo Utilizador</h2>
                 <button class="btn-close-modal" onclick="fecharModalAdicionarUtilizador()">✕</button>
             </div>
-            <form action="inserir_utilizador.php" method="POST">
+            <form action="Processos/inserir_utilizador.php" method="POST">
                 <div class="form-group-modal">
                     <label>Nome Completo</label>
                     <input type="text" name="nome" placeholder="Ex: João Silva" required>
@@ -285,7 +285,7 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
             <button type="button" onclick="fecharModalAdicionarArtigo()" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
 
-        <form action="processa_artigo.php" method="POST" enctype="multipart/form-data" style="margin: 0; padding: 28px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
+        <form action="Processos/processa_artigo.php" method="POST" enctype="multipart/form-data" style="margin: 0; padding: 28px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">

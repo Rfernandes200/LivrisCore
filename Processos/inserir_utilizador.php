@@ -1,11 +1,11 @@
 <?php
 session_start();
-require 'config.php';
+require '../config.php';
 
 // Proteção: Garante que apenas administradores logados podem aceder a este script
 // Se o teu sistema usa (int)$_SESSION['tipo'] === 1 para admin, mantém esta validação
 if (!isset($_SESSION['utilizador_id'])) {
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validações básicas de segurança
     if (empty($nome) || empty($email) || empty($password)) {
-        header("Location: admin.php?erro=Por favor, preencha todos os campos obrigatórios.");
+        header("Location: ../admin.php?erro=Por favor, preencha todos os campos obrigatórios.");
         exit();
     }
 
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_check->execute(['email' => $email]);
         
         if ((int)$stmt_check->fetchColumn() > 0) {
-            header("Location: admin.php?erro=O endereço de email já está a ser utilizado por outra conta.");
+            header("Location: ../admin.php?erro=O endereço de email já está a ser utilizado por outra conta.");
             exit();
         }
 
@@ -54,16 +54,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         // Redireciona de volta para o painel de administração com mensagem de sucesso
-        header("Location: admin.php?sucesso=Utilizador '" . htmlspecialchars($nome) . "' criado com sucesso!");
+        header("Location: ../admin.php?sucesso=Utilizador '" . htmlspecialchars($nome) . "' criado com sucesso!");
         exit();
 
     } catch (Exception $e) {
         // Redireciona com mensagem amigável em caso de falha crítica de BD
-        header("Location: admin.php?erro=Erro técnico ao registar o utilizador na base de dados.");
+        header("Location: ../admin.php?erro=Erro técnico ao registar o utilizador na base de dados.");
         exit();
     }
 } else {
     // Se tentarem aceder ao ficheiro diretamente sem submeter o modal, manda de volta
-    header("Location: admin.php");
+    header("Location: ../admin.php");
     exit();
 }
