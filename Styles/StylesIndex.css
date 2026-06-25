@@ -266,7 +266,7 @@
        background: #1e293b;
    }
 
-   /* Ajuste para o ícone do olho (👁️) */
+   /* Ajuste para o ícone do olho */
    .password-wrapper {
        position: relative;
        display: flex;
@@ -376,7 +376,7 @@
    /* Caixa Central do Formulário */
    .modal-card {
        background: #0b0f19;
-       /* Fundo do BiblioBase */
+       /* Fundo do LivrisCore */
        border: 1px solid rgba(255, 255, 255, 0.08);
        width: 100%;
        max-width: 650px;

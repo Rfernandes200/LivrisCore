@@ -16,7 +16,7 @@ if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !
 
     <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 20px; width: 100%;">
         <div style="white-space: nowrap; font-size: 0.9rem; color: #64748b; background: #f8fafc; padding: 8px 14px; border-radius: 20px; border: 1px solid #e2e8f0; font-weight: 500;">
-            📊 <span><?= count($reservas); ?> reserva(s) encontrada(s)</span>
+            <span><?= count($reservas); ?> reserva(s) encontrada(s)</span>
         </div>
     </div>
 
@@ -36,7 +36,7 @@ if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !
             <tbody>
                 <?php if (empty($reservas)): ?>
                     <tr>
-                        <td colspan="7" style="text-align: center; color: #64748b; padding: 50px; font-weight: 500;">📅 Não existem reservas ativas no sistema de momento.</td>
+                        <td colspan="7" style="text-align: center; color: #64748b; padding: 50px; font-weight: 500;">Não existem reservas ativas no sistema de momento.</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($reservas as $res): ?>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrar - BiblioBase</title>
+    <title>Entrar - LivrisCore</title>
     <link rel="stylesheet" href="Styles/StyleRegistro.css">
     
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
         
         <div class="login-sidebar">
             <div class="sidebar-brand">
-                <span class="brand-box">B</span> BiblioBase
+                <span class="brand-box">L</span> LivrisCore
             </div>
             <div class="sidebar-content">
                 <h2>"Uma biblioteca é um hospital para a mente."</h2>

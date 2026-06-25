@@ -19,8 +19,8 @@ SET time_zone = "+00:00";
 --
 -- Criação e Seleção Segura da Base de Dados (CORREÇÃO AQUI)
 --
-CREATE DATABASE IF NOT EXISTS `bibliobase` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `bibliobase`;
+CREATE DATABASE IF NOT EXISTS `livriscore` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `livriscore`;
 
 -- --------------------------------------------------------
 

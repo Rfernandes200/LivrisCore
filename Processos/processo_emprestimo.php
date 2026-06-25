@@ -92,7 +92,7 @@ if ($acao === 'oficializar_emprestimo') {
             $stmt_item = $pdo->prepare("UPDATE livros SET estado = 'indisponivel' WHERE id = :livro_id");
             $stmt_item->execute(['livro_id' => $reserva['livro_id']]);
 
-            $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'Empréstimo confirmado com sucesso! Boa leitura. 🎉'];
+            $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'Empréstimo confirmado com sucesso! Boa leitura.'];
         } else {
             $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Solicitação inválida ou expirada.'];
         }
@@ -127,7 +127,7 @@ if ($acao === 'entregar_emprestimo') {
             $stmt_item = $pdo->prepare("UPDATE livros SET estado = 'disponivel' WHERE id = :livro_id");
             $stmt_item->execute(['livro_id' => $emprestimo['livro_id']]);
 
-            $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'Artigo entregue e devolvido com sucesso! Obrigado. 👍'];
+            $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'Artigo entregue e devolvido com sucesso! Obrigado.'];
         } else {
             $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Empréstimo inválido ou já finalizado anteriormente.'];
         }

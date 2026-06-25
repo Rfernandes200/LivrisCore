@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => '🎉 Perfil do utilizador atualizado com sucesso!'];
+            $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'Perfil do utilizador atualizado com sucesso!'];
         }
 
         // ==========================================

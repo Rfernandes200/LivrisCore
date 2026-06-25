@@ -20,7 +20,7 @@ if ($está_logado) {
             <span></span>
         </button>
 
-        <div class="logo"><strong>B</strong> BiblioBase</div>
+        <div class="logo"><strong>LC</strong> LivrisCore</div>
         
         <div class="menu" id="navMenu">
             <a href="index.php" class="<?= $pagina_atual === 'index.php' ? 'active' : ''; ?>">Catálogo</a>

@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$db   = 'bibliobase';
+$db   = 'livriscore';
 $user = 'root';
 $pass = '';
 

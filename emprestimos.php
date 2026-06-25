@@ -58,7 +58,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Os Meus Empréstimos - BiblioBase</title>
+    <title>Os Meus Empréstimos - LivrisCore</title>
     
     <link rel="stylesheet" href="Styles/Styleempres.css">   
     <link rel="stylesheet" href="Styles/StyleNav.css">
@@ -221,7 +221,7 @@ try {
 
         <!-- SECÇÃO 2: EMPRÉSTIMOS ATIVOS -->
         <section class="section-card">
-            <h2 class="table-section-title title-ativo">📖 Artigos Contigo (Em Curso)</h2>
+            <h2 class="table-section-title title-ativo">Artigos Contigo (Em Curso)</h2>
             <div style="overflow-x: auto;">
                 <table class="custom-table">
                     <thead>

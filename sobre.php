@@ -7,7 +7,7 @@ require 'config.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sobre o BiblioBase - Sistema de Biblioteca</title>
+    <title>Sobre o LivrisCore - Sistema de Biblioteca</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="Styles/StyleNav.css">
     <link rel="stylesheet" href="Styles/StylesSobre.css">
@@ -17,7 +17,7 @@ require 'config.php';
 <?php require 'navbar.php'; ?>
 
 <div class="about-page-header">
-    <h1>Sobre o <span>BiblioBase</span></h1>
+    <h1>Sobre o <span>LivrisCore</span></h1>
     <p style="max-width: 600px; margin: 0 auto; color: #475569; font-size: 1.05rem; line-height: 1.5; font-family: 'Inter', sans-serif;">
         A plataforma digital concebida para modernizar, organizar e facilitar o acesso ao acervo literário da nossa biblioteca.
     </p>
@@ -26,9 +26,9 @@ require 'config.php';
 <div class="about-wrapper">
     
     <div class="about-card">
-        <h2>O que é o BiblioBase?</h2>
+        <h2>O que é o LivrisCore?</h2>
         <p style="line-height: 1.7; margin: 0; font-size: 0.95rem; color: #334155;">
-            O <strong>BiblioBase</strong> é um sistema de gestão bibliotecária em tempo real. Desenvolvido com foco na simplicidade e fluidez, o sistema permite que os leitores naveguem por todo o catálogo de livros disponíveis, consultem referências técnicas catalogadas por indexação <span style="color: #2563eb; font-weight: 600;">CDU</span>, visualizem sinopses detalhadas e façam reservas instantâneas sem burocracias.
+            O <strong>LivrisCore</strong> é um sistema de gestão bibliotecária em tempo real. Desenvolvido com foco na simplicidade e fluidez, o sistema permite que os leitores naveguem por todo o catálogo de livros disponíveis, consultem referências técnicas catalogadas por indexação <span style="color: #2563eb; font-weight: 600;">CDU</span>, visualizem sinopses detalhadas e façam reservas instantâneas sem burocracias.
         </p>
     </div>
 
@@ -71,7 +71,7 @@ require 'config.php';
 </div>
 
 <footer>
-    <p>&copy; 2026 BiblioBase - Sistema de Gestão de Biblioteca</p>
+    <p>&copy; 2026 LivrisCore - Sistema de Gestão de Biblioteca</p>
 </footer>
 
 </body>

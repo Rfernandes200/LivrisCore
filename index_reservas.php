@@ -6,7 +6,6 @@
 <?php if (isset($_SESSION['reserva_sucesso_codigo'])): ?>
 <div id="codeSuccessModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 100000; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     <div style="background: #0b0f19; border: 1px solid rgba(16, 185, 129, 0.3); width: 100%; max-width: 420px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); text-align: center; font-family: 'Inter', sans-serif; padding: 30px;">
-        <span style="font-size: 3rem;">🎉</span>
         <h2 style="color: white; font-size: 1.5rem; margin-top: 10px; margin-bottom: 5px;">Reserva Confirmada!</h2>
         <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 25px;">Apresente o código abaixo ao funcionário para levantar o seu livro.</p>
         
@@ -15,7 +14,7 @@
         </div>
         
         <p style="color: #eab308; font-size: 0.8rem; font-weight: 500; margin-bottom: 20px;">
-            ⚠️ Atenção: Este código expira em exatamente 4 horas!
+             Atenção: Este código expira em exatamente 4 horas!
         </p>
         
         <button type="button" id="closeCodeModalBtn" style="background: #10b981; border: none; color: #0f172a; font-weight: 600; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; width: 100%;">

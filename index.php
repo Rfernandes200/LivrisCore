@@ -69,7 +69,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiblioBase - Gestão de Biblioteca</title>
+    <title>LivrisCore - Gestão de Biblioteca</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="Styles/StylesIndex.css">
     <link rel="stylesheet" href="Styles/StylesIndex2.css">
@@ -172,7 +172,7 @@ try {
             
             <form method="GET" action="index.php" style="display: flex; align-items: center; gap: 12px; margin: 0; flex: 1; max-width: 580px;">
                 <div style="position: relative; width: 100%;">
-                    <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #3b82f6; font-size: 1.1rem; z-index: 2; pointer-events: none;">🔍</span>
+                    <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #3b82f6; font-size: 1.1rem; z-index: 2; pointer-events: none;"></span>
                     
                     <input type="text" 
                            name="pesquisa" 
@@ -278,7 +278,7 @@ try {
 </main>
 
 <footer>
-    <p>&copy; 2026 BiblioBase - Sistema de Gestão de Biblioteca</p>
+    <p>&copy; 2026 LivrisCore - Sistema de Gestão de Biblioteca</p>
 </footer>
 
 <div id="detailsCatalogModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
