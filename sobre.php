@@ -45,8 +45,8 @@ require 'config.php';
             </div>
 
             <div class="rule-box">
-                <h3>Janela de Tolerância</h3>
-                <p>Após confirmar uma reserva online, o sistema gera um código exclusivo. Tem um prazo limite estrito de <span class="highlight-yellow">4 Horas</span> para se dirigir ao balcão e levantar o livro, caso contrário a reserva expira automaticamente.</p>
+                <h3>Empréstimo</h3>
+                <p>Após confirmar uma reserva online, o sistema gera um código exclusivo. Tem que ir á página de empréstimos para concluir o processo, e após isso ir ao balcão ir buscar o livro.</p>
             </div>
 
             <div class="rule-box">
