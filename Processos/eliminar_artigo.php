@@ -39,7 +39,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         // Confirmar todas as remoções com segurança
         $pdo->commit();
 
-        $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'O artigo foi removido do acervo com sucesso!'];
+        $_SESSION['alerta'] = ['tipo' => 'sucesso', 'mensagem' => 'O artigo foi removido com sucesso!'];
         header("Location: ../admin.php?seccao=artigos");
         exit();
 

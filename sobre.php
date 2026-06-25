@@ -19,7 +19,7 @@ require 'config.php';
 <div class="about-page-header">
     <h1>Sobre o <span>LivrisCore</span></h1>
     <p style="max-width: 600px; margin: 0 auto; color: #475569; font-size: 1.05rem; line-height: 1.5; font-family: 'Inter', sans-serif;">
-        A plataforma digital concebida para modernizar, organizar e facilitar o acesso ao acervo literário da nossa biblioteca.
+        A plataforma digital concebida para modernizar, organizar e facilitar o acesso ao catálogo literário da nossa biblioteca.
     </p>
 </div>
 

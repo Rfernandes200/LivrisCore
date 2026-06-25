@@ -1,6 +1,6 @@
 <?php
 // index_reservas.php
-// Este ficheiro funciona como uma secção modular incluída no index.php
+// Este ficheiro funciona como uma secção  incluída no index.php
 ?>
 
 <?php if (isset($_SESSION['reserva_sucesso_codigo'])): ?>

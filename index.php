@@ -153,7 +153,7 @@ try {
             <p class="hero-tag">SISTEMA DE GESTÃO</p>
             <h1>A sua biblioteca,<br><span>organizada.</span></h1>
             <p class="hero-subtitle">
-                Pesquise, reserve e acompanhe todo o acervo de livros em tempo real.
+                Pesquise, reserve e acompanhe todo o catlogo de livros em tempo real.
             </p>
         </div>
     </div>
