@@ -43,7 +43,7 @@ if ($footer_logado) {
         <?php endif; ?>
         
         <a href="index.php" class="sidebar-back-button">
-            <span class="sb-text">Voltar ao início</span> <span class="sb-icon-mbi">VI</span>
+            <span class="sb-text">Voltar ao início</span> <span class="sb-icon-mbi">V</span>
         </a>
     </div>
 </aside>

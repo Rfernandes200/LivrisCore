@@ -28,7 +28,7 @@ require 'config.php';
     <div class="about-card">
         <h2>O que é o LivrisCore?</h2>
         <p style="line-height: 1.7; margin: 0; font-size: 0.95rem; color: #334155;">
-            O <strong>LivrisCore</strong> é um sistema de gestão bibliotecária em tempo real. Desenvolvido com foco na simplicidade e fluidez, o sistema permite que os leitores naveguem por todo o catálogo de livros disponíveis, consultem referências técnicas catalogadas por indexação <span style="color: #2563eb; font-weight: 600;">CDU</span>, visualizem sinopses detalhadas e façam reservas instantâneas sem burocracias.
+            O <strong>LivrisCore</strong> é um sistema de gestão bibliotecária em tempo real. Desenvolvido com foco na simplicidade e fluidez, o sistema permite que os leitores naveguem por todo o catálogo de livros disponíveis, pesquisem por livros e visualizem sinopses detalhadas e façam reservas instantâneas.
         </p>
     </div>
 
@@ -64,7 +64,7 @@ require 'config.php';
     <div class="about-card" style="text-align: center; background: rgba(59, 130, 246, 0.04); border: 1px solid rgba(59, 130, 246, 0.2); margin-bottom: 0;">
         <h2 style="justify-content: center; color: #1d4ed8;">Precisa de Ajuda Extra?</h2>
         <p style="margin-bottom: 0; font-size: 0.95rem; line-height: 1.6; color: #1e3a8a;">
-            Se encontrar alguma dificuldade no acesso ou necessitar de prolongar o tempo de um empréstimo físico já recolhido, contacte um dos nossos funcionários ou administradores diretamente no balcão de atendimento da biblioteca.
+            Se encontrar alguma dificuldade no acesso ou necessitar de prolongar o tempo de um empréstimo físico já recolhido, contacte um dos nossos funcionários diretamente no balcão de atendimento da biblioteca.
         </p>
     </div>
 

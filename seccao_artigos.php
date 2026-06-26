@@ -209,7 +209,7 @@ try {
 
     <div class="topo-header-artigos">
         <div>
-            <h1 style="font-family: 'Playfair Display', serif; color: #0f172a !important; font-size: 2.2rem; font-weight: bold; margin: 0 0 5px 0;">Gerir Artigos (Catálogo)</h1>
+            <h1 style="font-family: 'Playfair Display', serif; color: #0f172a !important; font-size: 2.2rem; font-weight: bold; margin: 0 0 5px 0;">Gerir Livros (Catálogo)</h1>
             <p style="color: #64748b !important; margin: 0; font-size: 0.95rem;">Monitorize, filtre, edite e insira novos exemplares ao catalogo da biblioteca.</p>
         </div>
         <button class="btn-adicionar-artigo" onclick="abrirModalAdicionarArtigo()" onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">

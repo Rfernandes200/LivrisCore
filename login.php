@@ -16,7 +16,7 @@
         
         <div class="login-sidebar">
             <div class="sidebar-brand">
-                <span class="brand-box">L</span> LivrisCore
+                <span class="brand-box">LC</span> LivrisCore
             </div>
             <div class="sidebar-content">
                 <h2>"Uma biblioteca é um hospital para a mente."</h2>

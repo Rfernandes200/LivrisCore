@@ -170,7 +170,7 @@ try {
 
     <div class="topo-header">
         <div>
-            <h1 style="font-family: 'Playfair Display', serif; font-size: 2.2rem; color: #0f172a; margin: 0 0 5px 0; font-weight: bold;">Gerir Reservas & Empréstimos</h1>
+            <h1 style="font-family: 'Playfair Display', serif; font-size: 2.2rem; color: #0f172a; margin: 0 0 5px 0; font-weight: bold;">Gerir Empréstimos</h1>
             <p style="color: #64748b; margin: 0; font-size: 0.95rem;">Consulte prazos, valide devoluções e monitorize o fluxo de retirada de livros.</p>
         </div>
     </div>
