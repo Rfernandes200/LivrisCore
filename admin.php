@@ -10,9 +10,9 @@ if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !
 
 $id_admin_atual = $_SESSION['utilizador_id'] ?? null; 
 
-// ==========================================
+
 // PROCESSAMENTO DOS FORMULÁRIOS (POST)
-// ==========================================
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // CASO 1: PROCESSAR EDICAO DE LIVRO (editar_artigo.php direciona para aqui ou crias um ficheiro focado)

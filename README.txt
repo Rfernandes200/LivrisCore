@@ -1,3 +1,7 @@
+credenciais
+a@a.a
+12345678
+
 ================================================================================
                     LIVRISCORE - SISTEMA DE GESTÃO DE BIBLIOTECA
                               DOCUMENTAÇÃO TÉCNICA

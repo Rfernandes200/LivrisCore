@@ -173,7 +173,7 @@ try {
 
         <!-- SECCÃO 1: RESERVAS PENDENTES -->
         <section class="section-card">
-            <h2 class="table-section-title title-pendente">⏳ Reservas Efetuadas (Aguardar Validação)</h2>
+            <h2 class="table-section-title title-pendente"> Reservas Efetuadas (Aguardar Validação)</h2>
             <div style="overflow-x: auto;">
                 <table class="custom-table">
                     <thead>
