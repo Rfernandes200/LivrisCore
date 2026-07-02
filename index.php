@@ -340,25 +340,63 @@ try {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // CONTROLO DO MODAL DE ADICIONAR LIVRO
+    
+    // ==========================================================
+    // 1. CONTROLO DO MODAL DE ADICIONAR LIVRO
+    // ==========================================================
     const addModal = document.getElementById('addCatalogModal');
     const openBtn = document.getElementById('openAddCatalogBtn');
     const closeBtn = document.getElementById('closeAddModalBtn');
     const cancelBtn = document.getElementById('cancelAddModalBtn');
 
-    if (openBtn) {
+    if (openBtn && addModal) {
         openBtn.addEventListener('click', function() {
             addModal.style.display = 'flex';
         });
     }
 
-    const closeAddModal = () => { addModal.style.display = 'none'; };
+    const closeAddModal = () => { 
+        if (addModal) {
+            addModal.style.display = 'none';
+            // Reset do preview de imagem local ao fechar
+            const wrapperPreview = document.getElementById('wrapper-preview-capa');
+            const previewImg = document.getElementById('preview-capa-livro');
+            const inputImg = document.getElementById('input-imagem-capa');
+            if (wrapperPreview) wrapperPreview.style.display = 'none';
+            if (previewImg) previewImg.src = '';
+            if (inputImg) inputImg.value = '';
+        }
+    };
+
     if (closeBtn) closeBtn.addEventListener('click', closeAddModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeAddModal);
     if (addModal) addModal.addEventListener('click', function(e) { if (e.target === addModal) closeAddModal(); });
 
     // ==========================================================
-    // LÓGICA DINÂMICA DE MÚLTIPLOS AUTORES SEM REPETIÇÃO
+    // 2. PRÉ-VISUALIZAÇÃO DA CAPA DO LIVRO EM TEMPO REAL
+    // ==========================================================
+    const inputImagemCapa = document.getElementById('input-imagem-capa');
+    if (inputImagemCapa) {
+        inputImagemCapa.addEventListener('change', function() {
+            const previewImg = document.getElementById('preview-capa-livro');
+            const wrapperPreview = document.getElementById('wrapper-preview-capa');
+
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    if (previewImg) previewImg.src = event.target.result;
+                    if (wrapperPreview) wrapperPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                if (previewImg) previewImg.src = '';
+                if (wrapperPreview) wrapperPreview.style.display = 'none';
+            }
+        });
+    }
+
+    // ==========================================================
+    // 3. LÓGICA DINÂMICA DE MÚLTIPLOS AUTORES SEM REPETIÇÃO
     // ==========================================================
     const containerAutores = document.getElementById('container-autores');
     const btnAddAutor = document.getElementById('btn-add-autor-row');
@@ -383,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    if(containerAutores) {
+    if (containerAutores) {
         containerAutores.addEventListener('change', function(e) {
             if (e.target.classList.contains('select-autor-dinamico')) {
                 atualizarAutoresDisponiveis();
@@ -394,17 +432,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btnAddAutor) {
         btnAddAutor.addEventListener('click', function() {
             const todosSelects = document.querySelectorAll('.select-autor-dinamico');
-            if (todosSelects[todosSelects.length - 1].value === "") {
+            if (todosSelects.length > 0 && todosSelects[todosSelects.length - 1].value === "") {
                 alert("Por favor, selecione o autor na linha anterior antes de adicionar um novo.");
                 return;
             }
 
             const primeiroSelect = document.querySelector('.select-autor-dinamico');
+            if (!primeiroSelect) return;
+
             const novaLinha = document.createElement('div');
-            novaLinha.style.display = 'flex';
-            novaLinha.style.gap = '6px';
-            novaLinha.style.alignItems = 'center';
-            novaLinha.style.marginTop = '8px';
+            novaLinha.style.cssText = "display: flex; gap: 6px; align-items: center; margin-top: 8px;";
 
             const novoSelect = primeiroSelect.cloneNode(true);
             novoSelect.value = ""; 
@@ -412,14 +449,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const btnRemover = document.createElement('button');
             btnRemover.type = 'button';
-            btnRemover.style.height = '45px';
-            btnRemover.style.width = '45px';
-            btnRemover.style.background = '#ef4444';
-            btnRemover.style.border = 'none';
-            btnRemover.style.borderRadius = '6px';
-            btnRemover.style.color = 'white';
-            btnRemover.style.fontSize = '1.2rem';
-            btnRemover.style.cursor = 'pointer';
+            btnRemover.style.cssText = "height: 45px; width: 45px; background: #ef4444; border: none; border-radius: 6px; color: white; font-size: 1.2rem; cursor: pointer;";
             btnRemover.innerText = '✕';
 
             btnRemover.addEventListener('click', function() {
@@ -434,85 +464,72 @@ document.addEventListener('DOMContentLoaded', function() {
             atualizarAutoresDisponiveis();
         });
     }
-// ==========================================================
-// PRÉ-VISUALIZAÇÃO DA CAPA DO LIVRO EM TEMPO REAL
-// ==========================================================
-document.body.addEventListener('change', function(e) {
-    if (e.target && e.target.id === 'input-imagem-capa') {
-        const input = e.target;
-        const previewImg = document.getElementById('preview-capa-livro');
-        const wrapperPreview = document.getElementById('wrapper-preview-capa');
 
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-
-            reader.onload = function(event) {
-                previewImg.src = event.target.result; // Define o Source da imagem com o ficheiro local
-                wrapperPreview.style.display = 'block'; // Mostra o quadrado da imagem
-            };
-
-            reader.readAsDataURL(input.files[0]);
-        } else {
-            // Se o utilizador cancelar a seleção, esconde a pré-visualização
-            previewImg.src = '';
-            wrapperPreview.style.display = 'none';
-        }
-    }
-});
-
-// Resetar a pré-visualização quando o modal for fechado
-const funcaoOriginalFechar = fecharModalAdicionarArtigo;
-fecharModalAdicionarArtigo = function() {
-    funcaoOriginalFechar();
-    const wrapperPreview = document.getElementById('wrapper-preview-capa');
-    const previewImg = document.getElementById('preview-capa-livro');
-    const inputImg = document.getElementById('input-imagem-capa');
-    if (wrapperPreview) wrapperPreview.style.display = 'none';
-    if (previewImg) previewImg.src = '';
-    if (inputImg) inputImg.value = ''; // Limpa o campo do ficheiro
-};
-
-    // CONTROLO DO MODAL DE DETALHES
+    // ==========================================================
+    // 4. CONTROLO DO MODAL DE DETALHES (COM FIX PARA A CAPA)
+    // ==========================================================
     const detailModal = document.getElementById('detailsCatalogModal');
     const closeDetailBtn = document.getElementById('closeDetailModalBtn');
     const cancelDetailBtn = document.getElementById('cancelDetailModalBtn');
 
     document.querySelectorAll('.js-open-details').forEach(button => {
         button.addEventListener('click', function() {
-            document.getElementById('txtDetailTitulo').innerText = this.dataset.titulo;
-            document.getElementById('txtDetailAutor').innerText = this.dataset.autor;
-            document.getElementById('txtDetailCdu').innerText = `[ ${this.dataset.cdu.toUpperCase()} ]`;
-            document.getElementById('txtDetailIsbn').innerText = this.dataset.isbn;
-            document.getElementById('txtDetailEditoraAno').innerText = `${this.dataset.editora} (${this.dataset.ano})`;
-            document.getElementById('txtDetailDescricao').innerText = this.dataset.descricao;
-            document.getElementById('imgDetailCapa').src = this.dataset.imagem;
-            document.getElementById('txtDetailCriador').innerText = this.dataset.criador;
+            document.getElementById('txtDetailTitulo').innerText = this.dataset.titulo || '-';
+            document.getElementById('txtDetailAutor').innerText = this.dataset.autor || '-';
+            document.getElementById('txtDetailCdu').innerText = this.dataset.cdu ? `[ ${this.dataset.cdu.toUpperCase()} ]` : '[ CDU ]';
+            document.getElementById('txtDetailIsbn').innerText = this.dataset.isbn || '-';
+            document.getElementById('txtDetailEditoraAno').innerText = `${this.dataset.editora || '-'} (${this.dataset.ano || '-'})`;
+            document.getElementById('txtDetailDescricao').innerText = this.dataset.descricao || 'Sem descrição disponível.';
+            document.getElementById('txtDetailCriador').innerText = this.dataset.criador || 'Sistema';
+
+            // --- TRATAMENTO INTELIGENTE DA IMAGEM DA CAPA ---
+            const imgComponent = document.getElementById('imgDetailCapa');
+            if (imgComponent) {
+                if (this.dataset.imagem && this.dataset.imagem.trim() !== "") {
+                    const caminhoImg = this.dataset.imagem.trim();
+                    
+                    // Se a string já vier com "Uploads/", aplica diretamente, senão concatena
+                    if (caminhoImg.startsWith('Uploads/')) {
+                        imgComponent.src = caminhoImg;
+                    } else {
+                        imgComponent.src = 'Uploads/' + caminhoImg;
+                    }
+                } else {
+                    // Imagem padrão caso o campo esteja vazio na BD
+                    imgComponent.src = 'Images/default-cover.png';
+                }
+            }
+            // ------------------------------------------------
 
             const badgeEstado = document.getElementById('txtDetailEstado');
-            const estado = this.dataset.estado;
-            badgeEstado.innerText = estado;
-            
-            if (estado.toLowerCase() === 'disponivel') {
-                badgeEstado.style.background = 'rgba(16, 185, 129, 0.1)';
-                badgeEstado.style.color = '#10b981';
-            } else if (estado.toLowerCase() === 'reservado') {
-                badgeEstado.style.background = 'rgba(234, 179, 8, 0.15)';
-                badgeEstado.style.color = '#eab308';
-            } else {
-                badgeEstado.style.background = 'rgba(239, 68, 68, 0.1)';
-                badgeEstado.style.color = '#ef4444';
+            if (badgeEstado) {
+                const estado = this.dataset.estado ? this.dataset.estado.toLowerCase() : '';
+                badgeEstado.innerText = this.dataset.estado || '-';
+                
+                if (estado === 'disponivel' || estado === 'disponível') {
+                    badgeEstado.style.background = 'rgba(16, 185, 129, 0.1)';
+                    badgeEstado.style.color = '#10b981';
+                } else if (estado === 'reservado') {
+                    badgeEstado.style.background = 'rgba(234, 179, 8, 0.15)';
+                    badgeEstado.style.color = '#eab308';
+                } else {
+                    badgeEstado.style.background = 'rgba(239, 68, 68, 0.1)';
+                    badgeEstado.style.color = '#ef4444';
+                }
             }
 
-            detailModal.style.display = 'flex';
+            if (detailModal) detailModal.style.display = 'flex';
         });
     });
 
-    const closeDetailModal = () => { detailModal.style.display = 'none'; };
+    const closeDetailModal = () => { if (detailModal) detailModal.style.display = 'none'; };
     if (closeDetailBtn) closeDetailBtn.addEventListener('click', closeDetailModal);
     if (cancelDetailBtn) cancelDetailBtn.addEventListener('click', closeDetailModal);
     if (detailModal) detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeDetailModal(); });
 
-    // TOAST ALERT
+    // ==========================================================
+    // 5. TOAST ALERT
+    // ==========================================================
     const toast = document.getElementById('toastAlert');
     if (toast) {
         setTimeout(() => { toast.classList.add('show'); }, 200);

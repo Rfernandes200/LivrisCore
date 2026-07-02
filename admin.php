@@ -275,25 +275,31 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
     <!-- 4. MODAL: ADICIONAR LIVRO -->
    
 <?php include 'modal_adicionar_livro.php'; ?>
-<button type="button" onclick="alternarModal('addCatalogModal', true)">Adicionar Livro</button>
 
 
+
+    <!-- 4. MODAL: EDITAR LIVRO -->
+<!-- Ficheiro Único e Centralizado: modal_editar_livro.php -->
 <div id="modalEditarArtigo" class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     
     <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 600px; max-height: 90vh; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); display: flex; flex-direction: column; overflow: hidden; font-family: 'Inter', sans-serif;">
         
+        <!-- Cabeçalho do Modal -->
         <div style="padding: 20px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2); flex-shrink: 0;">
             <div>
-                <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ MODIFICAR ARTIGO ]</span>
+                <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ Modificar Livro ]</span>
                 <h2 style="font-size: 1.3rem; color: white; font-weight: 600; margin: 0; text-align: left;">Editar Detalhes do Livro</h2>
             </div>
             <button type="button" onclick="fecharModalEditarArtigo()" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
         </div>
 
+        <!-- Formulário que envia para o editar_artigo.php -->
         <form action="Processos/editar_artigo.php" method="POST" enctype="multipart/form-data" style="margin: 0; padding: 28px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
             
+            <!-- ID Oculto do Livro -->
             <input type="hidden" id="edit_artigo_id" name="artigo_id">
             
+            <!-- Linha 1: Título e Autores -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">TÍTULO DO LIVRO *</label>
@@ -302,10 +308,13 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
                 
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">AUTOR(ES) DO LIVRO *</label>
-                    <div id="container-autores-edit" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    <div id="container-autores-edit" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Injetado dinamicamente via JS -->
+                    </div>
                 </div>
             </div>
             
+            <!-- Linha 2: ISBN e CDU -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">CÓDIGO ISBN *</label>
@@ -321,7 +330,8 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
                     </select>
                 </div>
             </div>
-            
+
+            <!-- Linha 3: Editora, Ano e Estado -->
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                 <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                     <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">EDITORA *</label>
@@ -340,26 +350,38 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
                     </select>
                 </div>
             </div>
-            
+
+            <!-- Linha 4: Sinopse -->
             <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                 <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">SINOPSE / RESUMO *</label>
                 <textarea id="edit_descricao" name="descricao" rows="4" required style="resize: vertical; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 12px 14px; box-sizing: border-box; font-family: inherit;"></textarea>
             </div>
 
+            <!-- Linha 5: Imagem de Capa com Pré-visualização Larga (Igual ao de Adição) -->
             <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                 <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">SUBSTITUIR CAPA (OPCIONAL)</label>
-                <input type="file" name="imagem" accept="image/*" style="width: 100%; height: 45px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: #64748b; padding: 10px 14px; box-sizing: border-box; font-family: inherit;">
-                <small style="color: #64748b; font-size: 0.75rem; margin-top: 4px; display:block;">Deixe vazio para manter a imagem atual.</small>
+                
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <!-- Contentor da Miniatura (Sempre visível para mostrar a imagem atual do livro) -->
+                    <div id="wrapper-preview-capa-edit" style="width: 140px; height: 130px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); background: #1e293b; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">
+                        <img id="preview-capa-livro-edit" src="" alt="Capa Atual" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    
+                    <input type="file" id="input-imagem-capa-edit" name="imagem" accept="image/*" style="width: 100%; height: 45px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: #64748b; padding: 10px 14px; box-sizing: border-box; font-family: inherit;">
+                </div>
+                <small style="color: #64748b; font-size: 0.75rem; margin-top: 4px; display:block;">Deixe vazio para manter a imagem atual. Aceita JPG, PNG, WEBP.</small>
             </div>
             
+            <!-- Botões de Ação -->
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; flex-shrink: 0;">
                 <button type="button" onclick="fecharModalEditarArtigo()" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Cancelar Edição</button>
-                <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600;">Atualizar Artigo</button>
+                <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600;">Atualizar Livro</button>
             </div>
         </form>
     </div>
 </div>
 
+<!-- Template Oculto para Linhas Dinâmicas de Autores -->
 <select id="template-select-autor" style="display: none;">
     <option value="" disabled selected>Selecione um Autor...</option>
     <?php foreach($todos_autores as $autor): ?>
@@ -456,6 +478,14 @@ function abrirModalEditarArtigo(btn) {
             document.getElementById('edit_estado').value = data.estado;
             document.getElementById('edit_descricao').value = data.descricao;
 
+            // Injetar imagem atual do livro na pré-visualização da Edição
+            const previewImgEdit = document.getElementById('preview-capa-livro-edit');
+            if (previewImgEdit && data.imagem) {
+                // Caminho relativo ou absoluto da pasta de uploads de acordo com a tua estrutura
+                previewImgEdit.src = data.imagem; 
+            }
+
+            // Renderizar Autores
             const container = document.getElementById('container-autores-edit');
             const template = document.getElementById('template-select-autor');
             container.innerHTML = '';
@@ -469,6 +499,7 @@ function abrirModalEditarArtigo(btn) {
                 });
             }
 
+            atualizarAutoresDisponiveis();
             alternarModal('modalEditarArtigo', true);
         })
         .catch(err => {
@@ -477,35 +508,42 @@ function abrirModalEditarArtigo(btn) {
         });
 }
 
-function fecharModalEditarArtigo() { alternarModal('modalEditarArtigo', false); }
+function fecharModalEditarArtigo() { 
+    alternarModal('modalEditarArtigo', false); 
+}
 
 
 // ==========================================================
 // 4. LÓGICA DINÂMICA DE VALIDAÇÃO DE AUTORES SEM REPETIÇÃO
 // ==========================================================
 function atualizarAutoresDisponiveis() {
-    const todosSelects = document.querySelectorAll('.select-autor-dinamico');
-    const valoresSelecionados = Array.from(todosSelects).map(s => s.value).filter(val => val !== "");
+    // Valida em simultâneo os selects de adição (.select-autor-dinamico) e edição (.select-autor-dinamico-edit)
+    const seletores = ['.select-autor-dinamico', '.select-autor-dinamico-edit'];
+    
+    seletores.forEach(classe => {
+        const todosSelects = document.querySelectorAll(classe);
+        const valoresSelecionados = Array.from(todosSelects).map(s => s.value).filter(val => val !== "");
 
-    todosSelects.forEach(selectAtual => {
-        const opcoes = selectAtual.querySelectorAll('option');
-        opcoes.forEach(opcao => {
-            if (opcao.value !== "") {
-                if (valoresSelecionados.includes(opcao.value) && selectAtual.value !== opcao.value) {
-                    opcao.disabled = true;
-                    opcao.style.display = 'none';
-                } else {
-                    opcao.disabled = false;
-                    opcao.style.display = 'block';
+        todosSelects.forEach(selectAtual => {
+            const opcoes = selectAtual.querySelectorAll('option');
+            opcoes.forEach(opcao => {
+                if (opcao.value !== "") {
+                    if (valoresSelecionados.includes(opcao.value) && selectAtual.value !== opcao.value) {
+                        opcao.disabled = true;
+                        opcao.style.display = 'none';
+                    } else {
+                        opcao.disabled = false;
+                        opcao.style.display = 'block';
+                    }
                 }
-            }
+            });
         });
     });
 }
 
-// Escuta mudanças de seleção no container de adicionar do Admin
+// Escuta mudanças de seleção em qualquer seletor dinâmico de autor
 document.body.addEventListener('change', function(e) {
-    if (e.target.classList.contains('select-autor-dinamico')) {
+    if (e.target.classList.contains('select-autor-dinamico') || e.target.classList.contains('select-autor-dinamico-edit')) {
         atualizarAutoresDisponiveis();
     }
 });
@@ -515,14 +553,22 @@ document.body.addEventListener('change', function(e) {
 // 5. EVENTOS GLOBAIS (CLIQUES EM BOTÕES DINÂMICOS)
 // ==========================================================
 document.addEventListener('click', (e) => {
-    // Adicionar linha na EDIÇÃO
+    // Adicionar linha na EDIÇÃO (Validando se a anterior não está vazia)
     if (e.target.id === 'btn-add-autor-row-edit') {
         const container = document.getElementById('container-autores-edit');
         const template = document.getElementById('template-select-autor');
+        const todosSelectsEdit = container.querySelectorAll('.select-autor-dinamico-edit');
+
+        if (todosSelectsEdit.length > 0 && todosSelectsEdit[todosSelectsEdit.length - 1].value === "") {
+            alert("Por favor, selecione o autor na linha anterior antes de adicionar um novo.");
+            return;
+        }
+
         criarLinhaAutorGenerica(container, template, '', false, 'select-autor-dinamico-edit', '');
+        atualizarAutoresDisponiveis();
     } 
     
-    // Adicionar linha no NOVO MODAL UNIFICADO (Lógica inteligente do Index adaptada)
+    // Adicionar linha no NOVO MODAL UNIFICADO (Adicionar Artigo)
     else if (e.target.id === 'btn-add-autor-row') {
         const containerAutores = document.getElementById('container-autores');
         const todosSelects = document.querySelectorAll('.select-autor-dinamico');
@@ -557,15 +603,17 @@ document.addEventListener('click', (e) => {
         atualizarAutoresDisponiveis();
     }
     
-    // Mapeamento dos botões de fecho do novo modal para respeitarem o efeito show/fade do Admin
+    // Fecho dos modais respeitando os efeitos de transição do Admin
     else if (e.target.id === 'closeAddModalBtn' || e.target.id === 'cancelAddModalBtn') {
         fecharModalAdicionarArtigo();
     }
 });
+
 // ==========================================================
 // PRÉ-VISUALIZAÇÃO DA CAPA DO LIVRO EM TEMPO REAL
 // ==========================================================
 document.body.addEventListener('change', function(e) {
+    // 1. Pré-visualização para o Modal Adicionar
     if (e.target && e.target.id === 'input-imagem-capa') {
         const input = e.target;
         const previewImg = document.getElementById('preview-capa-livro');
@@ -573,22 +621,33 @@ document.body.addEventListener('change', function(e) {
 
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-
             reader.onload = function(event) {
-                previewImg.src = event.target.result; // Define o Source da imagem com o ficheiro local
-                wrapperPreview.style.display = 'block'; // Mostra o quadrado da imagem
+                previewImg.src = event.target.result;
+                wrapperPreview.style.display = 'block';
             };
-
             reader.readAsDataURL(input.files[0]);
         } else {
-            // Se o utilizador cancelar a seleção, esconde a pré-visualização
             previewImg.src = '';
             wrapperPreview.style.display = 'none';
         }
     }
+
+    // 2. Pré-visualização para o Modal Editar
+    if (e.target && e.target.id === 'input-imagem-capa-edit') {
+        const input = e.target;
+        const previewImgEdit = document.getElementById('preview-capa-livro-edit');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewImgEdit.src = event.target.result; // Troca a imagem antiga pelo upload em tempo real
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
 });
 
-// Resetar a pré-visualização quando o modal for fechado
+// Resetar a pré-visualização quando o modal Adicionar for fechado
 const funcaoOriginalFechar = fecharModalAdicionarArtigo;
 fecharModalAdicionarArtigo = function() {
     funcaoOriginalFechar();
@@ -597,11 +656,19 @@ fecharModalAdicionarArtigo = function() {
     const inputImg = document.getElementById('input-imagem-capa');
     if (wrapperPreview) wrapperPreview.style.display = 'none';
     if (previewImg) previewImg.src = '';
-    if (inputImg) inputImg.value = ''; // Limpa o campo do ficheiro
+    if (inputImg) inputImg.value = '';
+};
+
+// Resetar o formulário de Edição ao fechar o modal
+const funcaoOriginalFecharEdit = fecharModalEditarArtigo;
+fecharModalEditarArtigo = function() {
+    funcaoOriginalFecharEdit();
+    const inputImgEdit = document.getElementById('input-imagem-capa-edit');
+    if (inputImgEdit) inputImgEdit.value = ''; // Limpa a seleção temporária do ficheiro
 };
 
 // ==========================================================
-// 6. FUNÇÃO AUXILIAR DE RENDERIZAÇÃO (Mantida para o modal Editar)
+// 6. FUNÇÃO AUXILIAR DE RENDERIZAÇÃO
 // ==========================================================
 function criarLinhaAutorGenerica(container, template, valorId, ePrimeiraLinha, classeSelect, idBotaoMais) {
     const newRow = document.createElement('div');
@@ -629,8 +696,15 @@ function criarLinhaAutorGenerica(container, template, valorId, ePrimeiraLinha, c
     btn.style.cssText = "height: 45px; width: 45px; min-width: 45px; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.3rem; font-weight: 600;";
     btn.innerHTML = ePrimeiraLinha ? '+' : '&times;';
     btn.style.background = ePrimeiraLinha ? '#10b981' : '#ef4444';
-    if (!ePrimeiraLinha) btn.onclick = () => newRow.remove();
-    else btn.id = idBotaoMais;
+    
+    if (!ePrimeiraLinha) {
+        btn.onclick = () => {
+            newRow.remove();
+            atualizarAutoresDisponiveis();
+        };
+    } else {
+        btn.id = idBotaoMais;
+    }
 
     newRow.appendChild(select);
     newRow.appendChild(btn);

@@ -18,8 +18,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     try {
-        // MELHORIA: Adicionada a coluna 'tipo' na consulta SELECT para a sessão a detetar
-        $stmt = $pdo->prepare("SELECT id, nome, password_hash, tipo FROM utilizadores WHERE email = :email");
+        // CORREÇÃO: Adicionada a coluna 'ativo' no SELECT
+        $stmt = $pdo->prepare("SELECT id, nome, password_hash, tipo, ativo FROM utilizadores WHERE email = :email");
         $stmt->bindParam(':email', $email);
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -27,6 +27,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Validar se o utilizador existe e se a password coincide (usando hash seguro)
         if ($user && password_verify($password, $user['password_hash'])) {
             
+            // ==========================================================
+            // [NOVA VALIDAÇÃO]: VERIFICAR SE A CONTA ESTÁ ATIVA
+            // ==========================================================
+            if ((int)$user['ativo'] !== 1) {
+                header("Location: ../login.php?erro=A sua conta está inativa. Contacte o administrador.");
+                exit();
+            }
+            // ==========================================================
+
             // --- LOGIN COM SUCESSO ---
 
             // Extrair apenas o primeiro nome (ex: "Rodrigo Silva" -> "Rodrigo")
