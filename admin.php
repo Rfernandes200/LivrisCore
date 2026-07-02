@@ -182,9 +182,7 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
         </main>
     </div>
 
-    <!-- ==================================================================
-         ZONA DE MODAIS (JANELAS EM OVERLAY)
-         ================================================================== -->
+    
 
     <!-- 1. MODAL: EDITAR UTILIZADOR -->
     <div id="modalEditarUtilizador" class="modal-overlay">
@@ -272,105 +270,13 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
         </div>
     </div>
 
-    <!-- 3. MODAL: ADICIONAR ARTIGO -->^
-<div id="modalAdicionarArtigo" class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
-    
-    <div style="background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 600px; max-height: 90vh; border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); display: flex; flex-direction: column; overflow: hidden; font-family: 'Inter', sans-serif;">
-        
-        <div style="padding: 20px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.2); flex-shrink: 0;">
-            <div>
-                <span style="font-size: 0.7rem; color: #3b82f6; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 4px; text-align: left;">[ ADICIONAR LIVRO ]</span>
-                <h2 style="font-size: 1.3rem; color: white; font-weight: 600; margin: 0; text-align: left;">Novo Livro no Catálogo</h2>
-            </div>
-            <button type="button" onclick="fecharModalAdicionarArtigo()" style="background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
-        </div>
-
-        <form action="Processos/processa_artigo.php" method="POST" enctype="multipart/form-data" style="margin: 0; padding: 28px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">TÍTULO DO LIVRO *</label>
-                    <input type="text" name="titulo" class="modal-field" placeholder="Ex: Os Maias" required style="width: 100%; height: 45px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
-                </div>
-                
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">AUTOR(ES) DO LIVRO *</label>
-                    <div id="container-autores" style="display: flex; flex-direction: column; gap: 8px;">
-                        <div style="display: flex; gap: 6px; align-items: center;">
-                            <select name="autor_id[]" class="modal-field select-autor-dinamico" required style="height: 45px; flex-grow: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
-                                <option value="" disabled selected style="background:#0b0f19;">Selecione um Autor...</option>
-                                <?php foreach($todos_autores as $autor): ?>
-                                    <option value="<?= $autor['id']; ?>" style="background:#0b0f19; color:white;">
-                                        <?= htmlspecialchars($autor['nome']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <button type="button" id="btn-add-autor-row" style="height: 45px; width: 45px; min-width: 45px; background: #10b981; border: none; border-radius: 6px; color: white; font-size: 1.3rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">CÓDIGO ISBN *</label>
-                    <input type="text" name="isbn" class="modal-field" placeholder="Ex: 978-972-0-04671-0" required style="width: 100%; height: 45px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">CLASSIFICAÇÃO CDU *</label>
-                    <select name="cdu_codigo" class="modal-field" required style="height: 45px; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
-                        <option value="" disabled selected style="background:#0b0f19;">Selecione a Classe CDU...</option>
-                        <?php foreach($todas_categorias as $classe): ?>
-                            <option value="<?= htmlspecialchars($classe['codigo']); ?>" style="background:#0b0f19; color:white;">
-                                <?= htmlspecialchars($classe['codigo'] . ' - ' . $classe['descricao']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">EDITORA *</label>
-                    <input type="text" name="editora" class="modal-field" placeholder="Ex: Porto Editora" required style="width: 100%; height: 45px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">ANO DE EDIÇÃO *</label>
-                    <input type="number" name="ano_edicao" class="modal-field" placeholder="Ex: 2026" min="1000" max="2026" required style="width: 100%; height: 45px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                    <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">ESTADO INICIAL *</label>
-                    <select name="estado" class="modal-field" required style="height: 45px; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 0 14px; box-sizing: border-box; font-family: inherit;">
-                        <option value="disponivel" selected style="background:#0b0f19;">Disponível</option>
-                        <option value="reservado" style="background:#0b0f19;">Reservado</option>
-                        <option value="indisponivel" style="background:#0b0f19;">Indisponível</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">SINOPSE / RESUMO *</label>
-                <textarea name="descricao" rows="4" class="modal-field" placeholder="Escreva uma breve sinopse do livro..." required style="resize: vertical; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 12px 14px; box-sizing: border-box; font-family: inherit;"></textarea>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-                <label style="font-size: 0.7rem; color: #64748b; font-weight: 600; letter-spacing: 0.05em;">IMAGEM DE CAPA (OBRIGATÓRIO) *</label>
-                <input type="file" name="imagem" accept="image/*" required class="modal-field" style="width: 100%; height: 45px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: #64748b; padding: 10px 14px; box-sizing: border-box; font-family: inherit;">
-                <small style="color: #64748b; font-size: 0.75rem; margin-top: 4px; display:block;">Apenas ficheiros de imagem válidos (JPG, PNG, WEBP).</small>
-            </div>
-            
-            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; flex-shrink: 0;">
-                <button type="button" onclick="fecharModalAdicionarArtigo()" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Cancelar Criação</button>
-                <button type="submit" style="background: #3b82f6; border: none; color: white; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600;">Confirmar Criação</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 
-    <!-- 4. MODAL: EDITAR ARTIGO -->
+    <!-- 4. MODAL: ADICIONAR LIVRO -->
+   
+<?php include 'modal_adicionar_livro.php'; ?>
+<button type="button" onclick="alternarModal('addCatalogModal', true)">Adicionar Livro</button>
 
-    <!-- 4. MODAL: EDITAR ARTIGO -->
 
 <div id="modalEditarArtigo" class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
     
@@ -464,8 +370,9 @@ $todas_categorias = $pdo->query("SELECT codigo, descricao FROM cdu_classes ORDER
          SCRIPTS JAVASCRIPT GERAIS DO PAINEL
          ================================================================== -->
 <script>
-
-// 1. FUNÇÃO MESTRE
+// ==========================================================
+// 1. FUNÇÃO MESTRE DE CONTROLO DE MODAIS
+// ==========================================================
 function alternarModal(id, mostrar = true) {
     const modal = document.getElementById(id);
     if (!modal) return;
@@ -478,7 +385,16 @@ function alternarModal(id, mostrar = true) {
     }
 }
 
+// Fecho automático ao clicar fora de qualquer modal ativo
+document.addEventListener('click', function(e) {
+    if (e.target.style.position === 'fixed' && e.target.id) {
+        alternarModal(e.target.id, false);
+    }
+});
+
+// ==========================================================
 // 2. FUNÇÕES DE UTILIZADORES
+// ==========================================================
 function abrirModalEditarUtilizador(btn) {
     document.getElementById('modal_id').value        = btn.getAttribute('data-id');
     document.getElementById('modal_nome').value      = btn.getAttribute('data-nome');
@@ -487,11 +403,11 @@ function abrirModalEditarUtilizador(btn) {
     document.getElementById('modal_tipo').value      = btn.getAttribute('data-tipo');
     document.getElementById('modal_ativo').value     = btn.getAttribute('data-ativo');
     
-    // check if editing own admin account
     const isSelf = btn.getAttribute('data-self') === 'true';
     const avisoSelf = document.getElementById('aviso_self_edit');
     const selectTipo = document.getElementById('modal_tipo');
     const selectAtivo = document.getElementById('modal_ativo');
+    
     if (isSelf) {
         if (avisoSelf) avisoSelf.style.display = 'block';
         if (selectTipo) selectTipo.disabled = true;
@@ -509,9 +425,17 @@ function fecharModalEditar() { alternarModal('modalEditarUtilizador', false); }
 function abrirModalAdicionarUtilizador() { alternarModal('modalAdicionarUtilizador', true); }
 function fecharModalAdicionarUtilizador() { alternarModal('modalAdicionarUtilizador', false); }
 
-// 3. FUNÇÕES DE ARTIGOS
-function abrirModalAdicionarArtigo() { alternarModal('modalAdicionarArtigo', true); }
-function fecharModalAdicionarArtigo() { alternarModal('modalAdicionarArtigo', false); }
+
+// ==========================================================
+// 3. FUNÇÕES DE ARTIGOS (ADICIONAR E EDITAR)
+// ==========================================================
+function abrirModalAdicionarArtigo() { 
+    alternarModal('addCatalogModal', true); 
+}
+
+function fecharModalAdicionarArtigo() { 
+    alternarModal('addCatalogModal', false); 
+}
 
 function abrirModalEditarArtigo(btn) {
     const id = btn.getAttribute('data-id');
@@ -523,7 +447,6 @@ function abrirModalEditarArtigo(btn) {
                 alert('Erro ao carregar dados: ' + data.erro);
                 return;
             }
-            // Preencher os campos do formulário
             document.getElementById('edit_artigo_id').value = data.id;
             document.getElementById('edit_titulo').value = data.titulo;
             document.getElementById('edit_isbn').value = data.isbn;
@@ -533,7 +456,6 @@ function abrirModalEditarArtigo(btn) {
             document.getElementById('edit_estado').value = data.estado;
             document.getElementById('edit_descricao').value = data.descricao;
 
-            // Preencher autores
             const container = document.getElementById('container-autores-edit');
             const template = document.getElementById('template-select-autor');
             container.innerHTML = '';
@@ -557,7 +479,130 @@ function abrirModalEditarArtigo(btn) {
 
 function fecharModalEditarArtigo() { alternarModal('modalEditarArtigo', false); }
 
-// 4. FUNÇÃO AUXILIAR DE AUTORES
+
+// ==========================================================
+// 4. LÓGICA DINÂMICA DE VALIDAÇÃO DE AUTORES SEM REPETIÇÃO
+// ==========================================================
+function atualizarAutoresDisponiveis() {
+    const todosSelects = document.querySelectorAll('.select-autor-dinamico');
+    const valoresSelecionados = Array.from(todosSelects).map(s => s.value).filter(val => val !== "");
+
+    todosSelects.forEach(selectAtual => {
+        const opcoes = selectAtual.querySelectorAll('option');
+        opcoes.forEach(opcao => {
+            if (opcao.value !== "") {
+                if (valoresSelecionados.includes(opcao.value) && selectAtual.value !== opcao.value) {
+                    opcao.disabled = true;
+                    opcao.style.display = 'none';
+                } else {
+                    opcao.disabled = false;
+                    opcao.style.display = 'block';
+                }
+            }
+        });
+    });
+}
+
+// Escuta mudanças de seleção no container de adicionar do Admin
+document.body.addEventListener('change', function(e) {
+    if (e.target.classList.contains('select-autor-dinamico')) {
+        atualizarAutoresDisponiveis();
+    }
+});
+
+
+// ==========================================================
+// 5. EVENTOS GLOBAIS (CLIQUES EM BOTÕES DINÂMICOS)
+// ==========================================================
+document.addEventListener('click', (e) => {
+    // Adicionar linha na EDIÇÃO
+    if (e.target.id === 'btn-add-autor-row-edit') {
+        const container = document.getElementById('container-autores-edit');
+        const template = document.getElementById('template-select-autor');
+        criarLinhaAutorGenerica(container, template, '', false, 'select-autor-dinamico-edit', '');
+    } 
+    
+    // Adicionar linha no NOVO MODAL UNIFICADO (Lógica inteligente do Index adaptada)
+    else if (e.target.id === 'btn-add-autor-row') {
+        const containerAutores = document.getElementById('container-autores');
+        const todosSelects = document.querySelectorAll('.select-autor-dinamico');
+        
+        if (todosSelects[todosSelects.length - 1].value === "") {
+            alert("Por favor, selecione o autor na linha anterior antes de adicionar um novo.");
+            return;
+        }
+
+        const primeiroSelect = document.querySelector('.select-autor-dinamico');
+        const novaLinha = document.createElement('div');
+        novaLinha.style.cssText = "display: flex; gap: 6px; align-items: center; margin-top: 8px;";
+
+        const novoSelect = primeiroSelect.cloneNode(true);
+        novoSelect.value = ""; 
+        novoSelect.required = true;
+
+        const btnRemover = document.createElement('button');
+        btnRemover.type = 'button';
+        btnRemover.style.cssText = "height: 45px; width: 45px; background: #ef4444; border: none; border-radius: 6px; color: white; font-size: 1.2rem; cursor: pointer;";
+        btnRemover.innerText = '✕';
+
+        btnRemover.addEventListener('click', function() {
+            novaLinha.remove();
+            atualizarAutoresDisponiveis();
+        });
+
+        novaLinha.appendChild(novoSelect);
+        novaLinha.appendChild(btnRemover);
+        containerAutores.appendChild(novaLinha);
+
+        atualizarAutoresDisponiveis();
+    }
+    
+    // Mapeamento dos botões de fecho do novo modal para respeitarem o efeito show/fade do Admin
+    else if (e.target.id === 'closeAddModalBtn' || e.target.id === 'cancelAddModalBtn') {
+        fecharModalAdicionarArtigo();
+    }
+});
+// ==========================================================
+// PRÉ-VISUALIZAÇÃO DA CAPA DO LIVRO EM TEMPO REAL
+// ==========================================================
+document.body.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'input-imagem-capa') {
+        const input = e.target;
+        const previewImg = document.getElementById('preview-capa-livro');
+        const wrapperPreview = document.getElementById('wrapper-preview-capa');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                previewImg.src = event.target.result; // Define o Source da imagem com o ficheiro local
+                wrapperPreview.style.display = 'block'; // Mostra o quadrado da imagem
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            // Se o utilizador cancelar a seleção, esconde a pré-visualização
+            previewImg.src = '';
+            wrapperPreview.style.display = 'none';
+        }
+    }
+});
+
+// Resetar a pré-visualização quando o modal for fechado
+const funcaoOriginalFechar = fecharModalAdicionarArtigo;
+fecharModalAdicionarArtigo = function() {
+    funcaoOriginalFechar();
+    const wrapperPreview = document.getElementById('wrapper-preview-capa');
+    const previewImg = document.getElementById('preview-capa-livro');
+    const inputImg = document.getElementById('input-imagem-capa');
+    if (wrapperPreview) wrapperPreview.style.display = 'none';
+    if (previewImg) previewImg.src = '';
+    if (inputImg) inputImg.value = ''; // Limpa o campo do ficheiro
+};
+
+// ==========================================================
+// 6. FUNÇÃO AUXILIAR DE RENDERIZAÇÃO (Mantida para o modal Editar)
+// ==========================================================
 function criarLinhaAutorGenerica(container, template, valorId, ePrimeiraLinha, classeSelect, idBotaoMais) {
     const newRow = document.createElement('div');
     newRow.style.cssText = "display: flex; gap: 6px; align-items: center; margin-bottom: 8px;";
@@ -591,19 +636,6 @@ function criarLinhaAutorGenerica(container, template, valorId, ePrimeiraLinha, c
     newRow.appendChild(btn);
     container.appendChild(newRow);
 }
-
-// 5. EVENTOS GLOBAIS
-document.addEventListener('click', (e) => {
-    if (e.target.id === 'btn-add-autor-row-edit') {
-        const container = document.getElementById('container-autores-edit');
-        const template = document.getElementById('template-select-autor');
-        criarLinhaAutorGenerica(container, template, '', false, 'select-autor-dinamico-edit', '');
-    } else if (e.target.id === 'btn-add-autor-row') {
-        const container = document.getElementById('container-autores');
-        const template = document.getElementById('template-select-autor');
-        criarLinhaAutorGenerica(container, template, '', false, 'select-autor-dinamico', '');
-    }
-});
 </script>
 </body>
 </html>

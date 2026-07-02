@@ -1,0 +1,23 @@
+Mapa de cores principais do projeto LivrisCore
+
+Cores principais:
+- #3b82f6  (Azul de destaque / acentos principais)
+- #2563eb  (Azul hover / botões e links ativos)
+- #0f172a  (Azul escuro / texto principal e fundos escuros)
+- #1e293b  (Azul profundo / secções de destaque e barras)
+- #f8fafc  (Fundo claro suave)
+- #f1f5f9  (Fundo de cartões e áreas secundárias)
+- #ffffff  (Branco / superfícies claras e cartões)
+- #e2e8f0  (Cinza claro / bordas e linhas de separação)
+- #94a3b8  (Cinza azulado / texto secundário e subtítulos)
+- #334155  (Cinza escuro / texto de corpo e ícones)
+
+Cores de status:
+- #10b981  
+- #dc2626  
+- #f59e0b  
+
+Notas:
+- O projeto usa uma paleta baseada em azuis escuros e tons de cinza neutros.
+- Os acentos azuis e os fundos claros são usados de forma consistente na navegação, botões e cartões.
+- As cores de status estão presentes em mensagens de alerta e badges.

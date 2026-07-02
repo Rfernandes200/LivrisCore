@@ -109,7 +109,7 @@ PALAVRAS-CHAVE: PHP-MVC, PDO, MySQL, Session-based Auth, CRUD Operations,
 ├─ livro_id (INT, FOREIGN KEY → livros)
 ├─ codigo_validacao (INT: 000-999, randômico)
 ├─ data_inicio (TIMESTAMP)
-├─ data_expiracao (TIMESTAMP: data_inicio + 4 horas)
+├─ data_expiracao (TIMESTAMP: data_inicio )
 ├─ status (ENUM: 'pendente', 'concluida', 'cancelada', 'expirada')
 └─ ÍNDICES: PRIMARY KEY, INDEX(utilizador_id), INDEX(status)
 
@@ -185,7 +185,7 @@ KEYWORDS: autenticação, session, bcrypt, prepared statements, FILTER_VALIDATE_
 │  └─ Resposta: $_SESSION['reserva_sucesso_codigo'] = $codigo
 │
 ├─ index_reservas.php (modal)
-│  └─ Exibe: Código 3-dígitos + prazo 4 horas para levantamento
+│  └─ Exibe: Código 3-dígitos 
 │
 └─ REGRA NEGÓCIO: Máx 2 reservas simultâneas por utilizador
 
@@ -376,7 +376,6 @@ LIMITE DE RESERVAS
 └─ Query: COUNT(*) WHERE utilizador_id = ? AND status = 'pendente'
 
 PRAZO DE LEVANTAMENTO
-├─ Duração: 4 horas após criação da reserva
 ├─ Cálculo: data_expiracao = data_inicio + INTERVAL 4 HOUR
 ├─ Expiração: Automática quando ultrapassa prazo
 └─ Cancelamento: Via função cancela_reserva.php

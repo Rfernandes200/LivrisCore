@@ -14,7 +14,7 @@
         </div>
         
         <p style="color: #eab308; font-size: 0.8rem; font-weight: 500; margin-bottom: 20px;">
-             Atenção: Este código expira em exatamente 4 horas!
+             Atenção: Este código é único e só pode ser usado uma vez. Guarde-o.
         </p>
         
         <button type="button" id="closeCodeModalBtn" style="background: #10b981; border: none; color: #0f172a; font-weight: 600; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; width: 100%;">
@@ -43,7 +43,7 @@
                 Deseja confirmar a reserva imediata deste livro? 
             </p>
             <p style="color: #eab308; background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.2); padding: 10px; border-radius: 6px; font-size: 0.8rem; line-height: 1.4; margin: 0;">
-                ℹ️ Após confirmar, será gerado um **código de levantamento**. Terá um prazo máximo de **4 horas** para levantar o livro na biblioteca.
+                ℹ️ Após confirmar, será gerado um **código de levantamento**.Terá de levantar o livro na biblioteca caso contratrio o seu empréstimo será cancelado.
             </p>
 
             <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; margin-top: 25px;">

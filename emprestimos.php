@@ -161,7 +161,7 @@ try {
         
         <header class="page-header">
             <h1>Os Meus Empréstimos e Solicitações</h1>
-            <p>Confirme as suas reservas ativas inserindo o código ou acompanhe os artigos em sua posse de forma simples.</p>
+            <p>Confirme as suas reservas ativas inserindo o código ou acompanhe os livros em sua posse de forma simples.</p>
         </header>
 
         <?php if (isset($_SESSION['alerta'])): ?>
@@ -221,7 +221,7 @@ try {
 
         <!-- SECÇÃO 2: EMPRÉSTIMOS ATIVOS -->
         <section class="section-card">
-            <h2 class="table-section-title title-ativo">Artigos Contigo (Em Curso)</h2>
+            <h2 class="table-section-title title-ativo">Livros Contigo (Em Curso)</h2>
             <div style="overflow-x: auto;">
                 <table class="custom-table">
                     <thead>
@@ -276,53 +276,53 @@ try {
         </section>
 
     </div>
+<!-- MODAL DE CONFIRMAÇÃO (CORRIGIDO) -->
+<div id="confirmReserveModal" style="display: none; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15, 23, 42, 0.6) !important; justify-content: center; align-items: center; z-index: 999999999999 !important;">
+    <div style="background: #ffffff; padding: 30px; border-radius: 12px; max-width: 480px; width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; box-sizing: border-box;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+            <div>
+                <small style="color: #059669; font-weight: bold; font-size: 0.75rem; letter-spacing: 1px; display:block; margin-bottom:4px;">VALIDAR RESERVA</small>
+                <h2 id="modalTargetTitulo" style="color: #0f172a; margin: 0; font-size: 1.25rem; font-weight: 600;">Oficializar Empréstimo</h2>
+            </div>
+            <button type="button" id="closeConfirmModalBtn" style="background: none; border: none; color: #94a3b8; font-size: 2.2rem; cursor: pointer; line-height: 0.8;">&times;</button>
+        </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO -->
-    <div id="confirmReserveModal" style="display: none; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15, 23, 42, 0.6) !important; justify-content: center; align-items: center; z-index: 999999999999 !important;">
-        <div style="background: #ffffff; padding: 30px; border-radius: 12px; max-width: 480px; width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif;">
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
-                <div>
-                    <small style="color: #059669; font-weight: bold; font-size: 0.75rem; letter-spacing: 1px; display:block; margin-bottom:4px;">VALIDAR RESERVA</small>
-                    <h2 id="modalTargetTitulo" style="color: #0f172a; margin: 0; font-size: 1.25rem; font-weight: 600;">Oficializar Empréstimo</h2>
+        <form action="Processos/processo_emprestimo.php" method="POST" id="modalFormEmprestimo" style="margin: 0;">
+            <input type="hidden" name="acao" value="oficializar_emprestimo">
+            <input type="hidden" name="reserva_id" id="modalTargetReservaId">
+
+            <!-- Grid de Datas Corrigida com flex: 1 e min-width 0 -->
+            <div style="display: flex; gap: 15px; margin-bottom: 25px; width: 100%;">
+                <div style="flex: 1; min-width: 0; position: relative;">
+                    <label style="color: #475569; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE INÍCIO</label>
+                    <input type="date" name="data_inicio" id="modalInputDataInicio" required 
+                           onkeydown="return false" 
+                           onclick="if(typeof this.showPicker === 'function') this.showPicker();"
+                           style="width: 100%; padding: 11px; background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-size:0.9rem; cursor: pointer; box-sizing: border-box;">
                 </div>
-                <button type="button" id="closeConfirmModalBtn" style="background: none; border: none; color: #94a3b8; font-size: 2.2rem; cursor: pointer; line-height: 0.8;">&times;</button>
+                
+                <div style="flex: 1; min-width: 0; position: relative;">
+                    <label style="color: #475569; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE FIM (MÁX. <?=$limite_dias?> DIAS)</label>
+                    <input type="date" name="data_fim" id="modalInputDataFim" required 
+                           onkeydown="return false" 
+                           onclick="if(typeof this.showPicker === 'function') this.showPicker();"
+                           style="width: 100%; padding: 11px; background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-size:0.9rem; cursor: pointer; box-sizing: border-box;">
+                </div>
             </div>
 
-            <form action="Processos/processo_emprestimo.php" method="POST" id="modalFormEmprestimo">
-                <input type="hidden" name="acao" value="oficializar_emprestimo">
-                <input type="hidden" name="reserva_id" id="modalTargetReservaId">
+            <div style="margin-bottom: 25px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                <label style="color: #475569; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 8px;">CÓDIGO DE SEGURANÇA (3 DÍGITOS) *</label>
+                <input type="text" name="codigo_validacao" required maxlength="3" pattern="\d{3}" placeholder="000" style="width: 100%; padding: 12px; background: #f8fafc; color: #059669; font-size: 1.6rem; text-align: center; font-weight: bold; border: 1px solid #cbd5e1; border-radius: 6px; letter-spacing: 6px; box-sizing: border-box;">
+            </div>
 
-                <div style="display: flex; gap: 15px; margin-bottom: 25px;">
-                    <div style="flex: 1; position: relative;">
-                        <label style="color: #475569; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE INÍCIO</label>
-                        <input type="date" name="data_inicio" id="modalInputDataInicio" required 
-                               onkeydown="return false" 
-                               onclick="if(typeof this.showPicker === 'function') this.showPicker();"
-                               style="width: 100%; padding: 11px; padding-right: 30px; background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-size:0.9rem; cursor: pointer;">
-                    </div>
-                    
-                    <div style="flex: 1; position: relative;">
-                        <label style="color: #475569; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 6px;">DATA DE FIM (MÁX. <?=$limite_dias?> DIAS)</label>
-                        <input type="date" name="data_fim" id="modalInputDataFim" required 
-                               onkeydown="return false" 
-                               onclick="if(typeof this.showPicker === 'function') this.showPicker();"
-                               style="width: 100%; padding: 11px; padding-right: 30px; background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-size:0.9rem; cursor: pointer;">
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 25px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-                    <label style="color: #475569; font-size: 0.75rem; font-weight:600; display: block; margin-bottom: 8px;">CÓDIGO DE SEGURANÇA (3 DÍGITOS) *</label>
-                    <input type="text" name="codigo_validacao" required maxlength="3" pattern="\d{3}" placeholder="000" style="width: 100%; padding: 12px; background: #f8fafc; color: #059669; font-size: 1.6rem; text-align: center; font-weight: bold; border: 1px solid #cbd5e1; border-radius: 6px; letter-spacing: 6px;">
-                </div>
-
-                <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-                    <button type="button" id="cancelConfirmModalBtn" style="padding: 10px 18px; background: transparent; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-weight:500;">Voltar</button>
-                    <button type="submit" style="padding: 10px 18px; background: #10b981; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Confirmar</button>
-                </div>
-            </form>
-        </div>
+            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                <button type="button" id="cancelConfirmModalBtn" style="padding: 10px 18px; background: transparent; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-weight:500;">Voltar</button>
+                <button type="submit" style="padding: 10px 18px; background: #10b981; color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Confirmar</button>
+            </div>
+        </form>
     </div>
+</div>
 
     <script>
     const DATA_HOJE_SISTEMA = "<?php echo $hoje_php; ?>";
