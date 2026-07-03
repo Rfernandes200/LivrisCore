@@ -8,13 +8,17 @@ if (!isset($_SESSION['utilizador_tipo']) || (int)$_SESSION['utilizador_tipo'] !=
     exit();
 }
 
-// 1. Importar o Dompdf (Ajusta o caminho conforme tenhas instalado via Composer ou download direto)
-require_once '../libs/dompdf/autoload.inc.php'; 
+// 1. CARREGAR O AUTOLOAD OFICIAL (A pontar para a tua nova pasta 'dompdf')
+require_once __DIR__ . '/../dompdf/autoload.inc.php';
+
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
+// ==========================================================
+// 2. CONSULTAS À BASE DE DADOS
+// ==========================================================
 try {
-    // 2. Procurar Empréstimos em Curso (data_devolucao_real ESTÁ VAZIA)
+    // Procurar Empréstimos em Curso (data_devolucao_real ESTÁ VAZIA)
     $stmt_em_curso = $pdo->prepare("
         SELECT e.*, u.nome as leitor_nome, l.titulo as livro_titulo, l.isbn 
         FROM emprestimos e 
@@ -26,7 +30,7 @@ try {
     $stmt_em_curso->execute();
     $em_curso = $stmt_em_curso->fetchAll(PDO::FETCH_ASSOC);
 
-    // 3. Procurar Empréstimos Devolvidos (data_devolucao_real NÃO ESTÁ VAZIA)
+    // Procurar Empréstimos Devolvidos (data_devolucao_real NÃO ESTÁ VAZIA)
     $stmt_devolvidos = $pdo->prepare("
         SELECT e.*, u.nome as leitor_nome, l.titulo as livro_titulo, l.isbn 
         FROM emprestimos e 
@@ -42,7 +46,9 @@ try {
     die("Erro ao gerar dados para o relatório: " . $e->getMessage());
 }
 
-// 4. Construir a estrutura HTML com um estilo escuro e moderno (condizente com o teu sistema)
+// ==========================================================
+// 3. CONSTRUÇÃO DO HTML / CSS DO PDF
+// ==========================================================
 $html = '
 <!DOCTYPE html>
 <html>
@@ -106,8 +112,8 @@ if (count($em_curso) > 0) {
     $html .= '<div class="no-data">Não existem empréstimos ativos de momento.</div>';
 }
 
-    // <!-- SECÇÃO 2: DEVOLVIDOS -->
-    $html .= '<h2>2. Histórico de Devolvidos</h2>';
+// <!-- SECÇÃO 2: DEVOLVIDOS -->
+$html .= '<h2>2. Histórico de Devolvidos</h2>';
 
 if (count($devolvidos) > 0) {
     $html .= '<table>
@@ -137,7 +143,9 @@ if (count($devolvidos) > 0) {
 
 $html .= '</body></html>';
 
-// 5. Inicializar o Dompdf com opções básicas para renderizar bem o HTML
+// ==========================================================
+// 4. RENDERIZAÇÃO E DOWNLOAD DO PDF
+// ==========================================================
 $options = new Options();
 $options->set('isHtml5ParserEnabled', true);
 $options->set('defaultFont', 'Helvetica');
@@ -145,12 +153,9 @@ $options->set('defaultFont', 'Helvetica');
 $dompdf = new Dompdf($options);
 $dompdf->loadHtml($html);
 
-// Definir o formato da página (A4 Vertical)
 $dompdf->setPaper('A4', 'portrait');
-
-// Renderizar o HTML em PDF
 $dompdf->render();
 
-// 6. Enviar o PDF diretamente para o browser para fazer Download automático
+// Faz o download automático do ficheiro
 $dompdf->stream("relatorio_biblioteca_" . date('Ymd') . ".pdf", array("Attachment" => true));
 exit();

@@ -165,7 +165,6 @@ try {
         }
     }
 </style>
-
 <div class="seccao-container">
 
     <div class="topo-header">
@@ -187,6 +186,13 @@ try {
         </div>
     <?php endif; ?>
 
+    <!-- MENSAGEM DE SUCESSO DO CANCELAMENTO -->
+    <?php if (isset($_GET['status']) && $_GET['status'] === 'success_cancelamento'): ?>
+        <div style="color: #dc2626; padding: 14px 18px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; margin-bottom: 20px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+            <strong>Cancelado:</strong> O empréstimo foi cancelado com sucesso e o livro já está livre no catálogo.
+        </div>
+    <?php endif; ?>
+
     <div class="admin-toolbar">
         <form action="admin.php" method="GET" class="filtro-form">
             <input type="hidden" name="seccao" value="emprestimos">
@@ -204,7 +210,9 @@ try {
             
             <button type="submit" class="btn-filtrar" onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">Filtrar</button>
         </form>
-
+        <a href="Processos/exportar_pdf.php" style="background: #3b82f6; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px;">
+         Descarregar Relatório (PDF)
+        </a>
         <div class="contador-badge" style="white-space: nowrap; font-size: 0.9rem; color: #64748b; background: #f8fafc; padding: 8px 14px; border-radius: 20px; border: 1px solid #e2e8f0; font-weight: 500;">
             <span><?= count($emprestimos); ?> artigo(s) listado(s)</span>
         </div>
@@ -221,7 +229,7 @@ try {
                     <th style="padding: 16px 20px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Data Início</th>
                     <th style="padding: 16px 20px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Data Fim</th>
                     <th style="padding: 16px 20px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Estado</th>
-                    <th style="width: 200px; padding: 16px 20px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; text-align: center;">Ações</th>
+                    <th style="width: 260px; padding: 16px 20px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; text-align: center;">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -272,16 +280,23 @@ try {
                                 </span>
                             </td>
                             <td style="padding: 14px 20px; text-align: center;">
-                                <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
                                     <?php if ($emp['estado_calculado'] !== 'devolvido'): ?>
                                         <form action="Processos/processa_devolucao.php" method="POST" style="margin: 0; display: inline;">
                                             <input type="hidden" name="emprestimo_id" value="<?= $emp['id']; ?>">
-                                            <button type="submit" style="padding: 8px 16px; font-size: 0.85rem; background: #2563eb; border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.15s;" onmouseover="this.style.backgroundColor='#1d4ed8'" onmouseout="this.style.backgroundColor='#2563eb'" title="Registar Devolução">Devolver</button>
+                                            <button type="submit" style="padding: 8px 12px; font-size: 0.82rem; background: #2563eb; border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.15s;" onmouseover="this.style.backgroundColor='#1d4ed8'" onmouseout="this.style.backgroundColor='#2563eb'" title="Registar Devolução">Devolver</button>
                                         </form>
 
                                         <form action="Processos/processa_renovacao.php" method="POST" style="margin: 0; display: inline;">
                                             <input type="hidden" name="emprestimo_id" value="<?= $emp['id']; ?>">
-                                            <button type="submit" style="background: #ffffff; border: 1px solid #cbd5e1; color: #d97706; padding: 7px 16px; font-size: 0.85rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.15s;" onmouseover="this.style.background='#fffbeb'; this.style.borderColor='#fef3c7';" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#cbd5e1';" title="Renovar Prazo">Renovar</button>
+                                            <button type="submit" style="background: #ffffff; border: 1px solid #cbd5e1; color: #d97706; padding: 7px 12px; font-size: 0.82rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.15s;" onmouseover="this.style.background='#fffbeb'; this.style.borderColor='#fef3c7';" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#cbd5e1';" title="Renovar Prazo">Renovar</button>
+                                        </form>
+
+                                        <!-- NOVO BOTÃO: CANCELAR EMPRÉSTIMO -->
+                                        <!-- Form atualizar para o nome exato: cancela_emprestimo.php -->
+                                        <form action="Processos/cancela_emprestimo.php" method="POST" style="margin: 0; display: inline;" onsubmit="return confirm('Tem a certeza que deseja cancelar este empréstimo? O livro voltará a ficar disponível para outros utilizadores.');">
+                                            <input type="hidden" name="emprestimo_id" value="<?= $emp['id']; ?>">
+                                            <button type="submit" style="background: #ffffff; border: 1px solid #fee2e2; color: #dc2626; padding: 7px 12px; font-size: 0.82rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.15s;" onmouseover="this.style.background='#fef2f2'; this.style.borderColor='#fca5a5';" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#fee2e2';" title="Cancelar Empréstimo">Cancelar</button>
                                         </form>
                                     <?php else: ?>
                                         <span style="color: #16a34a; font-size: 1.2rem; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; min-height: 33px;">✓</span>

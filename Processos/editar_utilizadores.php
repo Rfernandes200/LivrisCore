@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             }
 
-            // NOVA VALIDAÇÃO: Se o telemóvel não estiver vazio, valida se tem apenas números e exatamente 9 dígitos
+            // Valida se tem apenas números e exatamente 9 dígitos
             if (!empty($telemovel)) {
                 if (!preg_match('/^[0-9]{9}$/', $telemovel)) {
                     $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'O número de telemóvel deve conter apenas números e ter exatamente 9 dígitos.'];
@@ -42,8 +42,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit();
                 }
             } else {
-                $telemovel = null; // Caso queiras permitir limpar o telemóvel (deixar em branco)
+                $telemovel = null; // Permite limpar o telemóvel (deixar em branco)
             }
+
+            // ==========================================================
+            // NOVAS VALIDAÇÕES: Evitar duplicados na Edição via Admin
+            // ==========================================================
+            
+            // 1. Verificar se o e-mail escolhido já pertence a OUTRA conta diferente da que estamos a editar
+            $stmt_check_email = $pdo->prepare("SELECT id FROM utilizadores WHERE email = :email AND id != :id");
+            $stmt_check_email->execute(['email' => $email, 'id' => $id_alvo]);
+            if ($stmt_check_email->fetch()) {
+                $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Este endereço de email já está a ser utilizado por outra conta.'];
+                header("Location: ../admin.php?seccao=utilizadores");
+                exit();
+            }
+
+            // 2. Verificar se o telemóvel escolhido já pertence a OUTRA conta
+            if (!empty($telemovel)) {
+                $stmt_check_tel = $pdo->prepare("SELECT id FROM utilizadores WHERE telemovel = :telemovel AND id != :id");
+                $stmt_check_tel->execute(['telemovel' => $telemovel, 'id' => $id_alvo]);
+                if ($stmt_check_tel->fetch()) {
+                    $_SESSION['alerta'] = ['tipo' => 'erro', 'mensagem' => 'Este número de telemóvel já está registado noutra conta.'];
+                    header("Location: ../admin.php?seccao=utilizadores");
+                    exit();
+                }
+            }
+            // ==========================================================
 
             // Salvaguarda no Servidor: Se o admin estiver a modificar-se a si próprio...
             if ($id_alvo === $id_admin_atual) {

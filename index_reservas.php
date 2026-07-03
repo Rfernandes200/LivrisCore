@@ -43,7 +43,7 @@
                 Deseja confirmar a reserva imediata deste livro? 
             </p>
             <p style="color: #eab308; background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.2); padding: 10px; border-radius: 6px; font-size: 0.8rem; line-height: 1.4; margin: 0;">
-                ℹ️ Após confirmar, será gerado um **código de levantamento**.Terá de levantar o livro na biblioteca caso contratrio o seu empréstimo será cancelado.
+                 Após confirmar, será gerado um **código de levantamento**.Terá de levantar o livro na biblioteca caso contratrio o seu empréstimo será cancelado.
             </p>
 
             <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; margin-top: 25px;">

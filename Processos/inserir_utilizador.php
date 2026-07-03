@@ -3,7 +3,6 @@ session_start();
 require '../config.php';
 
 // Proteção: Garante que apenas administradores logados podem aceder a este script
-// Se o teu sistema usa (int)$_SESSION['tipo'] === 1 para admin, mantém esta validação
 if (!isset($_SESSION['utilizador_id'])) {
     header("Location: ../login.php");
     exit();
@@ -13,17 +12,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanatização e receção dos dados do formulário do modal
     $nome = trim($_POST['nome']);
     $email = trim($_POST['email']);
-    $telemovel = trim($_POST['telemovel']) ?: null; // Se estiver vazio, grava como NULL
+    $telemovel_raw = trim($_POST['telemovel'] ?? '');
+    $telemovel = $telemovel_raw ?: null; // Se estiver vazio, grava como NULL
     $tipo_raw = $_POST['tipo'];
     $password = $_POST['password'];
 
-    // Conversão do tipo de string para tinyint(1) compatível com a tua BD
-    // (admin -> 1, user -> 0)
+    // Conversão do tipo de string para tinyint(1) compatível com a tua BD (admin -> 1, user -> 0)
     $tipo = ($tipo_raw === 'admin') ? 1 : 0;
 
     // Validações básicas de segurança
     if (empty($nome) || empty($email) || empty($password)) {
         header("Location: ../admin.php?erro=Por favor, preencha todos os campos obrigatórios.");
+        exit();
+    }
+
+    // ==========================================================
+    // NOVA VALIDAÇÃO 1: Validar formato do telemóvel (se preenchido)
+    // ==========================================================
+    if (!empty($telemovel) && !preg_match('/^[0-9]{9}$/', $telemovel)) {
+        header("Location: ../admin.php?erro=O número de telemóvel tem de conter exatamente 9 números.");
         exit();
     }
 
@@ -36,6 +43,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: ../admin.php?erro=O endereço de email já está a ser utilizado por outra conta.");
             exit();
         }
+
+        // ==========================================================
+        // NOVA VALIDAÇÃO 2: Verificar se o telemóvel já existe na BD
+        // ==========================================================
+        if (!empty($telemovel)) {
+            $stmt_check_tel = $pdo->prepare("SELECT COUNT(*) FROM utilizadores WHERE telemovel = :telemovel");
+            $stmt_check_tel->execute(['telemovel' => $telemovel]);
+            
+            if ((int)$stmt_check_tel->fetchColumn() > 0) {
+                header("Location: ../admin.php?erro=O número de telemóvel já está registado noutra conta.");
+                exit();
+            }
+        }
+        // ==========================================================
 
         // 2. Encriptar a palavra-passe inicial usando a função nativa segura do PHP
         $password_hash = password_hash($password, PASSWORD_DEFAULT);

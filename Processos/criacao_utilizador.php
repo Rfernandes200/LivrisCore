@@ -27,6 +27,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
+    // ==========================================================
+    // NOVA VALIDAÇÃO 1: Validar formato do telemóvel (se preenchido)
+    // ==========================================================
+    if (!empty($telemovel) && !preg_match('/^[0-9]{9}$/', $telemovel)) {
+        header("Location: ../registo.php?erro=O número de telemóvel tem de conter exatamente 9 números.");
+        exit();
+    }
+
     // 3. Verificar se a password está totalmente vazia
     if ($password_bruta === '' || empty($password_limpa)) {
         header("Location: ../registo.php?erro=A password não pode estar vazia");
@@ -42,6 +50,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // --- PROCESSAMENTO SEGURO ---
 
     try {
+        // ==========================================================
+        // NOVA VALIDAÇÃO 2: Verificar duplicados na Base de Dados antes do INSERT
+        // ==========================================================
+        
+        // Verificar se o Email já existe
+        $stmt_check_email = $pdo->prepare("SELECT id FROM utilizadores WHERE email = ?");
+        $stmt_check_email->execute([$email]);
+        if ($stmt_check_email->fetch()) {
+            header("Location: ../registo.php?erro=Este email já está registado.");
+            exit();
+        }
+
+        // Verificar se o Telemóvel já existe (apenas se foi preenchido)
+        if (!empty($telemovel)) {
+            $stmt_check_tel = $pdo->prepare("SELECT id FROM utilizadores WHERE telemovel = ?");
+            $stmt_check_tel->execute([$telemovel]);
+            if ($stmt_check_tel->fetch()) {
+                header("Location: ../registo.php?erro=Este número de telemóvel já está registado noutra conta.");
+                exit();
+            }
+        }
+        // ==========================================================
+
         // Criar o hash seguro usando a password original
         $password_segura = password_hash($password_bruta, PASSWORD_DEFAULT);
 
@@ -65,12 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
     } catch (PDOException $e) {
-        // Verificar violação de chave única (Email já registado)
-        if ($e->getCode() == 23000) {
-            header("Location: ../registo.php?erro=Este email já está registado.");
-        } else {
-            header("Location: ../registo.php?erro=Erro técnico na base de dados.");
-        }
+        header("Location: ../registo.php?erro=Erro técnico na base de dados: " . $e->getMessage());
         exit();
     }
 } else {

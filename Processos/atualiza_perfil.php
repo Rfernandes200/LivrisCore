@@ -6,7 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['utilizador_id'])) {
     $id = $_SESSION['utilizador_id'];
     $nome = trim($_POST['nome']);
     $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
-    $telemovel = trim($_POST['telemovel'] ?? ''); // Recebe o telemóvel do formulário
+    $telemovel = trim($_POST['telemovel'] ?? ''); 
     $nova_pw = $_POST['nova_pw'];
     $confirma_pw = $_POST['confirma_pw'];
 
@@ -16,14 +16,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['utilizador_id'])) {
         exit();
     }
 
-    // Validação de segurança em PHP (garante que se houver telemóvel, tem exatamente 9 números)
+    // Validação de formato: garante que se houver telemóvel, tem exatamente 9 números
     if (!empty($telemovel) && !preg_match('/^[0-9]{9}$/', $telemovel)) {
         header("Location: ../perfil.php?erro=O número de telemóvel tem de conter exatamente 9 números.");
         exit();
     }
 
     try {
-        // 2. CORREÇÃO: Atualizar Nome, Email E TAMBÉM o Telemóvel na Base de Dados
+        // ==========================================================
+        // NOVA VALIDAÇÃO: Verificar se o telemóvel já existe em OUTRA conta
+        // ==========================================================
+        if (!empty($telemovel)) {
+            // Procuramos se o telemóvel existe, mas ignoramos o ID do próprio utilizador atual
+            $stmt_check = $pdo->prepare("SELECT id FROM utilizadores WHERE telemovel = ? AND id != ?");
+            $stmt_check->execute([$telemovel, $id]);
+            
+            if ($stmt_check->fetch()) {
+                header("Location: ../perfil.php?erro=Este número de telemóvel já está registado noutra conta.");
+                exit();
+            }
+        }
+        // ==========================================================
+
+        // 2. Atualizar Nome, Email E Telemóvel na Base de Dados
         $stmt = $pdo->prepare("UPDATE utilizadores SET nome = ?, email = ?, telemovel = ? WHERE id = ?");
         $stmt->execute([$nome, $email, $telemovel, $id]);
         
@@ -42,13 +57,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['utilizador_id'])) {
                 exit();
             }
             
-            // Certifica-te de que o nome da coluna é password_hash (ou altera para 'password' se for o teu caso)
             $hash = password_hash($nova_pw, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("UPDATE utilizadores SET password_hash = ? WHERE id = ?");
             $stmt->execute([$hash, $id]);
         }
 
-        header("Location: ../perfil.php?sucesso=Perfil atualizado com sucesso!");
+        header("Location: ../perfil.php?sucesso=Perfil updated com sucesso!");
         exit();
 
     } catch (PDOException $e) {
