@@ -35,9 +35,9 @@ if (!isset($_SESSION['utilizador_tipo']) || ((int)$_SESSION['utilizador_tipo'] !
             <p style="margin: 0; font-size: 2.4rem; font-weight: 700; color: #2563eb; line-height: 1;"><?= $total_emprestimos_ativos; ?></p>
         </div>
         
-        <!-- Cartão: Artigos no Catálogo -->
+        <!-- Cartão: Livros no Catálogo -->
         <div class="stat-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 10px; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.04)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.02)';">
-            <h3 style="margin: 0; color: #64748b; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Artigos no Catálogo</h3>
+            <h3 style="margin: 0; color: #64748b; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Livros no Catálogo</h3>
             <p style="margin: 0; font-size: 2.4rem; font-weight: 700; color: #2563eb; line-height: 1;"><?= $total_artigos; ?></p>
         </div>
         
