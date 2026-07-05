@@ -76,7 +76,7 @@ if ($acao === 'oficializar_emprestimo') {
             $stmt_up_res = $pdo->prepare("UPDATE reservas SET status = 'concluida' WHERE id = :id");
             $stmt_up_res->execute(['id' => $reserva_id]);
 
-            // 2. CORREÇÃO: Criar o registo oficial trocando item_id por livro_id
+            //  Criar o registo oficial trocando item_id por livro_id
             $sql_emp = "INSERT INTO emprestimos (utilizador_id, livro_id, reserva_id, data_saida, data_prevista_devolucao) 
                         VALUES (:user_id, :livro_id, :reserva_id, :data_inicio, :data_fim)";
             $stmt_emp = $pdo->prepare($sql_emp);
@@ -88,7 +88,7 @@ if ($acao === 'oficializar_emprestimo') {
                 'data_fim' => $data_fim
             ]);
 
-            // 3. CORREÇÃO: Ajustado para a tabela livros, livro_id e o estado correto ('indisponivel' de acordo com o teu enum do banco)
+            // 3. Ajustado para a tabela livros, livro_id e o estado correto ('indisponivel' de acordo com o teu enum do banco)
             $stmt_item = $pdo->prepare("UPDATE livros SET estado = 'indisponivel' WHERE id = :livro_id");
             $stmt_item->execute(['livro_id' => $reserva['livro_id']]);
 
@@ -113,7 +113,7 @@ if ($acao === 'entregar_emprestimo') {
     try {
         $pdo->beginTransaction();
 
-        // CORREÇÃO: Trocado item_id por livro_id
+       
         $stmt = $pdo->prepare("SELECT livro_id FROM emprestimos WHERE id = :id AND utilizador_id = :user_id AND data_devolucao_real IS NULL");
         $stmt->execute(['id' => $emprestimo_id, 'user_id' => $id_logado]);
         $emprestimo = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -123,7 +123,7 @@ if ($acao === 'entregar_emprestimo') {
             $stmt_devolucao = $pdo->prepare("UPDATE emprestimos SET data_devolucao_real = NOW() WHERE id = :id");
             $stmt_devolucao->execute(['id' => $emprestimo_id]);
 
-            // 2. CORREÇÃO: Trocado itens por livros e item_id por livro_id
+          
             $stmt_item = $pdo->prepare("UPDATE livros SET estado = 'disponivel' WHERE id = :livro_id");
             $stmt_item->execute(['livro_id' => $emprestimo['livro_id']]);
 

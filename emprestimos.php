@@ -221,59 +221,57 @@ try {
 
         <!-- SECÇÃO 2: EMPRÉSTIMOS ATIVOS -->
         <section class="section-card">
-            <h2 class="table-section-title title-ativo">Livros Contigo (Em Curso)</h2>
-            <div style="overflow-x: auto;">
-                <table class="custom-table">
-                    <thead>
+    <h2 class="table-section-title title-ativo">Livros Contigo (Em Curso)</h2>
+    <div style="overflow-x: auto;">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">ID</th>
+                    <th>Artigo</th>
+                    <th>Classificação (CDU)</th>
+                    <th>Data de Saída</th>
+                    <th>Data Limite</th>
+                    <th style="width: 150px; text-align: center;">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($emprestimos_ativos)): ?>
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #64748b; padding: 35px;">Não tens nenhum artigo emprestado em tua posse de momento.</td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($emprestimos_ativos as $emp): 
+                        $hoje = strtotime(date('Y-m-d'));
+                        $data_limite = strtotime($emp['data_prevista_devolucao']);
+                        $dias_restantes = (int)round(($data_limite - $hoje) / (60 * 60 * 24));
+                    ?>
                         <tr>
-                            <th style="width: 80px;">ID</th>
-                            <th>Artigo</th>
-                            <th>Classificação (CDU)</th>
-                            <th>Data de Saída</th>
-                            <th>Data Limite</th>
-                            <th style="width: 200px; text-align: center;">Ações</th>
+                            <td style="color: #64748b; font-weight: 600;">#<?= $emp['id']; ?></td>
+                            <td style="font-weight: 600; color: #1e293b;"><?= htmlspecialchars($emp['item_titulo']); ?></td>
+                            <td><span class="cdu-badge"><?= $emp['cat_nome'] ? htmlspecialchars($emp['cat_nome']) : 'Sem classe'; ?></span></td>
+                            <td style="color: #475569;"><?= date('d/m/Y', strtotime($emp['data_saida'])); ?></td>
+                            <td class="<?= ($dias_restantes <= 2) ? 'data-aviso-urgente' : 'data-aviso-normal' ?>">
+                                <?= date('d/m/Y', strtotime($emp['data_prevista_devolucao'])); ?>
+                                <small class="data-subtexto">
+                                    <?= $dias_restantes < 0 ? "Atrasado por " . abs($dias_restantes) . " dias!" : "Faltam $dias_restantes dias"; ?>
+                                </small>
+                            </td>
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center; align-items: center;">
+                                    <?php if ($dias_restantes < 0): ?>
+                                        <span class="badge-status-atrasado" style="color: #dc2626; border: 1px solid #fecaca; background: #fef2f2; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Atrasado</span>
+                                    <?php else: ?>
+                                        <span class="badge-status-ativo" style="color: #2563eb; border: 1px solid #bfdbfe; background: #eff6ff; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Ativo</span>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($emprestimos_ativos)): ?>
-                            <tr>
-                                <td colspan="6" style="text-align: center; color: #64748b; padding: 35px;">Não tens nenhum artigo emprestado em tua posse de momento.</td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($emprestimos_ativos as $emp): 
-                                $hoje = strtotime(date('Y-m-d'));
-                                $data_limite = strtotime($emp['data_prevista_devolucao']);
-                                $dias_restantes = (int)round(($data_limite - $hoje) / (60 * 60 * 24));
-                            ?>
-                                <tr>
-                                    <td style="color: #64748b; font-weight: 600;">#<?= $emp['id']; ?></td>
-                                    <td style="font-weight: 600; color: #1e293b;"><?= htmlspecialchars($emp['item_titulo']); ?></td>
-                                    <td><span class="cdu-badge"><?= $emp['cat_nome'] ? htmlspecialchars($emp['cat_nome']) : 'Sem classe'; ?></span></td>
-                                    <td style="color: #475569;"><?= date('d/m/Y', strtotime($emp['data_saida'])); ?></td>
-                                    <td class="<?= ($dias_restantes <= 2) ? 'data-aviso-urgente' : 'data-aviso-normal' ?>">
-                                        <?= date('d/m/Y', strtotime($emp['data_prevista_devolucao'])); ?>
-                                        <small class="data-subtexto">
-                                            <?= $dias_restantes < 0 ? "Atrasado por " . abs($dias_restantes) . " dias!" : "Faltam $dias_restantes dias"; ?>
-                                        </small>
-                                    </td>
-                                    <td style="text-align: center;">
-                                        <div style="display: flex; gap: 12px; justify-content: center; align-items: center;">
-                                            <span class="badge-status-ativo">Ativo</span>
-                                            
-                                            <form action="Processos/processo_emprestimo.php" method="POST" style="margin:0;" onsubmit="return confirm('Confirmas que queres proceder à entrega deste artigo?');">
-                                                <input type="hidden" name="acao" value="entregar_emprestimo">
-                                                <input type="hidden" name="emprestimo_id" value="<?= $emp['id']; ?>">
-                                                <button type="submit" class="btn-action-base btn-entregar-inline">Entregar</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</section>
 
     </div>
 <!-- MODAL DE CONFIRMAÇÃO (CORRIGIDO) -->
