@@ -24,6 +24,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['utilizador_id'])) {
 
     try {
         // ==========================================================
+        // NOVA VALIDAÇÃO: Verificar se o email já existe em OUTRA conta
+        // ==========================================================
+        $stmt_check_email = $pdo->prepare("SELECT id FROM utilizadores WHERE email = ? AND id != ?");
+        $stmt_check_email->execute([$email, $id]);
+        if ($stmt_check_email->fetch()) {
+            header("Location: ../perfil.php?erro=Este email já está registado noutra conta.");
+            exit();
+        }
+        // ==========================================================
+
+        // ==========================================================
         // NOVA VALIDAÇÃO: Verificar se o telemóvel já existe em OUTRA conta
         // ==========================================================
         if (!empty($telemovel)) {
