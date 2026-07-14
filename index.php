@@ -333,9 +333,7 @@ try {
     </div>
 </div>
 <?php include 'modal_adicionar_livro.php'; ?>
-<button type="button" id="openAddCatalogBtn" class="o-teu-estilo-aqui">
-    Adicionar Novo Livro
-</button>
+
 <?php require 'index_reservas.php'; ?>
 
 <script>
